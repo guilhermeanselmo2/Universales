@@ -18,7 +18,7 @@ enum WallStyle{
 
 class Wall : public GameObject{
 public:
-    Wall(float centerX, float centerY, string file, WallStyle lStyle, int lRoom = 0);
+    Wall(float centerX, float centerY, string file, WallStyle lStyle, Point lTile, int lRoom = 0);
     ~Wall();
 
     void Update(float dt);

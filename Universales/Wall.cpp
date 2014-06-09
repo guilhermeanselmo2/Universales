@@ -2,8 +2,9 @@
 #include "GameObject.h"
 #include "Camera.h"
 
-Wall::Wall(float centerX, float centerY, string file, WallStyle lStyle, int lRoom){
+Wall::Wall(float centerX, float centerY, string file, WallStyle lStyle, Point lTile, int lRoom){
 
+	tile = lTile;
     roomID = lRoom;
     wall.Open(file);
     switch (lStyle) {

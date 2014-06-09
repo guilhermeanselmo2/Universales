@@ -19,6 +19,7 @@ public:
 	//string Type();
 	virtual void AddObjective(float x, float y) = 0;
 	Rect box;
+	Point tile;
 	int roomID;
 };
 

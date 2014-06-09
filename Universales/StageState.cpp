@@ -28,9 +28,10 @@ StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet)
 	//objectArray.emplace_back(alien2);
 	//objectArray.emplace_back(alien3);
 
-	Point monkeyTile(5,5);
+	Point monkeyTile(0,0);
+	Point teste(5, 5);
     monkeyTile = tileMap.GetTileCenter(monkeyTile);
-    Permonkey* pM = new Permonkey(monkeyTile.x, monkeyTile.y);
+	Permonkey* pM = new Permonkey(monkeyTile.x, monkeyTile.y, teste);
     objectArray.emplace_back(pM);
 	//characterArray.emplace_back(pM);
 
@@ -88,6 +89,9 @@ void StageState::Update(float dt) {
 		break;
 	}
 	UpdateArray(dt,&tileMap);
+	Point teste = tileMap.GetTile(objectArray[0]->box.x + objectArray[0]->box.w / 2, objectArray[0]->box.y + objectArray[0]->box.h);
+	cout << "tile : " << teste.x << "," << teste.y << endl;
+	cout << "Aqui!!!!!" << endl;
 }
 
 void StageState::Render() {

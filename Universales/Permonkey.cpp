@@ -1,13 +1,14 @@
 #include "Permonkey.h"
 #include "Camera.h"
 
-Permonkey::Permonkey(float x, float y) : character("img/permacaco_anim_ss.png", 4, 0.5, 4) {
+Permonkey::Permonkey(float x, float y, Point lTile) : character("img/permacaco_anim_ss.png", 4, 0.5, 4) {
     box = Rect(x-character.GetWidth()/2,y-character.GetHeight()/2, character.GetWidth(), character.GetHeight());
     rotation = 0;
     roomID = 0;
     crt = 0;
     objective.x = 994;
     objective.y = 470;
+	tile = lTile;
 }
 
 Permonkey::~Permonkey(){

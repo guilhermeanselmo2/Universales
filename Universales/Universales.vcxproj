@@ -30,6 +30,7 @@
     <ClCompile Include="MultiTileSet.cpp" />
     <ClCompile Include="Music.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="OccupancyMap.cpp" />
     <ClCompile Include="PauseState.cpp" />
     <ClCompile Include="Penguins.cpp" />
     <ClCompile Include="Permonkey.cpp" />
@@ -72,6 +73,7 @@
     <ClInclude Include="MultiTileSet.h" />
     <ClInclude Include="Music.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="OccupancyMap.h" />
     <ClInclude Include="PauseState.h" />
     <ClInclude Include="Penguins.h" />
     <ClInclude Include="Permonkey.h" />

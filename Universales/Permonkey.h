@@ -5,14 +5,13 @@
 #include "Sprite.h"
 #include "Timer.h"
 #include "Character.h"
-#include "GameObject.h"
 #include <queue>
 
 class Permonkey : public GameObject{
 public:
-    Permonkey(float x, float y);
+    Permonkey(float x, float y, Point lTile);
     ~Permonkey();
-    void Update(float dt);
+	void Update(float dt);
     void Render(int cameraX, int cameraY);
     bool IsDead();
     void NotifyCollision (GameObject& other);
