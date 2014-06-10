@@ -3,6 +3,7 @@
 
 #include "GameObject.h"
 #include "Sprite.h"
+#include "Timer.h"
 
 enum WallStyle{
         UPPER_RIGHT = 0,
@@ -26,10 +27,13 @@ public:
     bool IsDead();
     void NotifyCollision(GameObject& other);
     bool Is(string type);
+	void Editing(bool editing);
     string Type();
 	void AddObjective(float x, float y, Point tile);
 
 private:
+	Timer editTimer;
+	bool editing;
     Sprite wall;
     WallStyle style;
 

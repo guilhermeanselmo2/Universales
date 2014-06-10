@@ -19,6 +19,7 @@ public:
 	void NotifyCollision(GameObject& other);
 	bool Is(string type);
 	void AddObjective(float x, float y, Point tile);
+	void Editing(bool editing);
 };
 
 #endif

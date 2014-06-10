@@ -40,5 +40,7 @@ bool Bullet::Is(string type) {
 	return  false;
 }
 
+void Bullet::Editing(bool editing) {}
+
 void Bullet::AddObjective(float x, float y, Point tile){
 }

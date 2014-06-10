@@ -3,7 +3,7 @@
 #include "Camera.h"
 
 Wall::Wall(float centerX, float centerY, string file, WallStyle lStyle, int lRoom){
-
+	editing = false;
     roomID = lRoom;
     wall.Open(file);
     switch (lStyle) {
@@ -30,12 +30,20 @@ Wall::~Wall(){
 }
 
 void Wall::Update(float dt){
-
+	editTimer.Update(dt);
 }
 
 void Wall::Render(int cameraX, int cameraY){
-	wall.Render(box.x+Camera::pos.x, box.y+Camera::pos.y);
-
+	if (editing){
+		if (editTimer.Get() < 2.0){
+			wall.Render(box.x + Camera::pos.x, box.y + Camera::pos.y);
+		}
+		if (editTimer.Get() > 3.0)
+			editTimer.Restart();
+	}
+	else {
+		wall.Render(box.x + Camera::pos.x, box.y + Camera::pos.y);
+	}
 }
 
 bool Wall::IsDead(){
@@ -57,6 +65,9 @@ string Wall::Type(){
         return "Corner";
 }
 
+void Wall::Editing(bool editing) {
+	this->editing = editing;
+}
 
 void Wall::AddObjective(float x, float y, Point tile){
 }

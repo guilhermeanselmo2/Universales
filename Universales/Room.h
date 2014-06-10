@@ -17,7 +17,7 @@ public:
     Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject>> *objectArray, int roomCount);
     void Update(float dt);
     void Render(TileMap *tileMap);
-	void EditRoom();
+	void EditRoom(bool editing);
     int GetID();
     bool IsInside(float x, float y);
     bool IsInside(Point tile);

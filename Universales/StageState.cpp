@@ -156,6 +156,14 @@ void StageState::Input() {
 			ptile = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 			p = tileMap.GetTileCenter(ptile);
 			objectArray[0]->AddObjective(p.x, p.y, ptile);
+			for (int i = 0; i < roomArray.size(); i++){
+				roomArray[i]->EditRoom(false);
+				for (int j = 0; j < objectArray.size(); j++){
+					if (objectArray[j]->Is("Wall")){
+						objectArray[j]->Editing(false);
+					}
+				}
+			}
 			break;
 		case GUI_A:
 			if(gui.BuildIconPressed()){
@@ -220,11 +228,19 @@ void StageState::Input() {
 		case AREA_SELECT:
 			break;
 		case EDIT_ROOM:
+			
 			for (int i = 0; i < roomArray.size(); i++){
 				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 				if (roomArray[i]->IsInside(p)){
 					cout << "editando quarto: " << roomArray[i]->GetID() << endl;
-					roomArray[i]->EditRoom();
+					roomArray[i]->EditRoom(true);
+					for (int j = 0; j < objectArray.size(); j++){
+						if (objectArray[j]->Is("Wall")){
+							if (objectArray[j]->roomID == roomArray[i]->GetID()) {
+								objectArray[j]->Editing(true);
+							}
+						}
+					}
 				}
 			}
 			action = NONE;

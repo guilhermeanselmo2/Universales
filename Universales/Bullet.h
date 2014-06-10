@@ -17,6 +17,7 @@ public:
 	bool IsDead();
 	void NotifyCollision(GameObject& other);
 	bool Is(string type);
+	void Editing(bool editing);
 	bool targetsPlayer;
 	void AddObjective(float x, float y, Point tile);
 };

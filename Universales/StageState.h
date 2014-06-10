@@ -25,6 +25,8 @@ enum Action{
 	GUI_A,
 	BUY,
 	EDIT_ROOM,
+	EDIT_WALL,
+	EDIT_DOOR,
 };
 
 class StageState : public State {

@@ -88,56 +88,116 @@ Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObj
 
 }
 
-void Room::EditRoom() {
-	roomState = EDITING;
+void Room::EditRoom(bool editing) {
+	if (editing)
+		roomState = EDITING;
+	else
+		roomState = NONE;
 }
 
 void Room::Render(TileMap *tileMap){
 	editTimer.Update(Game::GetInstance().GetDeltaTime());
-	Point renderPos;
-	if (end.x < begin.x){
-		if (end.y < begin.y){
-			for (int i = end.x; i <= begin.x; i++){
-				for (int j = end.y; j <= begin.y; j++){
-					if (i >= 0 && j >= 0 && i < tileMap->GetWidth() && j < tileMap->GetHeight()){
-						Point tile(i, j);
-						renderPos = tileMap->GetTileCenter(tile);
-						tileSp.Render(renderPos.x - tileSp.GetWidth() / 2 + Camera::pos.x, renderPos.y - tileSp.GetHeight() / 2 + Camera::pos.y);
+	if (roomState == EDITING) {
+		if (editTimer.Get() < 1.0){
+			Point renderPos;
+			if (end.x < begin.x){
+				if (end.y < begin.y){
+					for (int i = end.x; i <= begin.x; i++){
+						for (int j = end.y; j <= begin.y; j++){
+							if (i >= 0 && j >= 0 && i < tileMap->GetWidth() && j < tileMap->GetHeight()){
+								Point tile(i, j);
+								renderPos = tileMap->GetTileCenter(tile);
+								tileSp.Render(renderPos.x - tileSp.GetWidth() / 2 + Camera::pos.x, renderPos.y - tileSp.GetHeight() / 2 + Camera::pos.y);
+							}
+						}
+					}
+				}
+				else{
+					for (int i = end.x; i <= begin.x; i++){
+						for (int j = begin.y; j <= end.y; j++){
+							if (i >= 0 && j >= 0 && i < tileMap->GetWidth() && j < tileMap->GetHeight()){
+								Point tile(i, j);
+								renderPos = tileMap->GetTileCenter(tile);
+								tileSp.Render(renderPos.x - tileSp.GetWidth() / 2 + Camera::pos.x, renderPos.y - tileSp.GetHeight() / 2 + Camera::pos.y);
+							}
+						}
+					}
+				}
+			}
+			else{
+				if (end.y < begin.y){
+					for (int i = begin.x; i <= end.x; i++){
+						for (int j = end.y; j <= begin.y; j++){
+							if (i >= 0 && j >= 0 && i < tileMap->GetWidth() && j < tileMap->GetHeight()){
+								Point tile(i, j);
+								renderPos = tileMap->GetTileCenter(tile);
+								tileSp.Render(renderPos.x - tileSp.GetWidth() / 2 + Camera::pos.x, renderPos.y - tileSp.GetHeight() / 2 + Camera::pos.y);
+							}
+						}
+					}
+				}
+				else{
+					for (int i = begin.x; i <= end.x; i++){
+						for (int j = begin.y; j <= end.y; j++){
+							if (i >= 0 && j >= 0 && i < tileMap->GetWidth() && j < tileMap->GetHeight()){
+								Point tile(i, j);
+								renderPos = tileMap->GetTileCenter(tile);
+								tileSp.Render(renderPos.x - tileSp.GetWidth() / 2 + Camera::pos.x, renderPos.y - tileSp.GetHeight() / 2 + Camera::pos.y);
+							}
+						}
 					}
 				}
 			}
 		}
-		else{
-			for (int i = end.x; i <= begin.x; i++){
-				for (int j = begin.y; j <= end.y; j++){
-					if (i >= 0 && j >= 0 && i < tileMap->GetWidth() && j < tileMap->GetHeight()){
-						Point tile(i, j);
-						renderPos = tileMap->GetTileCenter(tile);
-						tileSp.Render(renderPos.x - tileSp.GetWidth() / 2 + Camera::pos.x, renderPos.y - tileSp.GetHeight() / 2 + Camera::pos.y);
-					}
-				}
-			}
-		}
+		if (editTimer.Get() > 1.5)
+			editTimer.Restart();
 	}
-	else{
-		if (end.y < begin.y){
-			for (int i = begin.x; i <= end.x; i++){
-				for (int j = end.y; j <= begin.y; j++){
-					if (i >= 0 && j >= 0 && i < tileMap->GetWidth() && j < tileMap->GetHeight()){
-						Point tile(i, j);
-						renderPos = tileMap->GetTileCenter(tile);
-						tileSp.Render(renderPos.x - tileSp.GetWidth() / 2 + Camera::pos.x, renderPos.y - tileSp.GetHeight() / 2 + Camera::pos.y);
+	else {
+		Point renderPos;
+		if (end.x < begin.x){
+			if (end.y < begin.y){
+				for (int i = end.x; i <= begin.x; i++){
+					for (int j = end.y; j <= begin.y; j++){
+						if (i >= 0 && j >= 0 && i < tileMap->GetWidth() && j < tileMap->GetHeight()){
+							Point tile(i, j);
+							renderPos = tileMap->GetTileCenter(tile);
+							tileSp.Render(renderPos.x - tileSp.GetWidth() / 2 + Camera::pos.x, renderPos.y - tileSp.GetHeight() / 2 + Camera::pos.y);
+						}
+					}
+				}
+			}
+			else{
+				for (int i = end.x; i <= begin.x; i++){
+					for (int j = begin.y; j <= end.y; j++){
+						if (i >= 0 && j >= 0 && i < tileMap->GetWidth() && j < tileMap->GetHeight()){
+							Point tile(i, j);
+							renderPos = tileMap->GetTileCenter(tile);
+							tileSp.Render(renderPos.x - tileSp.GetWidth() / 2 + Camera::pos.x, renderPos.y - tileSp.GetHeight() / 2 + Camera::pos.y);
+						}
 					}
 				}
 			}
 		}
 		else{
-			for (int i = begin.x; i <= end.x; i++){
-				for (int j = begin.y; j <= end.y; j++){
-					if (i >= 0 && j >= 0 && i < tileMap->GetWidth() && j < tileMap->GetHeight()){
-						Point tile(i, j);
-						renderPos = tileMap->GetTileCenter(tile);
-						tileSp.Render(renderPos.x - tileSp.GetWidth() / 2 + Camera::pos.x, renderPos.y - tileSp.GetHeight() / 2 + Camera::pos.y);
+			if (end.y < begin.y){
+				for (int i = begin.x; i <= end.x; i++){
+					for (int j = end.y; j <= begin.y; j++){
+						if (i >= 0 && j >= 0 && i < tileMap->GetWidth() && j < tileMap->GetHeight()){
+							Point tile(i, j);
+							renderPos = tileMap->GetTileCenter(tile);
+							tileSp.Render(renderPos.x - tileSp.GetWidth() / 2 + Camera::pos.x, renderPos.y - tileSp.GetHeight() / 2 + Camera::pos.y);
+						}
+					}
+				}
+			}
+			else{
+				for (int i = begin.x; i <= end.x; i++){
+					for (int j = begin.y; j <= end.y; j++){
+						if (i >= 0 && j >= 0 && i < tileMap->GetWidth() && j < tileMap->GetHeight()){
+							Point tile(i, j);
+							renderPos = tileMap->GetTileCenter(tile);
+							tileSp.Render(renderPos.x - tileSp.GetWidth() / 2 + Camera::pos.x, renderPos.y - tileSp.GetHeight() / 2 + Camera::pos.y);
+						}
 					}
 				}
 			}

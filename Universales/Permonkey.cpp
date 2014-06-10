@@ -43,6 +43,8 @@ void Permonkey::NotifyCollision(GameObject &other){
 
 }
 
+void Permonkey::Editing(bool edit) {}
+
 bool Permonkey::Is(string type){
     return type == "PerMonkey";
 }
