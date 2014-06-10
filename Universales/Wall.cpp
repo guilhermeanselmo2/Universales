@@ -58,5 +58,5 @@ string Wall::Type(){
 }
 
 
-void Wall::AddObjective(float x, float y){
+void Wall::AddObjective(float x, float y, Point tile){
 }

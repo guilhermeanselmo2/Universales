@@ -17,7 +17,7 @@ public:
 	virtual void NotifyCollision(GameObject& other) = 0;
 	virtual bool Is(string type) = 0;
 	//string Type();
-	virtual void AddObjective(float x, float y) = 0;
+	virtual void AddObjective(float x, float y, Point tile) = 0;
 	Rect box;
 	int roomID;
 };

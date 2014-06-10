@@ -19,7 +19,7 @@ public:
 	bool IsDead();
 	void NotifyCollision(GameObject& other);
 	bool Is(string type);
-	void AddObjective(float x, float y);
+	void AddObjective(float x, float y, Point tile);
 };
 
 #endif

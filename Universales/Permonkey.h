@@ -10,7 +10,7 @@
 
 class Permonkey : public GameObject{
 public:
-    Permonkey(float x, float y);
+	Permonkey(float x, float y, TileMap tileMap);
     ~Permonkey();
     void Update(float dt);
     void Render(int cameraX, int cameraY);
@@ -19,18 +19,24 @@ public:
     bool Is(string type);
     string Type();
 
-    void AddObjective(float x, float y);
+	void AddObjective(float x, float y, Point tile);
     void AddObjective(Point pos);
     void Go(Point pos);
     void Move (float dt);
     
 
 private:
-    Sprite character;
+	Character::ActionCharacter actionCharacter;
+	Sprite character;
+	Point permonkeyTile;
+	Point objectiveTile;
 	Point objective;
-	int objectiveX, objectiveY;
-    Timer temp;
-    int crt;
+	Point objectiveMem;
+	Timer temp;
+	int crt;
+	Point desvio;
+	bool flagDesvio;
+	TileMap tileMap;
 
 };
 

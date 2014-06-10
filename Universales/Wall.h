@@ -27,7 +27,7 @@ public:
     void NotifyCollision(GameObject& other);
     bool Is(string type);
     string Type();
-	void AddObjective(float x, float y);
+	void AddObjective(float x, float y, Point tile);
 
 private:
     Sprite wall;

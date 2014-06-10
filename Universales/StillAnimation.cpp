@@ -27,5 +27,5 @@ bool StillAnimation::Is(string type) {
 	return  false;
 }
 
-void StillAnimation::AddObjective(float x, float y){
+void StillAnimation::AddObjective(float x, float y, Point tile){
 }
