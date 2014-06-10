@@ -8,7 +8,7 @@
 
 
 StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet),
-	moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100){
+	moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()){
 	string file, tile, line, endLine("\n"), initFile("img/tileset/");
 	FILE *tileFile;
 	char c;
@@ -140,6 +140,7 @@ void StageState::Render() {
 		RenderArray();
 		break;
 	}
+	occupancyMap.Render(&tileMap);
 	
 }
 
@@ -186,6 +187,7 @@ void StageState::Input() {
 			action = NONE;
 			Room *newRoom = new Room(selectionBox.begin, selectionBox.end, &tileMap, &objectArray, roomArray.size());
             roomArray.emplace_back(newRoom);
+			occupancyMap.CreateHeuristic(&tileMap, roomArray[roomArray.size() - 1]->GetDoor(), 0);
 			}
 			break;
 		case DESTROY_ROOM:

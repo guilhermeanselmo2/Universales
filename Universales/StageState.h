@@ -14,6 +14,7 @@
 #include "CheatState.h"
 #include "Text.h"
 #include "Object.h"
+#include "OccupancyMap.h"
 
 enum Action{
 
@@ -45,6 +46,7 @@ private:
 	vector<unique_ptr<Character>> characterArray;
 	GUI gui;
 	Text moneyText;
+	OccupancyMap occupancyMap;
 };
 
 #endif

@@ -156,3 +156,7 @@ bool Room::IsInside(Point tile){
 int Room::GetID(){
     return RoomID;
 }
+
+Point Room::GetDoor(){
+	return door;
+}

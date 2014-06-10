@@ -12,11 +12,13 @@ public:
 	OccupancyMap(int x, int y);
 	~OccupancyMap();
 	void Update(TileMap *tileMap, vector<unique_ptr<GameObject>> objectArray);
+	void CreateHeuristic(TileMap *tileMap, Point door, int RoomID);
+	void Render(TileMap *tileMap);
 
 	vector<int> occupancyMap;
 
 private:
-	
+	vector<int> heuristics;
 };
 
 

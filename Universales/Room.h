@@ -16,6 +16,7 @@ public:
     bool IsInside(float x, float y);
     bool IsInside(Point tile);
     bool Is(string type);
+	Point GetDoor();
 
 private:
     vector<vector<Point>> tiles;
