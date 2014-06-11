@@ -20,7 +20,8 @@ public:
 	void NotifyCollision(GameObject& other);
 	bool Is(string type);
 	bool IsCharacter();
-	void AddObjective(float x, float y);
+	void AddObjective(float x, float y, Point tile);
+	void Editing(bool editing);
 };
 
 #endif

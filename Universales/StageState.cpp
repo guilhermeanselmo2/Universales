@@ -32,7 +32,7 @@ StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet)
 	Point monkeyTile(0,0);
 	Point teste(0, 0);
     monkeyTile = tileMap.GetTileCenter(monkeyTile);
-	Permonkey* pM = new Permonkey(monkeyTile.x, monkeyTile.y, teste);
+    Permonkey* pM = new Permonkey(monkeyTile.x, monkeyTile.y, teste, tileMap);
     objectArray.emplace_back(pM);
 
 	file = "img/tileset/tilelist.txt";
@@ -157,9 +157,17 @@ void StageState::Input() {
 
 		switch (action){
 		case NONE:
-			p = tileMap.GetTile(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
-            p = tileMap.GetTileCenter(p);
-			objectArray[0]->AddObjective(p.x, p.y);
+			ptile = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
+			p = tileMap.GetTileCenter(ptile);
+			objectArray[0]->AddObjective(p.x, p.y, ptile);
+			for (int i = 0; i < roomArray.size(); i++){
+				roomArray[i]->EditRoom(false);
+				for (int j = 0; j < objectArray.size(); j++){
+					if (objectArray[j]->Is("Wall")){
+						objectArray[j]->Editing(false);
+					}
+				}
+			}
 			break;
 		case GUI_A:
 			if(gui.BuildIconPressed()){
@@ -174,7 +182,12 @@ void StageState::Input() {
 						action = BUY;
 					}
 					else{
-						action = NONE;
+						if (gui.EditIconPressed()){
+							action = EDIT_ROOM;
+						}
+						else {
+							action = NONE;
+						}
 					}
 				}
 			}
@@ -194,33 +207,54 @@ void StageState::Input() {
 			}
 			break;
 		case DESTROY_ROOM:
-			for(int i = 0; i < roomArray.size(); i++){
-                p = tileMap.GetTile(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
-                if(roomArray[i]->IsInside(p)){
-					heuristicsArray.erase(roomArray[i]->GetID());
-                    cout << "Destroying..." << endl;
-                    DestroyRoom(i+1);
-					roomArray.erase(roomArray.begin()+i);
-					i = roomArray.size();
-				}
-				
-            }
-			action = NONE;
-			break;
-		case BUY:
 			for (int i = 0; i < roomArray.size(); i++){
-				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
+				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 				if (roomArray[i]->IsInside(p)){
+					heuristicsArray.erase(roomArray[i]->GetID());
 					cout << "Destroying..." << endl;
-					DestroyRoom(i + 1);
+					DestroyRoom(roomArray[i]->GetID());
 					roomArray.erase(roomArray.begin() + i);
 					i = roomArray.size();
 				}
+				
 			}
+			action = NONE;
+			break;
+		case BUY:
+
+			// Isso aki não é aki não =D
+
+			/* for (int i = 0; i < roomArray.size(); i++){
+				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
+				if (roomArray[i]->IsInside(p)){
+					cout << "Destroying..." << endl;
+					DestroyRoom(roomArray[i]->GetID());
+					roomArray.erase(roomArray.begin() + i);
+					i = roomArray.size();
+				}
+			} */
 			data->money -= 100;
 			action = NONE;
 			break;
 		case AREA_SELECT:
+			break;
+		case EDIT_ROOM:
+			
+			for (int i = 0; i < roomArray.size(); i++){
+				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
+				if (roomArray[i]->IsInside(p)){
+					cout << "editando quarto: " << roomArray[i]->GetID() << endl;
+					roomArray[i]->EditRoom(true);
+					for (int j = 0; j < objectArray.size(); j++){
+						if (objectArray[j]->Is("Wall")){
+							if (objectArray[j]->roomID == roomArray[i]->GetID()) {
+								objectArray[j]->Editing(true);
+							}
+						}
+					}
+				}
+			}
+			action = NONE;
 			break;
 		default:
 			break;
@@ -246,6 +280,8 @@ void StageState::Input() {
 		case GUI_A:
 			gui.SetPosition(InputManager::GetInstance().GetMouseX(),InputManager::GetInstance().GetMouseY());			
 			break;
+		case EDIT_ROOM:
+			break;
 		default:
 			break;
 		}
@@ -264,6 +300,8 @@ void StageState::Input() {
 		case DESTROY_ROOM:
 			break;
 		case AREA_SELECT:
+			break;
+		case EDIT_ROOM:
 			break;
 		default:
 			break;
@@ -284,6 +322,8 @@ void StageState::Input() {
 		case DESTROY_ROOM:
 			break;
 		case AREA_SELECT:
+			break;
+		case EDIT_ROOM:
 			break;
 		default:
 			break;
@@ -330,6 +370,8 @@ void StageState::PathAStar(int posX, int posY, int roomId){
 	cout << "RoomID : " << roomId << endl;
 	cout <<"Size : " <<roomArray.size() << endl;
 	Point door = roomArray[roomId-1]->GetDoor();
+	door.x = 7;
+	door.y = 7;
 	int index, cost, actualPos, movements = 0;
 	Point posCost;
 	bool arrived = false;

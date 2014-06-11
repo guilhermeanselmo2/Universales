@@ -4,11 +4,13 @@
 #include "GameObject.h"
 #include "Sprite.h"
 #include "Timer.h"
+#include "Character.h"
+#include "GameObject.h"
 #include <queue>
 
 class Permonkey : public GameObject{
 public:
-    Permonkey(float x, float y, Point lTile);
+    Permonkey(float x, float y, Point lTile, TileMap tileMap);
     ~Permonkey();
 	void Update(float dt);
     void Render(int cameraX, int cameraY);
@@ -17,8 +19,8 @@ public:
     bool Is(string type);
 	bool IsCharacter();
     string Type();
-
-    void AddObjective(float x, float y);
+	void Editing(bool editing);
+	void AddObjective(float x, float y, Point tile);
     void AddObjective(Point pos);
     void Go(Point pos);
 	void PathAStar(Point pos, vector<int> heuristic, vector<int> occupancyGrid);
@@ -27,11 +29,17 @@ public:
     
 
 private:
-    Sprite character;
+	Character::ActionCharacter actionCharacter;
+	Sprite character;
+	Point permonkeyTile;
+	Point objectiveTile;
 	Point objective;
-	int objectiveX, objectiveY;
-    Timer temp;
-    int crt;
+	Point objectiveMem;
+	Timer temp;
+	int crt;
+	Point desvio;
+	bool flagDesvio;
+	TileMap tileMap;
 
 };
 

@@ -18,13 +18,16 @@
 
 enum Action{
 
-    NONE = 0,
-    TILE_SELECT,
-    CONSTRUCT_ROOM,
-    DESTROY_ROOM,
-    AREA_SELECT,
+	NONE = 0,
+	TILE_SELECT,
+	CONSTRUCT_ROOM,
+	DESTROY_ROOM,
+	AREA_SELECT,
 	GUI_A,
 	BUY,
+	EDIT_ROOM,
+	EDIT_WALL,
+	EDIT_DOOR,
 };
 
 class StageState : public State {
@@ -44,6 +47,7 @@ private:
 	Action action;
 	SelectionBox selectionBox;
 	Point p;
+	Point ptile;
 	vector<unique_ptr<Room>> roomArray;
 	vector<int> obstacleMap;
 	unordered_map<int, vector<int>> heuristicsArray;

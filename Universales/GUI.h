@@ -15,11 +15,12 @@ public:
     bool BuildIconPressed();
     bool DestroyIconPressed();
 	bool BuyIconPressed();
+	bool EditIconPressed();
     bool IsInside();
 
 private:
-    Rect box, buildBox, destroyBox, buyBox;
-    Sprite buildIcon, destroyIcon, buyIcon;
+    Rect box, buildBox, destroyBox, buyBox, editBox;
+    Sprite buildIcon, destroyIcon, buyIcon, editIcon;
 
 };
 

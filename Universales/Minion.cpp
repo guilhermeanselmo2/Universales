@@ -42,5 +42,7 @@ bool Minion::Is(string type){
 	return false;
 }
 
-void Minion::AddObjective(float x, float y){
+void Minion::Editing(bool editing) {}
+
+void Minion::AddObjective(float x, float y, Point tile){
 }

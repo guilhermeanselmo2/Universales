@@ -18,8 +18,9 @@ public:
 	virtual bool IsDead() = 0;
 	virtual void NotifyCollision(GameObject& other) = 0;
 	virtual bool Is(string type) = 0;
+	virtual void Editing(bool editing) = 0;
 	//string Type();
-	virtual void AddObjective(float x, float y) = 0;
+	virtual void AddObjective(float x, float y, Point tile) = 0;
 	virtual bool IsCharacter() = 0;
 	virtual string Type() = 0;
 	

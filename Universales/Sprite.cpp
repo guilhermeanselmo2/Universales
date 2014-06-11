@@ -35,6 +35,8 @@ void Sprite::Update(float dt) {
 	}
 	if (frameCount == 1)
 		SetClip(0, 0, clipRect.w, clipRect.h);
+	if (frameTime == -1)
+		SetClip(0, 0, clipRect.w, clipRect.h);
 }
 
 void Sprite::SetFrame(int frame) {
@@ -49,6 +51,10 @@ void Sprite::SetFrameTime(float frameTime) {
 
 void Sprite::SetFrameCount(int frameCount) {
 	this->frameCount = frameCount;
+}
+
+void Sprite::SetCurrentHeight(int currentHeight) {
+	this->currentHeight = currentHeight;
 }
 
 int Sprite::GetTotalWidth() const {
