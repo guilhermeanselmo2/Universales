@@ -23,6 +23,7 @@ enum Action{
 	DESTROY_ROOM,
 	AREA_SELECT,
 	GUI_A,
+	SUB_GUI_EDIT,
 	BUY,
 	EDIT_ROOM,
 	EDIT_WALL,
@@ -48,6 +49,7 @@ private:
 	vector<unique_ptr<Room>> roomArray;
 	vector<unique_ptr<Character>> characterArray;
 	GUI gui;
+	//GUI subGuiEdit;
 	Text moneyText;
 };
 

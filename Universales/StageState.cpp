@@ -193,6 +193,12 @@ void StageState::Input() {
 		case CONSTRUCT_ROOM:
 			{
 			action = NONE;
+			Point aux;
+			if (selectionBox.begin.y > selectionBox.end.y) {
+				aux = selectionBox.begin;
+				selectionBox.begin = selectionBox.end;
+				selectionBox.end = aux;
+			}
 			Room *newRoom = new Room(selectionBox.begin, selectionBox.end, &tileMap, &objectArray, roomArray.size());
             roomArray.emplace_back(newRoom);
 			}
