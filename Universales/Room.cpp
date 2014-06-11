@@ -29,7 +29,7 @@ Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObj
     pos.SetPoint(end.x,begin.y);
 	tile = pos;
     pos = tileMap->GetTileCenter(pos);
-	wall = new Wall(pos.x - tileMap->GetTileWidth() / 4, pos.y + tileMap->GetTileHeight() / 4, file, LEFT_CORNER, tile, RoomID);
+	wall = new Wall(pos.x - tileMap->GetTileWidth() / 4, pos.y + tileMap->GetTileHeight() / 4, file, RIGHT_CORNER, tile, RoomID);
     objectArray->emplace_back(wall);
 
     file = "img/wall_corner_lower.png";

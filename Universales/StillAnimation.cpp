@@ -27,5 +27,10 @@ bool StillAnimation::Is(string type) {
 	return  false;
 }
 
+bool StillAnimation::IsCharacter(){
+	return false;
+}
+
 void StillAnimation::AddObjective(float x, float y){
 }
+

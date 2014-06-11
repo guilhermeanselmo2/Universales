@@ -5,10 +5,10 @@
 #include "Sprite.h"
 
 enum WallStyle{
-        UPPER_RIGHT = 0,
-        UPPER_LEFT,
-        LOWER_RIGHT,
-        LOWER_LEFT,
+    UPPER_RIGHT = 0,
+    UPPER_LEFT,
+    LOWER_RIGHT,
+    LOWER_LEFT,
     UPPER_CORNER,
     LEFT_CORNER,
     RIGHT_CORNER,
@@ -26,6 +26,7 @@ public:
     bool IsDead();
     void NotifyCollision(GameObject& other);
     bool Is(string type);
+	bool IsCharacter();
     string Type();
 	void AddObjective(float x, float y);
 

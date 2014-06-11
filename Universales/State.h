@@ -5,6 +5,7 @@
 #include "Comparator.h"
 #include "TileMap.h"
 #include "StateData.h"
+#include "Character.h"
 
 #include <vector>
 #include <memory>
@@ -28,6 +29,7 @@ protected:
 	virtual void UpdateArray(float dt, TileMap *tileMap);
 	virtual void RenderArray();
 	vector<unique_ptr<GameObject>> objectArray;
+	vector<unique_ptr<Character>> characterArray;
 	priority_queue<Point, vector<Point>,Comparator> renderQueue;
 
 };

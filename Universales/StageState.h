@@ -34,6 +34,8 @@ public:
 	void Update(float dt);
 	void Render();
 	void DestroyRoom(int roomID);
+	void PathAStar(int posX, int posY, int roomId);
+
 private:
 	void Input();
 	Sprite bg;
@@ -43,7 +45,10 @@ private:
 	SelectionBox selectionBox;
 	Point p;
 	vector<unique_ptr<Room>> roomArray;
-	vector<unique_ptr<Character>> characterArray;
+	vector<int> obstacleMap;
+	unordered_map<int, vector<int>> heuristicsArray;
+	
+	
 	GUI gui;
 	Text moneyText;
 	OccupancyMap occupancyMap;

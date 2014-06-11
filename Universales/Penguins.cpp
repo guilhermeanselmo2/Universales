@@ -1,5 +1,4 @@
 #include "Penguins.h"
-#include "Bullet.h"
 #include "Timer.h"
 #include "StillAnimation.h"
 #include "Sound.h"
@@ -58,13 +57,7 @@ void Penguins::Update(float dt) {
 		box.SetRect(box.GetXrect() - dt*linearSpeed*cos((rotation*M_PI) / 180), box.GetYrect() - dt*linearSpeed*sin((rotation*M_PI) / 180), box.GetWrect(), box.GetHrect());
 	cannonAngle = box.CenterRect(box).Inclinacao(InputManager::GetInstance().GetMouseX() - Camera::pos.GetXpoint(), InputManager::GetInstance().GetMouseY() - Camera::pos.GetYpoint(), box.CenterRect(box));
 	
-	if (IsDead()){
-		Sprite animationSp("img/penguindeath.png", 5, 0.08);
-		StillAnimation* animation = new StillAnimation(box.CenterRect(box).GetXpoint(), box.CenterRect(box).GetYpoint(), rotation, animationSp, 0.6, true);
-		Game::GetInstance().GetCurrentState().AddObject(animation);
-		Sound boom("audio/boom.wav");
-		boom.Play(0.5);
-	}
+
 }
 
 void Penguins::Render(int cameraX, int cameraY) {
@@ -73,10 +66,7 @@ void Penguins::Render(int cameraX, int cameraY) {
 }
 
 void Penguins::NotifyCollision(GameObject& other) {
-	Bullet& bullet = (Bullet&) other;
-	if (bullet.Is("Bullet") && bullet.targetsPlayer == false){
-		hp -= 10;
-	}
+
 }
 
 bool Penguins::IsDead() {
@@ -88,9 +78,7 @@ bool Penguins::IsDead() {
 }
 
 void Penguins::Shoot() {
-	Sprite bulletSp("img/penguinshot.png",4,0.08);
-	Bullet* bullet = new Bullet(box.CenterRect(box).GetXpoint() + 50*cos(cannonAngle),box.CenterRect(box).GetYpoint() + 50*sin(cannonAngle),cannonAngle,200.0,400.0,bulletSp,true);
-	Game::GetInstance().GetCurrentState().AddObject(bullet);
+
 }
 
 bool Penguins::Is(string type) {

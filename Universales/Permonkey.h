@@ -4,7 +4,6 @@
 #include "GameObject.h"
 #include "Sprite.h"
 #include "Timer.h"
-#include "Character.h"
 #include <queue>
 
 class Permonkey : public GameObject{
@@ -16,11 +15,14 @@ public:
     bool IsDead();
     void NotifyCollision (GameObject& other);
     bool Is(string type);
+	bool IsCharacter();
     string Type();
 
     void AddObjective(float x, float y);
     void AddObjective(Point pos);
     void Go(Point pos);
+	void PathAStar(Point pos, vector<int> heuristic, vector<int> occupancyGrid);
+	void PathAStar(int posX, int posY, vector<int> heuristic, vector<int> occupancyGrid);
     void Move (float dt);
     
 
