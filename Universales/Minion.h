@@ -18,7 +18,8 @@ public:
 	void Shoot(float x, float y);
 	void NotifyCollision(GameObject& other);
 	bool Is(string type);
-	void AddObjective(float x, float y);
+	void AddObjective(float x, float y, Point tile);
+	void Editing(bool editing);
 };
 
 #endif

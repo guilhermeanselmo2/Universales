@@ -30,7 +30,9 @@ bool StillAnimation::Is(string type) {
 bool StillAnimation::IsCharacter(){
 	return false;
 }
+void StillAnimation::Editing(bool editing) {}
 
-void StillAnimation::AddObjective(float x, float y){
+void StillAnimation::AddObjective(float x, float y, Point tile){
+
 }
 

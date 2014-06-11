@@ -325,6 +325,8 @@ void StageState::Input() {
 			break;
 		case EDIT_ROOM:
 			break;
+		case EDIT_ROOM:
+			break;
 		default:
 			break;
 		}

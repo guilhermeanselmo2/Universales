@@ -2,7 +2,7 @@
 #include "InputManager.h"
 #include <algorithm>
 
-GUI::GUI() : buildIcon("img/icons/build.png"), destroyIcon("img/icons/destroy.png"), buyIcon("img/icons/destroy.png"){
+GUI::GUI() : buildIcon("img/icons/build.png"), destroyIcon("img/icons/destroy.png"), buyIcon("img/icons/destroy.png"), editIcon("img/icons/editar.jpg"){
     box.w = buildIcon.GetWidth() + destroyIcon.GetWidth() + buyIcon.GetWidth();
     box.h = max(buildIcon.GetHeight(),destroyIcon.GetHeight());
 
@@ -14,6 +14,9 @@ GUI::GUI() : buildIcon("img/icons/build.png"), destroyIcon("img/icons/destroy.pn
 
 	buyBox.w = buyIcon.GetWidth();
 	buyBox.h = buyIcon.GetHeight();
+
+	editBox.w = editIcon.GetWidth();
+	editBox.h = editIcon.GetHeight();
 }
 
 GUI::~GUI(){
@@ -24,6 +27,7 @@ void GUI::Render(){
     buildIcon.Render(buildBox.x, buildBox.y);
     destroyIcon.Render(destroyBox.x, destroyBox.y);
 	buyIcon.Render(buyBox.x, buyBox.y);
+	editIcon.Render(editBox.x, editBox.y);
 }
 
 void GUI::SetPosition(float x, float y){
@@ -38,6 +42,9 @@ void GUI::SetPosition(float x, float y){
 
 	buyBox.x = x + destroyBox.w + buildBox.w;
 	buyBox.y = y;
+
+	editBox.x = x + buildBox.w + destroyBox.w + buyBox.w;
+	editBox.y = y;
 }
 
 void GUI::SetPosition(Point p){
@@ -52,6 +59,9 @@ void GUI::SetPosition(Point p){
 
 	buyBox.x = p.x + destroyBox.w + buildBox.w;
 	buyBox.y = p.y;
+
+	editBox.x = p.x + buildBox.w + destroyBox.w + buyBox.w;
+	editBox.y = p.y;
 }
 
 bool GUI::BuildIconPressed(){
@@ -66,6 +76,13 @@ bool GUI::BuyIconPressed(){
 	x = InputManager::GetInstance().GetMouseX();
 	y = InputManager::GetInstance().GetMouseY();
 	return buyBox.IsInside(x, y);
+}
+
+bool GUI::EditIconPressed(){
+	float x, y;
+	x = InputManager::GetInstance().GetMouseX();
+	y = InputManager::GetInstance().GetMouseY();
+	return editBox.IsInside(x, y);
 }
 
 bool GUI::DestroyIconPressed(){

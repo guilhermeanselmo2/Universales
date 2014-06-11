@@ -37,6 +37,7 @@ public:
 	bool IsOpen();
 	void SetScaleX(float scale);
 	void SetScaleY(float scale);
+	void SetCurrentHeight(int currentHeight);
 };
 
 #endif
