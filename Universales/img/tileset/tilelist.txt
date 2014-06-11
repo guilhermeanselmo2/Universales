@@ -1,2 +1,1 @@
-tile_grama_1.png
-tile_grama_2.png
+tileestacao.png

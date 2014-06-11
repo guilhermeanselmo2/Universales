@@ -31,6 +31,7 @@ public:
 	void Editing(bool editing);
     string Type();
 	void AddObjective(float x, float y, Point tile);
+	void AddObjective(vector<int> path);
 
 private:
 	Timer editTimer;

@@ -7,7 +7,7 @@ Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObj
     begin = lBegin;
     end = lEnd;
     string file;
-    //door = Point(end.x, begin.y+2);
+    door = Point(end.x, begin.y+2);
     RoomID = RoomCount+1;
 
     file = "img/wall_corner_upper.png";

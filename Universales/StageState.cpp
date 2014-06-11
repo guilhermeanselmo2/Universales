@@ -203,7 +203,8 @@ void StageState::Input() {
 			heuristicsArray.emplace(newRoom->GetID(),heuristc);
 			obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
 			Point tileC = tileMap.GetTile(objectArray[0]->box.x + objectArray[0]->box.w / 2, objectArray[0]->box.y + objectArray[0]->box.h);
-			PathAStar(tileC.x, tileC.y, newRoom->GetID());
+			vector<int> path = PathAStar(tileC.x, tileC.y, newRoom->GetID());
+			objectArray[0]->AddObjective(path);
 			}
 			break;
 		case DESTROY_ROOM:
@@ -325,8 +326,6 @@ void StageState::Input() {
 			break;
 		case EDIT_ROOM:
 			break;
-		case EDIT_ROOM:
-			break;
 		default:
 			break;
 		}
@@ -368,32 +367,33 @@ void StageState::DestroyRoom(int roomID){
     }
 }
 
-void StageState::PathAStar(int posX, int posY, int roomId){
+vector<int> StageState::PathAStar(int posX, int posY, int roomId){
 	cout << "RoomID : " << roomId << endl;
 	cout <<"Size : " <<roomArray.size() << endl;
 	Point door = roomArray[roomId-1]->GetDoor();
-	door.x = 7;
-	door.y = 7;
+
 	int index, cost, actualPos, movements = 0;
 	Point posCost;
 	bool arrived = false;
 	priority_queue<Point, vector<Point>, CostComparator> costQueue;
 	unordered_map<int, int> exploredTiles;
+	unordered_map<int, int> allPaths;
 	vector<int> heuristic = heuristicsArray[roomId];
+	vector<int> path;
 
-	if (door.x == posX && door.y == posY){
-		return;
-	}
 	index = posY*tileMap.GetWidth() + posX;
+	if (door.x == posX && door.y == posY){
+		path.emplace_back(index);
+		return path;
+	}
 	actualPos = index;
 	cost = heuristic[index];
 	posCost.SetPoint(index, movements, cost);
-	exploredTiles.emplace(index, cost);
+	exploredTiles.emplace(index, -1);
+	allPaths.emplace(actualPos, -1);
 	costQueue.emplace(posCost);
 	
 	while (!arrived){
-		int a;
-		cin >> a;
 		costQueue.pop();
 		movements++;
 		//Explore sides
@@ -404,6 +404,7 @@ void StageState::PathAStar(int posX, int posY, int roomId){
 			cost = heuristic[index] + movements;
 			posCost.SetPoint(index, movements, cost);
 			costQueue.emplace(posCost);
+			allPaths.emplace(index, actualPos);
 		}
 		//Down Right
 		posY++;
@@ -413,6 +414,7 @@ void StageState::PathAStar(int posX, int posY, int roomId){
 			cost = heuristic[index] + movements;
 			posCost.SetPoint(index, movements, cost);
 			costQueue.emplace(posCost);
+			allPaths.emplace(index, actualPos);
 		}
 		//Down Left
 		posY++;
@@ -422,6 +424,7 @@ void StageState::PathAStar(int posX, int posY, int roomId){
 			cost = heuristic[index] + movements;
 			posCost.SetPoint(index, movements, cost);
 			costQueue.emplace(posCost);
+			allPaths.emplace(index, actualPos);
 		}
 		//Down Right
 		posY--;
@@ -431,6 +434,7 @@ void StageState::PathAStar(int posX, int posY, int roomId){
 			cost = heuristic[index] + movements;
 			posCost.SetPoint(index, movements, cost);
 			costQueue.emplace(posCost);
+			allPaths.emplace(index, actualPos);
 		}
 
 		//Get next tile
@@ -447,6 +451,16 @@ void StageState::PathAStar(int posX, int posY, int roomId){
 		}
 		
 		cost = posCost.z;
-		exploredTiles.emplace(index, cost);
+		exploredTiles.emplace(index, actualPos);
+		actualPos = index;
 	}
+	path.emplace_back(index);
+	while (allPaths[index] != -1){
+		path.emplace_back(allPaths[index]);
+		index = allPaths[index];
+	}
+	for (int i = path.size()-1; i >= 0; i--){
+		cout << "Path : " << (int)(path[i] / tileMap.GetWidth()) << "," << path[i] % tileMap.GetWidth() << endl;
+	}
+	return path;
 }

@@ -20,6 +20,9 @@ Permonkey::~Permonkey(){
 }
 
 void Permonkey::Update(float dt){
+	cout << "Update Obj : " << objective.x << "," << objective.y << endl;
+	Point tile = tileMap.GetTile(objective.x, objective.y);
+	cout << "Update Tile : " << tile.x << "," << tile.y << endl;
 	switch (actionCharacter) {
 	case Character::RESTING:
 		character.SetFrameTime(-1);
@@ -61,6 +64,7 @@ string Permonkey::Type(){
 }
 
 void Permonkey::AddObjective(float x, float y, Point tile){
+	cout << "Add 1" << endl;
 	if (crt >= 0)
 		crt++;
 	objective.x = x;
@@ -71,12 +75,26 @@ void Permonkey::AddObjective(float x, float y, Point tile){
 }
 
 void Permonkey::AddObjective(Point pos){
+	cout << "Add 2" << endl;
     if (crt >= 0)
         crt++;
     objective = pos;
 }
 
+void Permonkey::AddObjective(vector<int> path){
+	cout << "Add 3" << endl;
+	if (crt >= 0)
+		crt++;
+	objective.x = (int)(path[path.size()-2 ] / tileMap.GetWidth());
+	objective.y = path[path.size() - 2] % tileMap.GetWidth();
+	objective = tileMap.GetTileCenter(objective);
+	cout << "Objective : " << objective.x << "," << objective.y << endl;
+
+}
+
+
 void Permonkey::Go(Point pos){
+	cout << "Go 1" << endl;
     objective = pos;
 }
 
@@ -101,6 +119,7 @@ void Permonkey::Move(float dt){
 			box.y = objective.y;
 			box = Rect(box.x - character.GetWidth() / 2, box.y - character.GetHeight() / 2, character.GetWidth(), character.GetHeight());
 			if (flagDesvio){
+				cout << "desvio" << endl;
 				objective.x = objectiveMem.x;
 				objective.y = objectiveMem.y;
 				flagDesvio = false;

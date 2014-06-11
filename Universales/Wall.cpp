@@ -106,3 +106,6 @@ void Wall::Editing(bool editing) {
 
 void Wall::AddObjective(float x, float y, Point tile){
 }
+
+void Wall::AddObjective(vector<int> path){
+}
