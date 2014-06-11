@@ -3,8 +3,10 @@
 
 #include "Rect.h"
 #include <string>
+#include <vector>
 
 using std::string;
+using namespace std;
 
 class GameObject {
 
@@ -19,7 +21,13 @@ public:
 	virtual void Editing(bool editing) = 0;
 	//string Type();
 	virtual void AddObjective(float x, float y, Point tile) = 0;
+	virtual bool IsCharacter() = 0;
+	virtual string Type() = 0;
+	
+	//void ConvertToTile(TileMap *tileMap);
+	//void ConvertToScreen(TileMap *tileMap);
 	Rect box;
+	Point tile;
 	int roomID;
 };
 

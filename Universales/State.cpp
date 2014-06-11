@@ -33,6 +33,7 @@ void State::UpdateArray(float dt, TileMap *tileMap) {
         if(objectArray[i]->Is("Wall")){
             p.SetPoint(p.x + tileMap->GetTileWidth()/2,p.y-tileMap->GetTileHeight()/4);
         }
+		p.SetPoint(p.x + tileMap->GetTileWidth() / 2, p.y - tileMap->GetTileHeight() / 4);
         p = tileMap->GetTile(p.x, p.y);
         if(objectArray[i]->Is("Wall")){
         }

@@ -27,7 +27,12 @@ bool StillAnimation::Is(string type) {
 	return  false;
 }
 
+bool StillAnimation::IsCharacter(){
+	return false;
+}
 void StillAnimation::Editing(bool editing) {}
 
 void StillAnimation::AddObjective(float x, float y, Point tile){
+
 }
+

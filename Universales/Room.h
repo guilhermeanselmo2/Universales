@@ -23,6 +23,7 @@ public:
     bool IsInside(Point tile);
     bool Is(string type);
 	RoomState roomState;
+	Point GetDoor();
 	Timer editTimer;
 
 private:

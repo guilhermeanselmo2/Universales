@@ -5,10 +5,11 @@
 #include "Music.h"
 #include "StateData.h"
 #include "Permonkey.h"
+#include "CostComparator.h"
 
 
 StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet),
-	moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100){
+	moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()){
 	string file, tile, line, endLine("\n"), initFile("img/tileset/");
 	FILE *tileFile;
 	char c;
@@ -29,10 +30,10 @@ StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet)
 	//objectArray.emplace_back(alien3);
 
 	Point monkeyTile(5,5);
+	Point teste(0, 0);
     monkeyTile = tileMap.GetTileCenter(monkeyTile);
-    Permonkey* pM = new Permonkey(monkeyTile.x, monkeyTile.y, tileMap);
+    Permonkey* pM = new Permonkey(monkeyTile.x, monkeyTile.y, teste, tileMap);
     objectArray.emplace_back(pM);
-	//characterArray.emplace_back(pM);
 
 	file = "img/tileset/tilelist.txt";
     tileFile = fopen(file.c_str(),"r");
@@ -62,6 +63,7 @@ StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet)
 StageState::~StageState() {
 	delete data;
 	objectArray.clear();
+	roomArray.clear();
 	//Music::Clear();
 	//Sprite::Clear();
 }
@@ -88,6 +90,8 @@ void StageState::Update(float dt) {
 		break;
 	}
 	UpdateArray(dt,&tileMap);
+	
+	Point teste = tileMap.GetTile(objectArray[0]->box.x + objectArray[0]->box.w / 2, objectArray[0]->box.y + objectArray[0]->box.h);
 }
 
 void StageState::Render() {
@@ -201,17 +205,24 @@ void StageState::Input() {
 			}
 			Room *newRoom = new Room(selectionBox.begin, selectionBox.end, &tileMap, &objectArray, roomArray.size());
             roomArray.emplace_back(newRoom);
+			vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[roomArray.size() - 1]->GetDoor(), 0);
+			heuristicsArray.emplace(newRoom->GetID(),heuristc);
+			obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
+			Point tileC = tileMap.GetTile(objectArray[0]->box.x + objectArray[0]->box.w / 2, objectArray[0]->box.y + objectArray[0]->box.h);
+			PathAStar(tileC.x, tileC.y, newRoom->GetID());
 			}
 			break;
 		case DESTROY_ROOM:
 			for (int i = 0; i < roomArray.size(); i++){
 				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 				if (roomArray[i]->IsInside(p)){
+					heuristicsArray.erase(roomArray[i]->GetID());
 					cout << "Destroying..." << endl;
 					DestroyRoom(roomArray[i]->GetID());
 					roomArray.erase(roomArray.begin() + i);
 					i = roomArray.size();
 				}
+				
 			}
 			action = NONE;
 			break;
@@ -331,10 +342,115 @@ void StageState::Input() {
 
 void StageState::DestroyRoom(int roomID){
     cout << roomID << endl;
+	Point pos;
     for(int i = 0; i<objectArray.size(); i++){
         if(objectArray[i]->roomID  == roomID){
+			if (objectArray[i]->Type() == "LEFT_CORNER" || objectArray[i]->Type() == "RIGHT_CORNER"){
+				if (objectArray[i]->Type() == "LEFT_CORNER"){
+					pos.x = objectArray[i]->box.x;
+					pos.y = objectArray[i]->box.y + objectArray[i]->box.h;
+
+						pos = tileMap.GetTile(pos.x, pos.y);
+					}
+					else{
+						pos.x = objectArray[i]->box.x + objectArray[i]->box.w;
+						pos.y = objectArray[i]->box.y + objectArray[i]->box.h;
+
+						pos = tileMap.GetTile(pos.x, pos.y);
+
+					}
+				}
+			else{
+				pos.x = objectArray[i]->box.x + objectArray[i]->box.w / 2;
+				pos.y = objectArray[i]->box.y + objectArray[i]->box.h;
+				pos = tileMap.GetTile(pos.x, pos.y);
+			}
+			occupancyMap.CleanTile(&tileMap, pos);
             objectArray.erase(objectArray.begin() + i);
             i--;
         }
     }
+}
+
+void StageState::PathAStar(int posX, int posY, int roomId){
+	cout << "RoomID : " << roomId << endl;
+	cout <<"Size : " <<roomArray.size() << endl;
+	Point door = roomArray[roomId-1]->GetDoor();
+	door.x = 7;
+	door.y = 7;
+	int index, cost, actualPos, movements = 0;
+	Point posCost;
+	bool arrived = false;
+	priority_queue<Point, vector<Point>, CostComparator> costQueue;
+	unordered_map<int, int> exploredTiles;
+	vector<int> heuristic = heuristicsArray[roomId];
+
+	if (door.x == posX && door.y == posY){
+		return;
+	}
+	index = posY*tileMap.GetWidth() + posX;
+	actualPos = index;
+	cost = heuristic[index];
+	posCost.SetPoint(index, movements, cost);
+	exploredTiles.emplace(index, cost);
+	costQueue.emplace(posCost);
+	
+	while (!arrived){
+		int a;
+		cin >> a;
+		costQueue.pop();
+		movements++;
+		//Explore sides
+		//Up Right
+		posY--;
+		index = posY*tileMap.GetWidth() + posX;
+		if (exploredTiles.find(index) == exploredTiles.end() && posX >= 0 && posY >= 0 && obstacleMap[index] != -1){
+			cost = heuristic[index] + movements;
+			posCost.SetPoint(index, movements, cost);
+			costQueue.emplace(posCost);
+		}
+		//Down Right
+		posY++;
+		posX++;
+		index = posY*tileMap.GetWidth() + posX;
+		if (exploredTiles.find(index) == exploredTiles.end() && posX >= 0 && posY >= 0 && obstacleMap[index] != -1){
+			cost = heuristic[index] + movements;
+			posCost.SetPoint(index, movements, cost);
+			costQueue.emplace(posCost);
+		}
+		//Down Left
+		posY++;
+		posX--;
+		index = posY*tileMap.GetWidth() + posX;
+		if (exploredTiles.find(index) == exploredTiles.end() && posX >= 0 && posY >= 0 && obstacleMap[index] != -1){
+			cost = heuristic[index] + movements;
+			posCost.SetPoint(index, movements, cost);
+			costQueue.emplace(posCost);
+		}
+		//Down Right
+		posY--;
+		posX--;
+		index = posY*tileMap.GetWidth() + posX;
+		if (exploredTiles.find(index) == exploredTiles.end() && posX >= 0 && posY >= 0 && obstacleMap[index] != -1){
+			cost = heuristic[index] + movements;
+			posCost.SetPoint(index, movements, cost);
+			costQueue.emplace(posCost);
+		}
+
+		//Get next tile
+
+		posCost = costQueue.top();
+		index = posCost.x;
+		posY = (int)(index / tileMap.GetWidth());
+		posX = index % tileMap.GetWidth();
+		movements = posCost.y;
+		if (posX == door.x && posY == door.y) {
+			arrived = true;
+			cout << "Achou : " << posX << "," << posY << endl;
+			cout << "Movements : "<< movements << endl;
+		}
+		
+		cost = posCost.z;
+		exploredTiles.emplace(index, cost);
+	}
 }

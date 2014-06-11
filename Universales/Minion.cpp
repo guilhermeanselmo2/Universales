@@ -1,5 +1,4 @@
 #include "Minion.h"
-#include "Bullet.h"
 #include "StillAnimation.h"
 
 Minion::Minion(GameObject* minionCenter, float angleOffset) : center(minionCenter), angle(angleOffset) {
@@ -21,11 +20,6 @@ void Minion::Update(float dt) {
 	angle = angle + dt;
 	rotation = (angle*180)/M_PI +90;
 
-	if (center->IsDead()) {
-		Sprite animationSp("img/miniondeath.png", 4, 0.08);
-		StillAnimation* animation = new StillAnimation(box.CenterRect(box).GetXpoint(), box.CenterRect(box).GetYpoint(), rotation, animationSp, 0.5, true);
-		Game::GetInstance().GetCurrentState().AddObject(animation);
-	}
 }
 
 void Minion::Render(int cameraX,int cameraY) {
@@ -33,11 +27,7 @@ void Minion::Render(int cameraX,int cameraY) {
 }
 
 void Minion::Shoot(float x, float y){
-	float angulo;
-	angulo = box.CenterRect(box).Inclinacao(x,y,box.CenterRect(box));
-	Sprite bulletSp("img/minionbullet.png",3,0.08);
-	Bullet* bullet = new Bullet(box.CenterRect(box).GetXpoint(),box.CenterRect(box).GetYpoint(),angulo,200.0,800.0,bulletSp,false);
-	Game::GetInstance().GetCurrentState().AddObject(bullet);
+
 }
 
 bool Minion::IsDead() {

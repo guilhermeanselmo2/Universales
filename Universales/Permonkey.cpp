@@ -1,14 +1,17 @@
 #include "Permonkey.h"
 #include "Camera.h"
 
-Permonkey::Permonkey(float x, float y, TileMap tileMap) : character("img/permacaco_anim_ss.png", 4, -1, 4), tileMap(tileMap) {
-	box = Rect(x - character.GetWidth() / 2, y - character.GetHeight() / 2, character.GetWidth(), character.GetHeight());
+Permonkey::Permonkey(float x, float y, Point lTile, TileMap tileMap) : character("img/permacaco_anim_ss.png", 4, -1, 4), tileMap(tileMap) {
+
+    box = Rect(x-character.GetWidth()/2,y-character.GetHeight(), character.GetWidth(), character.GetHeight());
 	rotation = 0;
 	roomID = 0;
 	crt = 0;
 	objective.x = 994;
 	objective.y = 470;
+	tile = lTile;
 	actionCharacter = Character::RESTING;
+	
 }
 
 Permonkey::~Permonkey(){
@@ -31,7 +34,7 @@ void Permonkey::Update(float dt){
 }
 
 void Permonkey::Render(int cameraX, int cameraY){
-    character.Render(box.x+Camera::pos.x, box.y+Camera::pos.y-box.h/2, rotation);
+    character.Render(box.x+Camera::pos.x, box.y+Camera::pos.y, rotation);
 }
 
 bool Permonkey::IsDead(){
@@ -47,6 +50,10 @@ void Permonkey::Editing(bool edit) {}
 
 bool Permonkey::Is(string type){
     return type == "PerMonkey";
+}
+
+bool Permonkey::IsCharacter(){
+	return false;
 }
 
 string Permonkey::Type(){
@@ -73,11 +80,20 @@ void Permonkey::Go(Point pos){
     objective = pos;
 }
 
+void Permonkey::PathAStar(Point pos, vector<int> heuristic, vector<int> occupancyGrid){
+	PathAStar(pos.x, pos.y, heuristic, occupancyGrid);
+
+}
+
+void Permonkey::PathAStar(int posX, int posY, vector<int> heuristic, vector<int> occupancyGrid){
+
+}
+
 void Permonkey::Move(float dt){
 	temp.Update(dt);
 	Point center_pos;
 	center_pos.x = box.x + character.GetWidth() / 2;
-	center_pos.y = box.y + character.GetHeight() / 2;
+    center_pos.y = box.y+character.GetHeight();
 	float distance = objective.GetDistance(box.x + character.GetWidth() / 2, box.y + character.GetHeight() / 2);
 	if ((objectiveTile.x >= 0) && (objectiveTile.y >= 0)) {
 		if (distance< 3) {
@@ -88,8 +104,7 @@ void Permonkey::Move(float dt){
 				objective.x = objectiveMem.x;
 				objective.y = objectiveMem.y;
 				flagDesvio = false;
-			}
-			else
+			} else
 				actionCharacter = Character::RESTING;
 		}
 
