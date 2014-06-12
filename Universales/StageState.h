@@ -55,6 +55,7 @@ private:
 	Point p;
 	Point ptile;
 	RoomType rType;
+	RoomType charRoom;
 	vector<unique_ptr<Room>> roomArray;
 	vector<int> obstacleMap;
 	unordered_map<int, vector<int>> heuristicsArray;

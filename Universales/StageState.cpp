@@ -107,15 +107,18 @@ void StageState::Update(float dt) {
 		
 		if (objectArray[i]->IsCharacter() && objectArray[i]->GetChoice() != GOING_P && objectArray[i]->GetChoice() != GOING_S){
 			charChoice = objectArray[i]->GetChoice();
-			if (charChoice == Choice::PIRATE_C){
-				rType = RoomType::PIRATE;
+			cout << "Char " << i << " : " << charChoice << endl;
+			charRoom = CORRIDOR;
+			if (charChoice == PIRATE_C){
+				charRoom = PIRATE;
 			}
-			if (charChoice == Choice::SAMURAI_C){
-				rType = RoomType::SAMURAI;
+			if (charChoice == SAMURAI_C){
+				charRoom = SAMURAI;
 			}
 			if (!roomArray.empty()){
 				for (int j = 0; j < roomArray.size(); j++){
-					if (roomArray[j]->GetState() == rType){
+					if (roomArray[j]->GetState() == charRoom){
+						cout << "Room : " << roomArray[j]->GetState() << endl;;
 						int x, y;
 						Point t;
 						x = objectArray[i]->box.x + objectArray[i]->box.w / 2;
@@ -127,7 +130,7 @@ void StageState::Update(float dt) {
 			}
 		}
 	}
-	if (creationTimer.Get() > 30){
+	if (creationTimer.Get() > 5){
 		CreateCharacter(5, 5);
 		creationTimer.Restart();
 	}

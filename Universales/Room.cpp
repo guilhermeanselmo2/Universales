@@ -243,6 +243,5 @@ Point Room::GetDoor(){
 }
 
 RoomType Room::GetState(){
-	cout << "RoomType : " << roomType << endl;
 	return roomType;
 }
