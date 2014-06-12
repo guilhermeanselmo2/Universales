@@ -8,6 +8,15 @@
 using std::string;
 using namespace std;
 
+enum Choice{
+	PIRATE_C = 0,
+	SAMURAI_C,
+	CORRIDOR_C,
+	DECIDING,
+	GOING_P,
+	GOING_S,
+};
+
 class GameObject {
 
 public:
@@ -24,6 +33,7 @@ public:
 	virtual void AddObjective(vector<int> path) = 0;
 	virtual bool IsCharacter() = 0;
 	virtual string Type() = 0;
+	virtual Choice GetChoice() = 0;
 	
 	//void ConvertToTile(TileMap *tileMap);
 	//void ConvertToScreen(TileMap *tileMap);

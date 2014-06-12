@@ -2,6 +2,10 @@
 #define CharacterH
 #include "Point.h"
 
+enum CharType{
+	PERMONKEY = 0,
+};
+
 class Character {
 public:
 	enum ActionCharacter{

@@ -12,7 +12,15 @@ StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet)
 	moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()){
 	string file, tile, line, endLine("\n"), initFile("img/tileset/");
 	FILE *tileFile;
+	Point roomBegin, roomEnd;
 	char c;
+
+	creationTimer.Restart();
+
+	rType = CORRIDOR;
+
+	roomBegin.SetPoint(0, 0);
+	roomEnd.SetPoint(25, 25);
 
 	action = NONE;
 
@@ -29,11 +37,14 @@ StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet)
 	//objectArray.emplace_back(alien2);
 	//objectArray.emplace_back(alien3);
 
-	Point monkeyTile(0,0);
+	Point monkeyTile(4,4);
 	Point teste(0, 0);
     monkeyTile = tileMap.GetTileCenter(monkeyTile);
     Permonkey* pM = new Permonkey(monkeyTile.x, monkeyTile.y, teste, tileMap);
     objectArray.emplace_back(pM);
+
+	//Room *newRoom = new Room(roomBegin, roomEnd, &tileMap, &objectArray, roomArray.size(), rType);
+	//roomArray.emplace_back(newRoom);
 
 	file = "img/tileset/tilelist.txt";
     tileFile = fopen(file.c_str(),"r");
@@ -70,6 +81,7 @@ StageState::~StageState() {
 
 void StageState::Update(float dt) {
 	Input();
+	creationTimer.Update(dt);
 	switch (action)	{
 	case NONE:
 		break;
@@ -91,7 +103,35 @@ void StageState::Update(float dt) {
 	}
 	UpdateArray(dt,&tileMap);
 	
-	Point teste = tileMap.GetTile(objectArray[0]->box.x + objectArray[0]->box.w / 2, objectArray[0]->box.y + objectArray[0]->box.h);
+	for (int i = 0; i < objectArray.size(); i++){
+		
+		if (objectArray[i]->IsCharacter() && objectArray[i]->GetChoice() != GOING_P && objectArray[i]->GetChoice() != GOING_S){
+			charChoice = objectArray[i]->GetChoice();
+			if (charChoice == Choice::PIRATE_C){
+				rType = RoomType::PIRATE;
+			}
+			if (charChoice == Choice::SAMURAI_C){
+				rType = RoomType::SAMURAI;
+			}
+			if (!roomArray.empty()){
+				for (int j = 0; j < roomArray.size(); j++){
+					if (roomArray[j]->GetState() == rType){
+						int x, y;
+						Point t;
+						x = objectArray[i]->box.x + objectArray[i]->box.w / 2;
+						y = objectArray[i]->box.y + objectArray[i]->box.h;
+						t = tileMap.GetTile(x, y);
+						objectArray[i]->AddObjective(PathAStar(t.x, t.y, roomArray[j]->GetID()));
+					}
+				}
+			}
+		}
+	}
+	if (creationTimer.Get() > 30){
+		CreateCharacter(5, 5);
+		creationTimer.Restart();
+	}
+	
 }
 
 void StageState::Render() {
@@ -122,6 +162,10 @@ void StageState::Render() {
 		selectionBox.Render(&tileMap);
 		RenderArray();
 		break;
+	case GUI_ROOM:
+		RenderArray();
+		gui.Render();
+		break;
 	case CONSTRUCT_ROOM:
 		selectionBox.Render(&tileMap);
 		RenderArray();
@@ -149,6 +193,17 @@ void StageState::Input() {
 		Game::GetInstance().Push(state);
 	}
 
+	if (InputManager::GetInstance().KeyPress(SDLK_c)){
+		Point tile(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
+		tile = tileMap.GetTile(tile.x, tile.y);
+		CreateCharacter(tile.x, tile.y);
+		cout << "Size : " << objectArray.size() << endl;
+	}
+
+	if (InputManager::GetInstance().KeyPress(SDLK_d)){
+		DestroyCharacter(objectArray.size()-1);
+	}
+
 	if (InputManager::GetInstance().KeyPress(SDLK_RETURN)){
 		CheatState *state = new CheatState(this, data);
 		Game::GetInstance().Push(state);
@@ -171,7 +226,8 @@ void StageState::Input() {
 			break;
 		case GUI_A:
 			if(gui.BuildIconPressed()){
-				action = TILE_SELECT;
+				action = GUI_ROOM;
+				gui.SetState(ROOMS);
             }
 			else{
 				if (gui.DestroyIconPressed()){
@@ -194,17 +250,42 @@ void StageState::Input() {
 			break;
 		case TILE_SELECT:
 			break;
+		case GUI_ROOM:
+			if (gui.PirateIconPressed()){
+				rType = PIRATE;
+				cout << "pirate" << endl;
+				action = TILE_SELECT;
+			}else{
+				if (gui.SamuraiIconPressed()){
+					rType = SAMURAI;
+					cout << "Samurai" << endl;
+					action = TILE_SELECT;
+				}else{
+					cout << "none" << endl;
+					action = NONE;
+				}
+
+			}
+			gui.SetState(BASIC);
+
+			break;
 		case CONSTRUCT_ROOM:
 			{
 			action = NONE;
-			Room *newRoom = new Room(selectionBox.begin, selectionBox.end, &tileMap, &objectArray, roomArray.size());
+			Point aux;
+			if (selectionBox.begin.y > selectionBox.end.y) {
+				aux = selectionBox.begin;
+				selectionBox.begin = selectionBox.end;
+				selectionBox.end = aux;
+			}
+			Room *newRoom = new Room(selectionBox.begin, selectionBox.end, &tileMap, &objectArray, roomArray.size(), rType);
             roomArray.emplace_back(newRoom);
 			vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[roomArray.size() - 1]->GetDoor(), 0);
 			heuristicsArray.emplace(newRoom->GetID(),heuristc);
 			obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
-			Point tileC = tileMap.GetTile(objectArray[0]->box.x + objectArray[0]->box.w / 2, objectArray[0]->box.y + objectArray[0]->box.h);
-			vector<int> path = PathAStar(tileC.x, tileC.y, newRoom->GetID());
-			objectArray[0]->AddObjective(path);
+			//Point tileC = tileMap.GetTile(objectArray[0]->box.x + objectArray[0]->box.w / 2, objectArray[0]->box.y + objectArray[0]->box.h);
+			//vector<int> path = PathAStar(tileC.x, tileC.y, newRoom->GetID());
+			//objectArray[0]->AddObjective(path);
 			}
 			break;
 		case DESTROY_ROOM:
@@ -463,4 +544,15 @@ vector<int> StageState::PathAStar(int posX, int posY, int roomId){
 		cout << "Path : " << (int)(path[i] / tileMap.GetWidth()) << "," << path[i] % tileMap.GetWidth() << endl;
 	}
 	return path;
+}
+
+void StageState::CreateCharacter(int x, int y){
+	Point tile(x, y);
+	tile = tileMap.GetTileCenter(tile);
+	Permonkey* pM = new Permonkey(tile.x, tile.y, tile, tileMap);
+	objectArray.emplace_back(pM);
+}
+
+void StageState::DestroyCharacter(int id){
+	objectArray.erase(objectArray.begin() + id);
 }

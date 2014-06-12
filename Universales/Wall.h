@@ -32,6 +32,7 @@ public:
     string Type();
 	void AddObjective(float x, float y, Point tile);
 	void AddObjective(vector<int> path);
+	Choice GetChoice();
 
 private:
 	Timer editTimer;

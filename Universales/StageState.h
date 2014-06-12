@@ -13,17 +13,21 @@
 #include "PauseState.h"
 #include "CheatState.h"
 #include "Text.h"
+#include "Timer.h"
 #include "Object.h"
 #include "OccupancyMap.h"
+#include "Permonkey.h"
 
 enum Action{
 
 	NONE = 0,
 	TILE_SELECT,
+	GUI_ROOM,
 	CONSTRUCT_ROOM,
 	DESTROY_ROOM,
 	AREA_SELECT,
 	GUI_A,
+	SUB_GUI_EDIT,
 	BUY,
 	EDIT_ROOM,
 	EDIT_WALL,
@@ -37,6 +41,8 @@ public:
 	void Update(float dt);
 	void Render();
 	void DestroyRoom(int roomID);
+	void CreateCharacter(int x, int y);
+	void DestroyCharacter(int id);
 	vector<int> PathAStar(int posX, int posY, int roomId);
 
 private:
@@ -48,14 +54,17 @@ private:
 	SelectionBox selectionBox;
 	Point p;
 	Point ptile;
+	RoomType rType;
 	vector<unique_ptr<Room>> roomArray;
 	vector<int> obstacleMap;
 	unordered_map<int, vector<int>> heuristicsArray;
 	
-	
+	Timer creationTimer;
 	GUI gui;
+	//GUI subGuiEdit;
 	Text moneyText;
 	OccupancyMap occupancyMap;
+	Choice charChoice;
 };
 
 #endif

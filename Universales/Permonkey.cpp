@@ -1,8 +1,7 @@
 #include "Permonkey.h"
 #include "Camera.h"
 
-Permonkey::Permonkey(float x, float y, Point lTile, TileMap tileMap) : character("img/permacaco_anim_ss.png", 4, 0.5, 4), tileMap(tileMap) {
-
+Permonkey::Permonkey(float x, float y, Point lTile, TileMap tileMap) : character("img/permacaco_anim_ss.png", 4, -1, 4), tileMap(tileMap) {
     box = Rect(x-character.GetWidth()/2,y-character.GetHeight(), character.GetWidth(), character.GetHeight());
 	rotation = 0;
 	roomID = 0;
@@ -11,7 +10,7 @@ Permonkey::Permonkey(float x, float y, Point lTile, TileMap tileMap) : character
 	objective.y = 470;
 	tile = lTile;
 	actionCharacter = Character::RESTING;
-	
+	choice = DECIDING;
 }
 
 Permonkey::~Permonkey(){
@@ -20,9 +19,6 @@ Permonkey::~Permonkey(){
 }
 
 void Permonkey::Update(float dt){
-	cout << "Update Obj : " << objective.x << "," << objective.y << endl;
-	Point tile = tileMap.GetTile(objective.x, objective.y);
-	cout << "Update Tile : " << tile.x << "," << tile.y << endl;
 	switch (actionCharacter) {
 	case Character::RESTING:
 		character.SetFrameTime(-1);
@@ -34,6 +30,13 @@ void Permonkey::Update(float dt){
 		Move(dt);
 		break;
 	}
+	if (choice == DECIDING){
+		MakeChoice();
+	}
+}
+
+Choice Permonkey::GetChoice(){
+	return choice;
 }
 
 void Permonkey::Render(int cameraX, int cameraY){
@@ -56,7 +59,7 @@ bool Permonkey::Is(string type){
 }
 
 bool Permonkey::IsCharacter(){
-	return false;
+	return true;
 }
 
 string Permonkey::Type(){
@@ -64,37 +67,56 @@ string Permonkey::Type(){
 }
 
 void Permonkey::AddObjective(float x, float y, Point tile){
-	cout << "Add 1" << endl;
 	if (crt >= 0)
 		crt++;
 	objective.x = x;
 	objective.y = y;
 	objectiveTile = tile;
-	if ((tile.x >= 0) && (tile.y >= 0))
+
+
+	if ((tile.x >= 0) && (tile.y >= 0)) {
 		actionCharacter = Character::MOVING;
+		flagDesvio = false;
+	}
 }
 
 void Permonkey::AddObjective(Point pos){
-	cout << "Add 2" << endl;
     if (crt >= 0)
         crt++;
     objective = pos;
+	actionCharacter = Character::MOVING;
+	flagDesvio = false;
 }
 
-void Permonkey::AddObjective(vector<int> path){
-	cout << "Add 3" << endl;
+void Permonkey::AddObjective(vector<int> path) {
+	this->path = path;
+	switch (choice)	{
+	case PIRATE_C:
+		choice = GOING_P;
+		break;
+	case SAMURAI_C:
+		choice = GOING_S;
+		break;
+	default:
+		break;
+	}
+	cout << "choice : " << choice << endl;
 	if (crt >= 0)
 		crt++;
-	objective.x = (int)(path[path.size()-2 ] / tileMap.GetWidth());
-	objective.y = path[path.size() - 2] % tileMap.GetWidth();
+	//this->path.pop_back();
+	//this->path.pop_back();
+	cout << "U_Path :: " << path[path.size()-1] % tileMap.GetWidth() << "," << (int)path[path.size()-1] / tileMap.GetWidth() << endl;
+	objective.y = (int)(path[path.size()-1] / tileMap.GetWidth());
+	objective.x = path[path.size()-1] % tileMap.GetWidth();
 	objective = tileMap.GetTileCenter(objective);
-	cout << "Objective : " << objective.x << "," << objective.y << endl;
-
+	objectiveTile = tileMap.GetTile(objective.x, objective.y);
+	path.pop_back();
+	actionCharacter = Character::MOVING;
+	flagDesvio = false;
 }
 
 
 void Permonkey::Go(Point pos){
-	cout << "Go 1" << endl;
     objective = pos;
 }
 
@@ -111,21 +133,29 @@ void Permonkey::Move(float dt){
 	temp.Update(dt);
 	Point center_pos;
 	center_pos.x = box.x + character.GetWidth() / 2;
-    center_pos.y = box.y+character.GetHeight();
-	float distance = objective.GetDistance(box.x + character.GetWidth() / 2, box.y + character.GetHeight() / 2);
+    center_pos.y = box.y + character.GetHeight();
+	float distance = objective.GetDistance(box.x + character.GetWidth() / 2, box.y + character.GetHeight());
+
 	if ((objectiveTile.x >= 0) && (objectiveTile.y >= 0)) {
-		if (distance< 3) {
+		if (distance < 8) {
 			box.x = objective.x;
 			box.y = objective.y;
-			box = Rect(box.x - character.GetWidth() / 2, box.y - character.GetHeight() / 2, character.GetWidth(), character.GetHeight());
+			box = Rect(box.x - character.GetWidth() / 2, box.y - character.GetHeight(), character.GetWidth(), character.GetHeight());
+			actionCharacter = Character::RESTING;
+			if (!path.empty()) {
+				objective.y = (int)(path[path.size()-1] / tileMap.GetWidth());
+				objective.x = path[path.size()-1] % tileMap.GetWidth();
+				objective = tileMap.GetTileCenter(objective);
+				objectiveTile = tileMap.GetTile(objective.x, objective.y);
+				actionCharacter = Character::MOVING;
+				path.pop_back();
+			}
 			if (flagDesvio){
-				cout << "desvio" << endl;
 				objective.x = objectiveMem.x;
 				objective.y = objectiveMem.y;
 				flagDesvio = false;
+				actionCharacter = Character::MOVING;
 			}
-			else
-				actionCharacter = Character::RESTING;
 		}
 
 		if (distance > 3 && temp.Get() > 0.001) {
@@ -193,10 +223,21 @@ void Permonkey::Move(float dt){
 			}
 
 			else {
+				
 				//Stop;
 			}
 			//box = Rect(tile_pos.x-character.GetWidth()/2,tile_pos.y-character.GetHeight()/2, character.GetWidth(), character.GetHeight());
 			temp.Restart();
 		}
 	}
+}
+
+void Permonkey::MakeChoice(){
+	int decision = rand() % 100 + 1;
+	if (decision >= 66){
+		choice = PIRATE_C;
+	}else{
+		choice = SAMURAI_C;
+	}
+
 }

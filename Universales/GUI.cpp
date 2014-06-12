@@ -2,9 +2,9 @@
 #include "InputManager.h"
 #include <algorithm>
 
-GUI::GUI() : buildIcon("img/icons/build.png"), destroyIcon("img/icons/destroy.png"), buyIcon("img/icons/destroy.png"), editIcon("img/icons/editar.jpg"){
-    box.w = buildIcon.GetWidth() + destroyIcon.GetWidth() + buyIcon.GetWidth();
-    box.h = max(buildIcon.GetHeight(),destroyIcon.GetHeight());
+GUI::GUI() : buildIcon("img/icons/build.png"), destroyIcon("img/icons/destroy.png"), buyIcon("img/icons/buy2.png"), editIcon("img/icons/editar.jpg"), pirateIcon("img/icons/pirate.jpg"), samuraiIcon("img/icons/samurai.jpg"){
+    box.w = buildIcon.GetWidth()*4;
+    box.h = buildIcon.GetHeight()*2;
 
     buildBox.w = buildIcon.GetWidth();
     buildBox.h = buildIcon.GetHeight();
@@ -17,6 +17,17 @@ GUI::GUI() : buildIcon("img/icons/build.png"), destroyIcon("img/icons/destroy.pn
 
 	editBox.w = editIcon.GetWidth();
 	editBox.h = editIcon.GetHeight();
+
+	cout << pirateIcon.GetHeight() << endl; 
+
+	pirateBox.w = pirateIcon.GetWidth();
+	pirateBox.h = pirateIcon.GetHeight();
+
+
+	samuraiBox.w = samuraiIcon.GetWidth();
+	samuraiBox.h = samuraiIcon.GetHeight();
+
+	guiState = BASIC;
 }
 
 GUI::~GUI(){
@@ -24,10 +35,21 @@ GUI::~GUI(){
 }
 
 void GUI::Render(){
-    buildIcon.Render(buildBox.x, buildBox.y);
-    destroyIcon.Render(destroyBox.x, destroyBox.y);
-	buyIcon.Render(buyBox.x, buyBox.y);
-	editIcon.Render(editBox.x, editBox.y);
+	switch (guiState){
+	case BASIC:
+		buildIcon.Render(buildBox.x, buildBox.y);
+		destroyIcon.Render(destroyBox.x, destroyBox.y);
+		buyIcon.Render(buyBox.x, buyBox.y);
+		editIcon.Render(editBox.x, editBox.y);
+		break;
+	case ROOMS:
+		pirateIcon.Render(pirateBox.x, pirateBox.y);
+		samuraiIcon.Render(samuraiBox.x, samuraiBox.y);
+		break;
+	default:
+		break;
+	}
+
 }
 
 void GUI::SetPosition(float x, float y){
@@ -45,6 +67,12 @@ void GUI::SetPosition(float x, float y){
 
 	editBox.x = x + buildBox.w + destroyBox.w + buyBox.w;
 	editBox.y = y;
+
+	pirateBox.x = x;
+	pirateBox.y = y - pirateBox.h;
+
+	samuraiBox.x = x + pirateBox.w;
+	samuraiBox.y = y - destroyBox.h;
 }
 
 void GUI::SetPosition(Point p){
@@ -62,6 +90,16 @@ void GUI::SetPosition(Point p){
 
 	editBox.x = p.x + buildBox.w + destroyBox.w + buyBox.w;
 	editBox.y = p.y;
+
+	pirateBox.x = p.x;
+	pirateBox.h = p.y + pirateBox.h;
+
+	samuraiBox.x = p.x + pirateBox.w;
+	samuraiBox.h = p.y + destroyBox.h;
+}
+
+void GUI::SetState(GuiState newState){
+	guiState = newState;
 }
 
 bool GUI::BuildIconPressed(){
@@ -92,9 +130,24 @@ bool GUI::DestroyIconPressed(){
     return destroyBox.IsInside(x,y);
 }
 
+bool GUI::PirateIconPressed(){
+	float x, y;
+	x = InputManager::GetInstance().GetMouseX();
+	y = InputManager::GetInstance().GetMouseY();
+	return pirateBox.IsInside(x, y);
+}
+
+bool GUI::SamuraiIconPressed(){
+	float x, y;
+	x = InputManager::GetInstance().GetMouseX();
+	y = InputManager::GetInstance().GetMouseY();
+	return samuraiBox.IsInside(x, y);
+}
+
 bool GUI::IsInside(){
     float x,y;
     x = InputManager::GetInstance().GetMouseX();
     y = InputManager::GetInstance().GetMouseY();
     return box.IsInside(x,y);
 }
+

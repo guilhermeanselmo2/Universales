@@ -8,6 +8,7 @@
 #include "GameObject.h"
 #include <queue>
 
+
 class Permonkey : public GameObject{
 public:
     Permonkey(float x, float y, Point lTile, TileMap tileMap);
@@ -27,6 +28,9 @@ public:
 	void PathAStar(Point pos, vector<int> heuristic, vector<int> occupancyGrid);
 	void PathAStar(int posX, int posY, vector<int> heuristic, vector<int> occupancyGrid);
     void Move (float dt);
+	void MakeChoice();
+	Choice GetChoice();
+
     
 
 private:
@@ -41,6 +45,9 @@ private:
 	Point desvio;
 	bool flagDesvio;
 	TileMap tileMap;
+	vector<int> path;
+	int hunger;
+	Choice choice;
 
 };
 

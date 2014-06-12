@@ -2,13 +2,29 @@
 #include "Camera.h"
 #include "Wall.h"
 
-Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject> > *objectArray, int RoomCount) : tileSp("img/tileset/tile_tatami.png"){
+Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject> > *objectArray, int RoomCount, RoomType type) : tileSp("img/tileset/tile_tatami.png"){
 	Point tile;
     begin = lBegin;
     end = lEnd;
     string file;
     door = Point(end.x, begin.y+2);
     RoomID = RoomCount+1;
+	roomType = type;
+	switch (roomType)
+	{
+	case CORRIDOR:
+		tileSp.Open("img/tileset/fundo_espaco.png");
+		break;
+	case SAMURAI:
+		break;
+	case PIRATE:
+		tileSp.Open("img/tileset/tile_madeira.png");
+		break;
+	case STEAM:
+		break;
+	default:
+		break;
+	}
 
     file = "img/wall_corner_upper.png";
     Point pos(begin.x,begin.y);
@@ -224,4 +240,9 @@ int Room::GetID(){
 
 Point Room::GetDoor(){
 	return door;
+}
+
+RoomType Room::GetState(){
+	cout << "RoomType : " << roomType << endl;
+	return roomType;
 }
