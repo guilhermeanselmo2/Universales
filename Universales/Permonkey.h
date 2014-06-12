@@ -22,6 +22,7 @@ public:
 	void Editing(bool editing);
 	void AddObjective(float x, float y, Point tile);
     void AddObjective(Point pos);
+	void AddObjective(vector<int> path);
     void Go(Point pos);
 	void PathAStar(Point pos, vector<int> heuristic, vector<int> occupancyGrid);
 	void PathAStar(int posX, int posY, vector<int> heuristic, vector<int> occupancyGrid);
@@ -40,6 +41,7 @@ private:
 	Point desvio;
 	bool flagDesvio;
 	TileMap tileMap;
+	vector<int> path;
 
 };
 

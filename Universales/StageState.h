@@ -38,7 +38,7 @@ public:
 	void Update(float dt);
 	void Render();
 	void DestroyRoom(int roomID);
-	void PathAStar(int posX, int posY, int roomId);
+	vector<int> PathAStar(int posX, int posY, int roomId);
 
 private:
 	void Input();

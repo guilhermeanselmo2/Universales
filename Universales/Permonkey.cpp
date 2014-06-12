@@ -61,22 +61,44 @@ string Permonkey::Type(){
 }
 
 void Permonkey::AddObjective(float x, float y, Point tile){
+	cout << "Add 1" << endl;
 	if (crt >= 0)
 		crt++;
 	objective.x = x;
 	objective.y = y;
 	objectiveTile = tile;
-	if ((tile.x >= 0) && (tile.y >= 0))
+
+	cout << "tile x: " << tile.x << "tile y:" << tile.y << endl;
+
+	if ((tile.x >= 0) && (tile.y >= 0)) {
 		actionCharacter = Character::MOVING;
+		flagDesvio = false;
+	}
 }
 
 void Permonkey::AddObjective(Point pos){
+	cout << "Add 2" << endl;
     if (crt >= 0)
         crt++;
     objective = pos;
+	actionCharacter = Character::MOVING;
+	flagDesvio = false;
 }
 
+void Permonkey::AddObjective(vector<int> path) {
+	cout << "Add 3" << endl;
+	this->path = path;
+	if (crt >= 0)
+		crt++;
+	this->path.pop_back();
+	this->path.pop_back();
+	actionCharacter = Character::MOVING;
+	flagDesvio = false;
+}
+
+
 void Permonkey::Go(Point pos){
+	cout << "Go 1" << endl;
     objective = pos;
 }
 
@@ -93,19 +115,28 @@ void Permonkey::Move(float dt){
 	temp.Update(dt);
 	Point center_pos;
 	center_pos.x = box.x + character.GetWidth() / 2;
-    center_pos.y = box.y+character.GetHeight();
-	float distance = objective.GetDistance(box.x + character.GetWidth() / 2, box.y + character.GetHeight() / 2);
+    center_pos.y = box.y + character.GetHeight();
+	float distance = objective.GetDistance(box.x + character.GetWidth() / 2, box.y + character.GetHeight());
 	if ((objectiveTile.x >= 0) && (objectiveTile.y >= 0)) {
-		if (distance< 3) {
+		if (distance < 8) {
 			box.x = objective.x;
 			box.y = objective.y;
-			box = Rect(box.x - character.GetWidth() / 2, box.y - character.GetHeight() / 2, character.GetWidth(), character.GetHeight());
+			box = Rect(box.x - character.GetWidth() / 2, box.y - character.GetHeight(), character.GetWidth(), character.GetHeight());
+			actionCharacter = Character::RESTING;
+			if (!path.empty()) {
+				path.pop_back();
+				objective.y = (int)(path[path.size()] / tileMap.GetWidth());
+				objective.x = path[path.size()] % tileMap.GetWidth();
+				objective = tileMap.GetTileCenter(objective);
+				objectiveTile = tileMap.GetTile(objective.x, objective.y);
+				actionCharacter = Character::MOVING;
+			}
 			if (flagDesvio){
 				objective.x = objectiveMem.x;
 				objective.y = objectiveMem.y;
 				flagDesvio = false;
-			} else
-				actionCharacter = Character::RESTING;
+				actionCharacter = Character::MOVING;
+			}
 		}
 
 		if (distance > 3 && temp.Get() > 0.001) {

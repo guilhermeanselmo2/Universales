@@ -21,6 +21,7 @@ public:
 	virtual void Editing(bool editing) = 0;
 	//string Type();
 	virtual void AddObjective(float x, float y, Point tile) = 0;
+	virtual void AddObjective(vector<int> path) = 0;
 	virtual bool IsCharacter() = 0;
 	virtual string Type() = 0;
 	
