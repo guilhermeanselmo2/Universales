@@ -66,11 +66,9 @@ Sprite :: ~Sprite() {}
 void Sprite::Open(string file) {
 
 	if (assetTable.find(file) != assetTable.end()){
-		cout << "Arquivo carregado ..." << endl;
 	}
 
 	if (assetTable.find(file) == assetTable.end()){
-		cout << "Arquivo "<< file << " nao encontrado... carregando arquivo... " << endl;
 		texture = (SDL_Texture*)IMG_LoadTexture(Game::GetInstance().GetRenderer(), file.c_str());
 		assetTable.emplace(file, texture);
 	}

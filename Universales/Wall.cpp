@@ -104,6 +104,10 @@ void Wall::AddObjective(float x, float y, Point tile){
 void Wall::AddObjective(vector<int> path){
 }
 
+int Wall::GetHunger(){
+	return 0;
+}
+
 Choice Wall::GetChoice(){
 	Choice a = DECIDING;
 	return a;

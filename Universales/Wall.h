@@ -34,6 +34,7 @@ public:
 	void AddObjective(float x, float y, Point tile);
 	void AddObjective(vector<int> path);
 	Choice GetChoice();
+	int GetHunger();
 
 private:
 	Timer editTimer;

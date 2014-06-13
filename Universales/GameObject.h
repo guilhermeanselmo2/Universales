@@ -34,12 +34,17 @@ public:
 	virtual bool IsCharacter() = 0;
 	virtual string Type() = 0;
 	virtual Choice GetChoice() = 0;
+
+	virtual int GetHunger() = 0;
 	
 	//void ConvertToTile(TileMap *tileMap);
 	//void ConvertToScreen(TileMap *tileMap);
 	Rect box;
 	Point tile;
 	int roomID;
+	int hunger;
+	int satisfaction;
+	int money;
 };
 
 #endif

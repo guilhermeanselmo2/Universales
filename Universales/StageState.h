@@ -17,6 +17,7 @@
 #include "Object.h"
 #include "OccupancyMap.h"
 #include "Permonkey.h"
+#include "CharacterSheet.h"
 
 enum Action{
 
@@ -43,6 +44,7 @@ public:
 	void CreateCharacter(int x, int y);
 	void DestroyCharacter(int id);
 	vector<int> PathAStar(int posX, int posY, int roomId);
+	void SelectCharacter();
 
 private:
 	void Input();
@@ -65,6 +67,7 @@ private:
 	Text moneyText;
 	OccupancyMap occupancyMap;
 	Choice charChoice;
+	CharacterSheet sheet;
 };
 
 #endif

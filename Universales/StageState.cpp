@@ -6,10 +6,10 @@
 #include "StateData.h"
 #include "Permonkey.h"
 #include "CostComparator.h"
-
+#include "Camera.h"
 
 StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet),
-	moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()){
+moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()), sheet(PERMONKEY){
 	string file, tile, line, endLine("\n"), initFile("img/tileset/");
 	FILE *tileFile;
 	Point roomBegin, roomEnd;
@@ -23,6 +23,7 @@ StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet)
 	roomEnd.SetPoint(25, 25);
 
 	action = NONE;
+
 
 	bg.Open("img/fundo_espaco.png");
 	Music musica("audio/stageState.ogg");
@@ -128,7 +129,7 @@ void StageState::Update(float dt) {
 			}
 		}
 	}
-	if (creationTimer.Get() > 5){
+	if (creationTimer.Get() > 10){
 		CreateCharacter(5, 5);
 		creationTimer.Restart();
 	}
@@ -192,7 +193,8 @@ void StageState::Render() {
 		RenderArray();
 		break;
 	}
-	
+	if (sheet.GetRender())
+		sheet.Render();
 }
 
 void StageState::Input() {
@@ -202,10 +204,9 @@ void StageState::Input() {
 	}
 
 	if (InputManager::GetInstance().KeyPress(SDLK_c)){
-		Point tile(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
+		Point tile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 		tile = tileMap.GetTile(tile.x, tile.y);
 		CreateCharacter(tile.x, tile.y);
-		cout << "Size : " << objectArray.size() << endl;
 	}
 
 	if (InputManager::GetInstance().KeyPress(SDLK_d)){
@@ -222,7 +223,8 @@ void StageState::Input() {
 		case NONE:
 			ptile = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 			p = tileMap.GetTileCenter(ptile);
-			objectArray[0]->AddObjective(p.x, p.y, ptile);
+			//objectArray[0]->AddObjective(p.x, p.y, ptile);
+			SelectCharacter();
 			for (int i = 0; i < roomArray.size(); i++){
 				roomArray[i]->EditRoom(false);
 				for (int j = 0; j < objectArray.size(); j++){
@@ -382,28 +384,34 @@ void StageState::Input() {
 	}
 
 	if(InputManager::GetInstance().MousePress(SDL_BUTTON_RIGHT)){
-		switch (action)
-		{
-		case NONE:
-			gui.SetPosition(InputManager::GetInstance().GetMouseX(),InputManager::GetInstance().GetMouseY());
-			action = GUI_A;
-			break;
-		case TILE_SELECT:
-			break;
-		case CONSTRUCT_ROOM:
-			break;
-		case DESTROY_ROOM:
-			break;
-		case AREA_SELECT:
-			break;
-		case GUI_A:
-			gui.SetPosition(InputManager::GetInstance().GetMouseX(),InputManager::GetInstance().GetMouseY());			
-			break;
-		case SUB_GUI_EDIT:
-			action = NONE;
-			break;
-		default:
-			break;
+		if (sheet.GetRender()){
+			if (!sheet.GetBox().IsInside(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY()))
+				sheet.SetRender(false);
+		}
+		else{
+			switch (action)
+			{
+			case NONE:
+				gui.SetPosition(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
+				action = GUI_A;
+				break;
+			case TILE_SELECT:
+				break;
+			case CONSTRUCT_ROOM:
+				break;
+			case DESTROY_ROOM:
+				break;
+			case AREA_SELECT:
+				break;
+			case GUI_A:
+				gui.SetPosition(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
+				break;
+			case SUB_GUI_EDIT:
+				action = NONE;
+				break;
+			default:
+				break;
+			}
 		}
 	}
 
@@ -589,4 +597,21 @@ void StageState::CreateCharacter(int x, int y){
 
 void StageState::DestroyCharacter(int id){
 	objectArray.erase(objectArray.begin() + id);
+}
+
+void StageState::SelectCharacter(){
+	for (int i = 0; i < objectArray.size(); i++){
+		if (objectArray[i]->IsCharacter()){
+			if (objectArray[i]->box.IsInside(InputManager::GetInstance().GetMouseX()-Camera::pos.x, InputManager::GetInstance().GetMouseY()-Camera::pos.y)){
+				//Camera::Follow(objectArray[i]);
+				sheet.SetRace(to_string(i));
+				sheet.SetHunger(to_string(objectArray[i]->GetHunger()));
+				sheet.SetSatisfaction(to_string(objectArray[i]->satisfaction));
+				sheet.SetMoney(to_string(objectArray[i]->money));
+				sheet.SetRender(true);
+				cout << "Character is : " << objectArray[i]->hunger << endl;
+				break;
+			}
+		}
+	}
 }

@@ -15,6 +15,7 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Character.cpp" />
+    <ClCompile Include="CharacterSheet.cpp" />
     <ClCompile Include="CheatState.cpp" />
     <ClCompile Include="Comparator.cpp" />
     <ClCompile Include="CostComparator.cpp" />
@@ -46,7 +47,6 @@
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="TileMap.cpp" />
     <ClCompile Include="TileSet.cpp" />
-    <ClCompile Include="TileState.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TitleState.cpp" />
     <ClCompile Include="Wall.cpp" />
@@ -56,6 +56,7 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Character.h" />
+    <ClInclude Include="CharacterSheet.h" />
     <ClInclude Include="CheatState.h" />
     <ClInclude Include="Comparator.h" />
     <ClInclude Include="CostComparator.h" />

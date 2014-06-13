@@ -29,6 +29,7 @@ public:
 	void PathAStar(int posX, int posY, vector<int> heuristic, vector<int> occupancyGrid);
     void Move (float dt);
 	void MakeChoice();
+	int GetHunger();
 	Choice GetChoice();
 
     

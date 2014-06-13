@@ -21,7 +21,7 @@ void Button::Update(float dt){
 	p.x = InputManager::GetInstance().GetMouseX();
 	p.y = InputManager::GetInstance().GetMouseY();
 	
-	bool click = InputManager::GetInstance().MousePress(1);
+	bool click = InputManager::GetInstance().MouseRelease(1);
 
 	if (area.IsInside(p.x,p.y)){
 		texto->SetColor(BLUE);

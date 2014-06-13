@@ -11,6 +11,12 @@ Permonkey::Permonkey(float x, float y, Point lTile, TileMap tileMap) : character
 	tile = lTile;
 	actionCharacter = Character::RESTING;
 	choice = DECIDING;
+
+	hunger = rand()%21;
+	money = rand()%900+101;
+	satisfaction = 50;
+	
+	
 }
 
 Permonkey::~Permonkey(){
@@ -30,6 +36,7 @@ void Permonkey::Update(float dt){
 		Move(dt);
 		break;
 	}
+
 	if (choice == DECIDING){
 		MakeChoice();
 	}
@@ -60,6 +67,10 @@ bool Permonkey::Is(string type){
 
 bool Permonkey::IsCharacter(){
 	return true;
+}
+
+int Permonkey::GetHunger(){
+	return hunger;
 }
 
 string Permonkey::Type(){
