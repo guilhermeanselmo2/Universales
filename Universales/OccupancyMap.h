@@ -15,7 +15,7 @@ public:
 	vector<int> Update(TileMap *tileMap, vector<unique_ptr<GameObject>> *objectArray);
 	vector<int> CreateHeuristic(TileMap *tileMap, Point door, int RoomID);
 	void Render(TileMap *tileMap);
-	void CleanTile(TileMap *tileMap, Point tile);
+	vector<int> CleanTile(TileMap *tileMap, Point tile);
 
 	vector<int> occupancyMap;
 

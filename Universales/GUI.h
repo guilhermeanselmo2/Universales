@@ -8,6 +8,7 @@
 enum GuiState{
 	BASIC = 0,
 	ROOMS,
+	EDIT,
 };
 
 class GUI{

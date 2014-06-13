@@ -9,7 +9,7 @@
 
 
 StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet),
-	moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()){
+moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()), subGuiEdit("img/icons/door.png", "img/icons/wall.jpg") {
 	string file, tile, line, endLine("\n"), initFile("img/tileset/");
 	FILE *tileFile;
 	Point roomBegin, roomEnd;
@@ -116,7 +116,7 @@ void StageState::Update(float dt) {
 			}
 			if (!roomArray.empty()){
 				for (int j = 0; j < roomArray.size(); j++){
-					if (roomArray[j]->GetState() == charRoom){
+					if ((roomArray[j]->GetState() == charRoom) && (roomArray[j]->roomState != Room::EDITING)){
 						int x, y;
 						Point t;
 						x = objectArray[i]->box.x + objectArray[i]->box.w / 2;
@@ -158,6 +158,7 @@ void StageState::Render() {
 	switch (action)	{
 	case NONE:
 		RenderArray();
+		occupancyMap.Render(&tileMap);
 		break;
 	case TILE_SELECT:
 		selectionBox.Render(&tileMap);
@@ -249,6 +250,7 @@ void StageState::Input() {
 						if (gui.EditIconPressed()){
 							subGuiEdit.SetPositionSubGUI(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
 							action = SUB_GUI_EDIT;
+							subGuiEdit.SetState(EDIT);
 						}
 						else {
 							action = NONE;
@@ -297,11 +299,19 @@ void StageState::Input() {
 			{
 			action = NONE;
 			Point aux;
+
 			if (selectionBox.begin.y > selectionBox.end.y) {
 				aux = selectionBox.begin;
 				selectionBox.begin = selectionBox.end;
 				selectionBox.end = aux;
 			}
+
+			if ((selectionBox.begin.x > selectionBox.end.x) && (selectionBox.begin.y < selectionBox.end.y)) {
+				aux = selectionBox.begin;
+				selectionBox.begin.x = selectionBox.end.x;
+				selectionBox.end.x = aux.x;
+			}
+
 			Room *newRoom = new Room(selectionBox.begin, selectionBox.end, &tileMap, &objectArray, roomArray.size(), rType);
             roomArray.emplace_back(newRoom);
 			vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[roomArray.size() - 1]->GetDoor(), 0);
@@ -344,16 +354,21 @@ void StageState::Input() {
 								roomArray[i]->SetDoor(p.x, p.y, roomArray[i]->GetID(), &objectArray);
 						}
 					}
+					
 					for (int j = 0; j < objectArray.size(); j++){
 						if (objectArray[j]->Is("Wall")){
 							if (objectArray[j]->roomID == roomArray[i]->GetID()) {
 								objectArray[j]->Editing(true);
 								if (objectArray[j]->tile.DisPoints(objectArray[j]->tile, roomArray[i]->GetDoor()) == 0) {
-									objectArray.erase(objectArray.begin() + j);
+									objectArray.erase(objectArray.begin() + j); 
 								}
 							}
 						}
 					}
+					vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[i]->GetDoor(), 0);
+					heuristicsArray[roomArray[i]->GetID()] = heuristc;
+					obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
+					obstacleMap = occupancyMap.CleanTile(&tileMap, roomArray[i]->GetDoor());
 				}
 			}
 			action = NONE;
@@ -486,7 +501,6 @@ vector<int> StageState::PathAStar(int posX, int posY, int roomId){
 	cout << "RoomID : " << roomId << endl;
 	cout <<"Size : " <<roomArray.size() << endl;
 	Point door = roomArray[roomId-1]->GetDoor();
-
 	int index, cost, actualPos, movements = 0;
 	Point posCost;
 	bool arrived = false;
@@ -507,7 +521,8 @@ vector<int> StageState::PathAStar(int posX, int posY, int roomId){
 	exploredTiles.emplace(index, -1);
 	allPaths.emplace(actualPos, -1);
 	costQueue.emplace(posCost);
-	
+	//cout << door.y*tileMap.GetWidth() + door.x << endl;
+	//cout << "obs : " << obstacleMap[door.y*tileMap.GetWidth() + door.x] << endl;
 	while (!arrived){
 		costQueue.pop();
 		movements++;
@@ -558,6 +573,9 @@ vector<int> StageState::PathAStar(int posX, int posY, int roomId){
 		index = posCost.x;
 		posY = (int)(index / tileMap.GetWidth());
 		posX = index % tileMap.GetWidth();
+
+		
+
 		movements = posCost.y;
 		if (posX == door.x && posY == door.y) {
 			arrived = true;
@@ -568,6 +586,7 @@ vector<int> StageState::PathAStar(int posX, int posY, int roomId){
 		cost = posCost.z;
 		exploredTiles.emplace(index, actualPos);
 		actualPos = index;
+		
 	}
 	path.emplace_back(index);
 	while (allPaths[index] != -1){
