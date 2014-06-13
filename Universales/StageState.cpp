@@ -107,7 +107,6 @@ void StageState::Update(float dt) {
 		
 		if (objectArray[i]->IsCharacter() && objectArray[i]->GetChoice() != GOING_P && objectArray[i]->GetChoice() != GOING_S){
 			charChoice = objectArray[i]->GetChoice();
-			cout << "Char " << i << " : " << charChoice << endl;
 			charRoom = CORRIDOR;
 			if (charChoice == PIRATE_C){
 				charRoom = PIRATE;
@@ -118,7 +117,6 @@ void StageState::Update(float dt) {
 			if (!roomArray.empty()){
 				for (int j = 0; j < roomArray.size(); j++){
 					if (roomArray[j]->GetState() == charRoom){
-						cout << "Room : " << roomArray[j]->GetState() << endl;;
 						int x, y;
 						Point t;
 						x = objectArray[i]->box.x + objectArray[i]->box.w / 2;
@@ -544,7 +542,7 @@ vector<int> StageState::PathAStar(int posX, int posY, int roomId){
 		index = allPaths[index];
 	}
 	for (int i = path.size()-1; i >= 0; i--){
-		cout << "Path : " << (int)(path[i] / tileMap.GetWidth()) << "," << path[i] % tileMap.GetWidth() << endl;
+		//cout << "Path : " << (int)(path[i] / tileMap.GetWidth()) << "," << path[i] % tileMap.GetWidth() << endl;
 	}
 	return path;
 }
