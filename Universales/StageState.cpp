@@ -9,7 +9,8 @@
 
 
 StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet),
-	moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()){
+	moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()),
+	gui("img/icons/build.png","img/icons/destroy.png","img/icons/destroy.png","img/icons/editar.jpg"), subGuiEdit("img/icons/door.png","img/icons/wall.jpg"){
 	string file, tile, line, endLine("\n"), initFile("img/tileset/");
 	FILE *tileFile;
 	char c;
@@ -136,6 +137,13 @@ void StageState::Render() {
 		RenderArray();
 		gui.Render();
 		break;
+	case SUB_GUI_EDIT :
+		RenderArray();
+		subGuiEdit.Render();
+		break;
+	case EDIT_DOOR:
+		RenderArray();
+		break;
 	default:
 		RenderArray();
 		break;
@@ -183,12 +191,28 @@ void StageState::Input() {
 					}
 					else{
 						if (gui.EditIconPressed()){
-							action = EDIT_ROOM;
+							subGuiEdit.SetPositionSubGUI(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
+							action = SUB_GUI_EDIT;
 						}
 						else {
 							action = NONE;
 						}
 					}
+				}
+			}
+			break;
+		case SUB_GUI_EDIT:
+			if (subGuiEdit.DoorIconPressed()){
+				cout << "editando porta..." << endl;
+				action = EDIT_DOOR;
+			}
+			else{
+				if (subGuiEdit.WallIconPressed()){
+					cout << "editando parede..." << endl;
+					action = EDIT_WALL;
+				}
+				else {
+					action = NONE;
 				}
 			}
 			break;
@@ -228,25 +252,38 @@ void StageState::Input() {
 			action = NONE;
 			break;
 		case BUY:
-
-			// Isso aki não é aki não =D
-
-			/* for (int i = 0; i < roomArray.size(); i++){
-				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
-				if (roomArray[i]->IsInside(p)){
-					cout << "Destroying..." << endl;
-					DestroyRoom(roomArray[i]->GetID());
-					roomArray.erase(roomArray.begin() + i);
-					i = roomArray.size();
-				}
-			} */
 			data->money -= 100;
 			action = NONE;
 			break;
 		case AREA_SELECT:
 			break;
-		case EDIT_ROOM:
-			
+		case EDIT_DOOR:
+			for (int i = 0; i < roomArray.size(); i++){
+				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
+				if (roomArray[i]->IsInside(p)){
+					cout << "editando quarto: " << roomArray[i]->GetID() << endl;
+					roomArray[i]->EditRoom(true);
+					for (int j = 0; j < objectArray.size(); j++){
+						if (objectArray[j]->Is("Wall")){
+							if ((p.x == objectArray[j]->tile.x) && (p.y == objectArray[j]->tile.y))
+								roomArray[i]->SetDoor(p.x, p.y, roomArray[i]->GetID(), &objectArray);
+						}
+					}
+					for (int j = 0; j < objectArray.size(); j++){
+						if (objectArray[j]->Is("Wall")){
+							if (objectArray[j]->roomID == roomArray[i]->GetID()) {
+								objectArray[j]->Editing(true);
+								if (objectArray[j]->tile.DisPoints(objectArray[j]->tile, roomArray[i]->GetDoor()) == 0) {
+									objectArray.erase(objectArray.begin() + j);
+								}
+							}
+						}
+					}
+				}
+			}
+			action = NONE;
+			break;
+		case EDIT_WALL:
 			for (int i = 0; i < roomArray.size(); i++){
 				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 				if (roomArray[i]->IsInside(p)){
@@ -287,7 +324,8 @@ void StageState::Input() {
 		case GUI_A:
 			gui.SetPosition(InputManager::GetInstance().GetMouseX(),InputManager::GetInstance().GetMouseY());			
 			break;
-		case EDIT_ROOM:
+		case SUB_GUI_EDIT:
+			action = NONE;
 			break;
 		default:
 			break;
@@ -308,8 +346,6 @@ void StageState::Input() {
 			break;
 		case AREA_SELECT:
 			break;
-		case EDIT_ROOM:
-			break;
 		default:
 			break;
 		}
@@ -320,7 +356,7 @@ void StageState::Input() {
 
 		switch (action){
 		case NONE:
-			action = TILE_SELECT;
+			//action = TILE_SELECT;
 			break;
 		case TILE_SELECT:
 			break;
@@ -329,8 +365,6 @@ void StageState::Input() {
 		case DESTROY_ROOM:
 			break;
 		case AREA_SELECT:
-			break;
-		case EDIT_ROOM:
 			break;
 		default:
 			break;

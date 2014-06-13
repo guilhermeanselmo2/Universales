@@ -22,11 +22,13 @@ public:
     bool IsInside(float x, float y);
     bool IsInside(Point tile);
     bool Is(string type);
+	void SetDoor(float x, float y, int RoomID, vector<unique_ptr<GameObject>> *objectArray);
 	RoomState roomState;
 	Point GetDoor();
 	Timer editTimer;
 
 private:
+	TileMap tileMap;
     vector<vector<Point>> tiles;
     Sprite tileSp;
     Point begin;

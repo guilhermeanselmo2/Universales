@@ -26,7 +26,6 @@ enum Action{
 	GUI_A,
 	SUB_GUI_EDIT,
 	BUY,
-	EDIT_ROOM,
 	EDIT_WALL,
 	EDIT_DOOR,
 };
@@ -53,9 +52,8 @@ private:
 	vector<int> obstacleMap;
 	unordered_map<int, vector<int>> heuristicsArray;
 	
-	
 	GUI gui;
-	//GUI subGuiEdit;
+	GUI subGuiEdit;
 	Text moneyText;
 	OccupancyMap occupancyMap;
 };

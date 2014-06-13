@@ -24,6 +24,9 @@ Wall::Wall(float centerX, float centerY, string file, WallStyle lStyle, Point lT
 	case RIGHT_CORNER:
 		box = Rect(centerX - wall.GetWidth()/2, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
 		break;
+	case INF_CORNER:
+		box = Rect(centerX - wall.GetWidth() / 2, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		break;
     default:
         break;
     }
@@ -39,16 +42,7 @@ void Wall::Update(float dt){
 }
 
 void Wall::Render(int cameraX, int cameraY){
-	if (editing){
-		if (editTimer.Get() < 2.0){
-			wall.Render(box.x + Camera::pos.x, box.y + Camera::pos.y);
-		}
-		if (editTimer.Get() > 3.0)
-			editTimer.Restart();
-	}
-	else {
-		wall.Render(box.x + Camera::pos.x, box.y + Camera::pos.y);
-	}
+	wall.Render(box.x + Camera::pos.x, box.y + Camera::pos.y);
 }
 
 bool Wall::IsDead(){
