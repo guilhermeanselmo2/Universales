@@ -2,7 +2,8 @@
 #include "Camera.h"
 #include "Wall.h"
 
-Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject> > *objectArray, int RoomCount, RoomType type) : tileSp("img/tileset/tile_tatami.png"){
+Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject> > *objectArray, int RoomCount, RoomType type) : tileSp("img/tileset/tile_tatami.png"), tileMap(*tileMap){
+
 	Point tile;
     begin = lBegin;
     end = lEnd;
@@ -52,7 +53,7 @@ Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObj
     pos.SetPoint(end.x,end.y);
 	tile = pos;
     pos = tileMap->GetTileCenter(pos);
-	wall = new Wall(pos.x, pos.y, file, UPPER_CORNER, tile, RoomID);
+	wall = new Wall(pos.x, pos.y, file, INF_CORNER, tile, RoomID);
     objectArray->emplace_back(wall);
 
 
@@ -112,7 +113,7 @@ void Room::EditRoom(bool editing) {
 void Room::Render(TileMap *tileMap){
 	editTimer.Update(Game::GetInstance().GetDeltaTime());
 	if (roomState == EDITING) {
-		if (editTimer.Get() < 1.0){
+		if (editTimer.Get() < 0.04){
 			Point renderPos;
 			if (end.x < begin.x){
 				if (end.y < begin.y){
@@ -163,7 +164,7 @@ void Room::Render(TileMap *tileMap){
 				}
 			}
 		}
-		if (editTimer.Get() > 1.5)
+		if (editTimer.Get() > 0.09)
 			editTimer.Restart();
 	}
 	else {
@@ -217,6 +218,37 @@ void Room::Render(TileMap *tileMap){
 			}
 		}
 	}
+}
+
+void Room::SetDoor(float x, float y, int RoomID, vector<unique_ptr<GameObject> > *objectArray) {
+	Point aux = door;
+	if ((aux.y < end.y) && (aux.x == end.x)){
+		Point p(tileMap.GetTileCenter(aux));
+		string file = "img/wall_1.png";
+		Wall *wall = new Wall(p.x - tileMap.GetTileWidth() / 4, p.y + tileMap.GetTileHeight() / 4, file, UPPER_LEFT, aux, RoomID);
+		objectArray->emplace_back(wall);
+	}
+	if ((aux.y > begin.y) && (aux.x == begin.x)){
+		Point p(tileMap.GetTileCenter(aux));
+		string file = "img/wall_1.png";
+		Wall *wall = new Wall(p.x - tileMap.GetTileWidth() / 4, p.y + tileMap.GetTileHeight() / 4, file, UPPER_LEFT, aux, RoomID);
+		objectArray->emplace_back(wall);
+	}
+	if ((aux.x < end.x) && (aux.y == end.y)){
+		Point p(tileMap.GetTileCenter(aux));
+		string file = "img/wall_2.png";
+		Wall *wall = new Wall(p.x - tileMap.GetTileWidth() / 4, p.y + tileMap.GetTileHeight() / 4, file, UPPER_LEFT, aux, RoomID);
+		objectArray->emplace_back(wall);
+	}
+	if ((aux.x > begin.x) && (aux.y == begin.y)){
+		Point p(tileMap.GetTileCenter(aux));
+		string file = "img/wall_2.png";
+		Wall *wall = new Wall(p.x - tileMap.GetTileWidth() / 4, p.y + tileMap.GetTileHeight() / 4, file, UPPER_LEFT, aux, RoomID);
+		objectArray->emplace_back(wall);
+	}
+	door.x = x;
+	door.y = y;
+	cout << "door: " << door.x << ","<< door.y << endl;
 }
 
 bool Room::IsInside(float x, float y){

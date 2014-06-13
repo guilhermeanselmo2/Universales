@@ -12,12 +12,18 @@ enum GuiState{
 
 class GUI{
 public:
-    GUI();
+	GUI();
+    GUI(string file1, string file2, string file3, string file4);
+	GUI(string file1, string file2);
     ~GUI();
     void Render();
     void SetPosition(float x, float y);
     void SetPosition(Point p);
 	void SetState(GuiState newState);
+	void SetPositionSubGUI(float x, float y);
+	void SetPositionSubGUI(Point p);
+	bool DoorIconPressed();
+	bool WallIconPressed();
     bool BuildIconPressed();
     bool DestroyIconPressed();
 	bool BuyIconPressed();
@@ -27,8 +33,8 @@ public:
     bool IsInside();
 
 private:
-    Rect box, buildBox, destroyBox, buyBox, editBox, roomBox, pirateBox, samuraiBox;
-    Sprite buildIcon, destroyIcon, buyIcon, editIcon, pirateIcon, samuraiIcon;
+    Rect box, buildBox, destroyBox, buyBox, editBox, roomBox, pirateBox, samuraiBox, doorBox, wallBox;
+    Sprite buildIcon, destroyIcon, buyIcon, editIcon, pirateIcon, samuraiIcon, doorIcon, wallIcon;
 	GuiState guiState;
 
 };

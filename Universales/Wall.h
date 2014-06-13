@@ -4,6 +4,7 @@
 #include "GameObject.h"
 #include "Sprite.h"
 #include "Timer.h"
+#include "Point.h"
 
 enum WallStyle{
     UPPER_RIGHT = 0,

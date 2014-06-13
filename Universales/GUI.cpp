@@ -5,6 +5,7 @@
 GUI::GUI() : buildIcon("img/icons/build.png"), destroyIcon("img/icons/destroy.png"), buyIcon("img/icons/buy2.png"), editIcon("img/icons/editar.jpg"), pirateIcon("img/icons/pirate.jpg"), samuraiIcon("img/icons/samurai.jpg"){
     box.w = buildIcon.GetWidth()*4;
     box.h = buildIcon.GetHeight()*2;
+   
 
     buildBox.w = buildIcon.GetWidth();
     buildBox.h = buildIcon.GetHeight();
@@ -30,6 +31,19 @@ GUI::GUI() : buildIcon("img/icons/build.png"), destroyIcon("img/icons/destroy.pn
 	guiState = BASIC;
 }
 
+GUI::GUI(string file1, string file2) : doorIcon(file1), wallIcon(file2) {
+
+	box.w = doorIcon.GetWidth() + wallIcon.GetWidth();
+	box.h = max(doorIcon.GetHeight(), wallIcon.GetHeight());
+
+	doorBox.w = doorIcon.GetWidth();
+	doorBox.h = doorIcon.GetHeight();
+
+	wallBox.w = wallIcon.GetWidth();
+	wallBox.h = wallIcon.GetHeight();
+
+}
+
 GUI::~GUI(){
 
 }
@@ -43,6 +57,8 @@ void GUI::Render(){
 		editIcon.Render(editBox.x, editBox.y);
 		break;
 	case ROOMS:
+	doorIcon.Render(doorBox.x,doorBox.y);
+	wallIcon.Render(wallBox.x, wallBox.y);
 		pirateIcon.Render(pirateBox.x, pirateBox.y);
 		samuraiIcon.Render(samuraiBox.x, samuraiBox.y);
 		break;
@@ -75,6 +91,17 @@ void GUI::SetPosition(float x, float y){
 	samuraiBox.y = y - destroyBox.h;
 }
 
+void GUI::SetPositionSubGUI(float x, float y) {
+	box.x = x;
+	box.y = y;
+
+	doorBox.x = x;
+	doorBox.y = y;
+
+	wallBox.x = x + doorBox.w;
+	wallBox.y = y;
+}
+
 void GUI::SetPosition(Point p){
     box.x = p.x;
     box.y = p.y;
@@ -102,11 +129,36 @@ void GUI::SetState(GuiState newState){
 	guiState = newState;
 }
 
+void GUI::SetPositionSubGUI(Point p) {
+	box.x = p.x;
+	box.y = p.y;
+
+	doorBox.x = p.x;
+	doorBox.y = p.y;
+
+	wallBox.x = p.x + doorBox.w;
+	wallBox.y = p.y;
+}
+
 bool GUI::BuildIconPressed(){
     float x,y;
     x = InputManager::GetInstance().GetMouseX();
     y = InputManager::GetInstance().GetMouseY();
     return buildBox.IsInside(x,y);
+}
+
+bool GUI::DoorIconPressed(){
+	float x, y;
+	x = InputManager::GetInstance().GetMouseX();
+	y = InputManager::GetInstance().GetMouseY();
+	return doorBox.IsInside(x, y);
+}
+
+bool GUI::WallIconPressed(){
+	float x, y;
+	x = InputManager::GetInstance().GetMouseX();
+	y = InputManager::GetInstance().GetMouseY();
+	return wallBox.IsInside(x, y);
 }
 
 bool GUI::BuyIconPressed(){
