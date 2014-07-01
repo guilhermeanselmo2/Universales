@@ -21,11 +21,11 @@ void Sound::Stop() {
 
 void Sound::Open(string file) {
 	if (assetTable.find(file) != assetTable.end()){
-		std::cout << "Arquivo carregado ..." << std::endl;
+		//std::cout << "Arquivo carregado ..." << std::endl;
 	}
 
 	if (assetTable.find(file) == assetTable.end()){
-		std::cout << "Arquivo nao encontrado... carregando arquivo... " << std::endl;
+		//std::cout << "Arquivo nao encontrado... carregando arquivo... " << std::endl;
 		chunk = Mix_LoadWAV(file.c_str());
 		assetTable.emplace(file, chunk);
 	}

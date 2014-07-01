@@ -4,19 +4,23 @@ std::unordered_map<std::string, TTF_Font*> Text::assetTable;
 
 Text::Text() {}
 
-Text::Text(string fontFile, int fontSize, TextStyle style, string text, SDL_Color color, int x, int y) : fontFile(fontFile), fontSize(fontSize), style(style), text(text), color(color) {
+Text::Text(string fontFile, int fontSize, TextStyle style, string text, SDL_Color color, int x, int y, int width) : fontFile(fontFile), fontSize(fontSize), style(style), text(text), color(color) {
 	texture = NULL;
 	font = NULL;
-	box.SetRect(x, y, box.GetWrect(), box.GetHrect());
+	this->width = width;
+	if (width == 0)
+		box.SetRect(x, y, box.GetWrect(), box.GetHrect());
+	else
+		box.SetRect(x, y, width, box.GetHrect());
 
 	string key = fontFile + std::to_string(fontSize);
 
 	if (assetTable.find(key) != assetTable.end()){
-		std::cout << "Arquivo carregado ..." << std::endl;
+		//std::cout << "Arquivo carregado ..." << std::endl;
 	}
 
 	if (assetTable.find(key) == assetTable.end()){
-		std::cout << "Arquivo nao encontrado... carregando arquivo... " << std::endl;
+		//std::cout << "Arquivo nao encontrado... carregando arquivo... " << std::endl;
 		font = TTF_OpenFont(fontFile.c_str(), fontSize);
 		assetTable.emplace(key, font);
 	}
@@ -56,6 +60,7 @@ void Text::SetPos(int x, int y, bool centerX, bool centerY){
 
 void Text::SetText(string text) {
 	this->text = text;
+	cout << "width : " << box.w << endl;
 	RemakeTexture();
 }
 
@@ -74,11 +79,11 @@ void Text::SetFontSize(int fontSize) {
 	string key = fontFile + std::to_string(fontSize);
 
 	if (assetTable.find(key) != assetTable.end()){
-		std::cout << "Arquivo carregado ..." << std::endl;
+		//std::cout << "Arquivo carregado ..." << std::endl;
 	}
 
 	if (assetTable.find(key) == assetTable.end()){
-		std::cout << "Arquivo nao encontrado... carregando arquivo... " << std::endl;
+		//std::cout << "Arquivo nao encontrado... carregando arquivo... " << std::endl;
 		font = TTF_OpenFont(fontFile.c_str(), fontSize);
 		assetTable.emplace(key, font);
 	}
@@ -87,6 +92,10 @@ void Text::SetFontSize(int fontSize) {
 
 	if (font != NULL)
 		RemakeTexture();
+}
+
+string Text::GetText(){
+	return text;
 }
 
 void Text::Clear() {
@@ -108,16 +117,25 @@ void Text::RemakeTexture() {
 		surface = TTF_RenderText_Solid(font, text.c_str(), color);
 		break;
 	case TEXT_SHADED:
-		surface = TTF_RenderText_Shaded(font, text.c_str(), color, SDL_Color());
+		surface = TTF_RenderText_Shaded(font, text.c_str(), color, LIGHT_BLUE);
 		break;
 	case TEXT_BLENDED:
 		surface = TTF_RenderText_Blended(font, text.c_str(), color);
 		break;
+	case TEXT_WRAPPED:
+		cout << "Width3 : " << width << endl;
+		surface = TTF_RenderText_Blended_Wrapped(font, text.c_str(), color, width);
+		break;
 	default:
+		cout << "Style : " << style << endl;
 		cout << "Estilo desconhecido!" << endl;
 	}
+	
 	texture = SDL_CreateTextureFromSurface(Game::GetInstance().GetRenderer(), surface);
 	SDL_FreeSurface(surface);
 	SDL_QueryTexture(texture, 0, 0, &w, &h);
-	box.SetRect(box.GetXrect(),box.GetYrect(), w, h);
+	if (style == TEXT_WRAPPED)
+		box.SetRect(box.GetXrect(),box.GetYrect(), width, h);
+	else
+		box.SetRect(box.GetXrect(), box.GetYrect(), w, h);
 }

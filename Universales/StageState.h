@@ -18,6 +18,8 @@
 #include "OccupancyMap.h"
 #include "Permonkey.h"
 #include "CharacterSheet.h"
+#include "Object.h"
+#include "Sheet.h"
 
 enum Action{
 
@@ -48,6 +50,7 @@ public:
 
 private:
 	void Input();
+	void ParseObject(vector<string> objList);
 	Sprite bg;
 	MultiTileSet tileSet;
 	TileMap tileMap;
@@ -68,6 +71,7 @@ private:
 	OccupancyMap occupancyMap;
 	Choice charChoice;
 	CharacterSheet sheet;
+	Sheet buySheet;
 };
 
 #endif

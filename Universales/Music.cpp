@@ -22,11 +22,11 @@ void Music::Stop() {
 void Music::Open(string file) {
 
 	if (assetTable.find(file) != assetTable.end()){
-		std::cout << "Arquivo carregado ..." << std::endl;
+		//std::cout << "Arquivo carregado ..." << std::endl;
 	}
 
 	if (assetTable.find(file) == assetTable.end()){
-		std::cout << "Arquivo nao encontrado... carregando arquivo... " << std::endl;
+		//std::cout << "Arquivo nao encontrado... carregando arquivo... " << std::endl;
 		music = Mix_LoadMUS(file.c_str());
 		assetTable.emplace(file, music);
 	}

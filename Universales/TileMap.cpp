@@ -48,7 +48,7 @@ int& TileMap::At(int x, int y, int z) {
 
 Point TileMap::GetTile(int screenX, int screenY, int layer){
     float side = sqrt(pow(-4+tileSet->GetTileWidth()/2,2)+pow(-2+tileSet->GetTileHeight()/2,2));
-    Point object(screenX-512,screenY);
+    Point object(screenX-700,screenY);
     float objMag = sqrt(object.x*object.x + object.y*object.y);
     float tileThetaR = atan2(tileSet->GetTileHeight()/2,tileSet->GetTileWidth()/2);
     float tileThetaL = M_PI-tileThetaR;
@@ -69,7 +69,7 @@ Point TileMap::GetTile(int screenX, int screenY, int layer){
 
 Point TileMap::GetTileCenter(Point tile, int layer){
     float x0, y0, x, y;
-    x0 = 512;
+    x0 = 700;
     y0 = tileSet->GetTileHeight()/2;
     x = x0 - tile.y*(-4+tileSet->GetTileWidth()/2) + tile.x*(tileSet->GetTileWidth()/2-4);
     y = y0 + tile.y*(-2+tileSet->GetTileHeight()/2) + tile.x*(tileSet->GetTileHeight()/2-2);
@@ -92,7 +92,7 @@ void TileMap::Render(int cameraX, int cameraY) {
 void TileMap::RenderLayer(int layer, int cameraX, int cameraY) {
 	int x0, y0, x, y;
     y0 = tileSet->GetTileHeight()/2;
-    x0 = 512;
+    x0 = 700;
     for(int j =  0; j<mapHeight;j++){
         x = x0-j*(-4+tileSet->GetTileWidth()/2);
         y = y0+j*(-2+tileSet->GetTileHeight()/2);

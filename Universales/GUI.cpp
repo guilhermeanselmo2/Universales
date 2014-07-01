@@ -57,10 +57,12 @@ void GUI::Render(){
 		editIcon.Render(editBox.x, editBox.y);
 		break;
 	case ROOMS:
-	doorIcon.Render(doorBox.x,doorBox.y);
-	wallIcon.Render(wallBox.x, wallBox.y);
 		pirateIcon.Render(pirateBox.x, pirateBox.y);
 		samuraiIcon.Render(samuraiBox.x, samuraiBox.y);
+		break;
+	case EDIT:
+		doorIcon.Render(doorBox.x, doorBox.y);
+		wallIcon.Render(wallBox.x, wallBox.y);
 		break;
 	default:
 		break;

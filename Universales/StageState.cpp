@@ -8,12 +8,18 @@
 #include "CostComparator.h"
 #include "Camera.h"
 
+#include <fstream>
+#include <string>
+#include <vector>
+
 StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet),
-moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()), sheet(PERMONKEY){
-	string file, tile, line, endLine("\n"), initFile("img/tileset/");
-	FILE *tileFile;
+moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()), sheet(PERMONKEY), subGuiEdit("img/icons/door.png", "img/icons/wall.jpg"){
+	string file, file2, tile, line, endLine("\n"), initFile("img/tileset/");
+	FILE *tileFile, *objectFile;
 	Point roomBegin, roomEnd;
+	ifstream objFile;
 	char c;
+	vector<string> objectList;
 
 	creationTimer.Restart();
 
@@ -27,16 +33,6 @@ moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE,
 
 	bg.Open("img/fundo_espaco.png");
 	Music musica("audio/stageState.ogg");
-	//musica.Play(-1);
-	//Penguins* penguin = new Penguins(100, 300);
-	//Alien* alien = new Alien(800, 300, 6);
-	//Alien* alien2 = new Alien(100, 100, 6);
-	//Alien* alien3 = new Alien(100, 500, 6);
-	//Camera::Follow(penguin);
-	//objectArray.emplace_back(penguin);
-	//objectArray.emplace_back(alien);
-	//objectArray.emplace_back(alien2);
-	//objectArray.emplace_back(alien3);
 
 	Point monkeyTile(4,4);
 	Point teste(0, 0);
@@ -48,7 +44,7 @@ moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE,
 	//roomArray.emplace_back(newRoom);
 
 	file = "img/tileset/tilelist.txt";
-    tileFile = fopen(file.c_str(),"r");
+	tileFile = fopen(file.c_str(), "r");
     if(tileFile == NULL)
         exit(EXIT_FAILURE);
 
@@ -65,6 +61,27 @@ moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE,
         if(tile.compare(initFile)!= 0)
             tileSet.Open(tile);
     }
+	fclose(tileFile);
+
+	objFile.open("obj/objects.txt");
+
+	
+	
+
+	while (!objFile.eof()){
+		getline(objFile, file);
+		objectList.emplace_back(file);
+	}
+
+
+	for (int i = 0; i < objectList.size(); i++){
+		cout << objectList[i] << endl;
+	}
+
+	cout << "Ended" << endl;
+
+	ParseObject(objectList);
+
 	data = new StateData();
 	data->money = 0;
 	data->fame = 0;
@@ -99,6 +116,8 @@ void StageState::Update(float dt) {
 		break;
 	case AREA_SELECT:
 		break;
+	case BUY:
+		buySheet.UpdateObjectSheet();
 	default:
 		break;
 	}
@@ -117,7 +136,7 @@ void StageState::Update(float dt) {
 			}
 			if (!roomArray.empty()){
 				for (int j = 0; j < roomArray.size(); j++){
-					if (roomArray[j]->GetState() == charRoom){
+					if ((roomArray[j]->GetState() == charRoom) && (roomArray[j]->roomState != Room::EDITING)){
 						int x, y;
 						Point t;
 						x = objectArray[i]->box.x + objectArray[i]->box.w / 2;
@@ -138,6 +157,9 @@ void StageState::Update(float dt) {
 
 void StageState::Render() {
 	bg.Render(0, 0);
+	bg.Render(bg.GetWidth(), 0);
+	bg.Render(bg.GetWidth(), bg.GetHeight());
+	bg.Render(0, bg.GetHeight());
 	tileMap.Render(Camera::pos.GetXpoint(), Camera::pos.GetYpoint());
 
 	moneyText.SetText(to_string(data->money));
@@ -159,6 +181,7 @@ void StageState::Render() {
 	switch (action)	{
 	case NONE:
 		RenderArray();
+		occupancyMap.Render(&tileMap);
 		break;
 	case TILE_SELECT:
 		selectionBox.Render(&tileMap);
@@ -188,6 +211,9 @@ void StageState::Render() {
 		break;
 	case EDIT_DOOR:
 		RenderArray();
+		break;
+	case BUY:
+		buySheet.RenderObjectSheet();
 		break;
 	default:
 		RenderArray();
@@ -251,6 +277,7 @@ void StageState::Input() {
 						if (gui.EditIconPressed()){
 							subGuiEdit.SetPositionSubGUI(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
 							action = SUB_GUI_EDIT;
+							subGuiEdit.SetState(EDIT);
 						}
 						else {
 							action = NONE;
@@ -299,11 +326,19 @@ void StageState::Input() {
 			{
 			action = NONE;
 			Point aux;
+
 			if (selectionBox.begin.y > selectionBox.end.y) {
 				aux = selectionBox.begin;
 				selectionBox.begin = selectionBox.end;
 				selectionBox.end = aux;
 			}
+
+			if ((selectionBox.begin.x > selectionBox.end.x) && (selectionBox.begin.y < selectionBox.end.y)) {
+				aux = selectionBox.begin;
+				selectionBox.begin.x = selectionBox.end.x;
+				selectionBox.end.x = aux.x;
+			}
+
 			Room *newRoom = new Room(selectionBox.begin, selectionBox.end, &tileMap, &objectArray, roomArray.size(), rType);
             roomArray.emplace_back(newRoom);
 			vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[roomArray.size() - 1]->GetDoor(), 0);
@@ -329,8 +364,10 @@ void StageState::Input() {
 			action = NONE;
 			break;
 		case BUY:
+			if (!buySheet.IsInside(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY())){
+				action = NONE;
+			}
 			data->money -= 100;
-			action = NONE;
 			break;
 		case AREA_SELECT:
 			break;
@@ -346,16 +383,21 @@ void StageState::Input() {
 								roomArray[i]->SetDoor(p.x, p.y, roomArray[i]->GetID(), &objectArray);
 						}
 					}
+					
 					for (int j = 0; j < objectArray.size(); j++){
 						if (objectArray[j]->Is("Wall")){
 							if (objectArray[j]->roomID == roomArray[i]->GetID()) {
 								objectArray[j]->Editing(true);
 								if (objectArray[j]->tile.DisPoints(objectArray[j]->tile, roomArray[i]->GetDoor()) == 0) {
-									objectArray.erase(objectArray.begin() + j);
+									objectArray.erase(objectArray.begin() + j); 
 								}
 							}
 						}
 					}
+					vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[i]->GetDoor(), 0);
+					heuristicsArray[roomArray[i]->GetID()] = heuristc;
+					obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
+					obstacleMap = occupancyMap.CleanTile(&tileMap, roomArray[i]->GetDoor());
 				}
 			}
 			action = NONE;
@@ -494,7 +536,6 @@ vector<int> StageState::PathAStar(int posX, int posY, int roomId){
 	cout << "RoomID : " << roomId << endl;
 	cout <<"Size : " <<roomArray.size() << endl;
 	Point door = roomArray[roomId-1]->GetDoor();
-
 	int index, cost, actualPos, movements = 0;
 	Point posCost;
 	bool arrived = false;
@@ -515,7 +556,8 @@ vector<int> StageState::PathAStar(int posX, int posY, int roomId){
 	exploredTiles.emplace(index, -1);
 	allPaths.emplace(actualPos, -1);
 	costQueue.emplace(posCost);
-	
+	//cout << door.y*tileMap.GetWidth() + door.x << endl;
+	//cout << "obs : " << obstacleMap[door.y*tileMap.GetWidth() + door.x] << endl;
 	while (!arrived){
 		costQueue.pop();
 		movements++;
@@ -566,6 +608,9 @@ vector<int> StageState::PathAStar(int posX, int posY, int roomId){
 		index = posCost.x;
 		posY = (int)(index / tileMap.GetWidth());
 		posX = index % tileMap.GetWidth();
+
+		
+
 		movements = posCost.y;
 		if (posX == door.x && posY == door.y) {
 			arrived = true;
@@ -576,6 +621,7 @@ vector<int> StageState::PathAStar(int posX, int posY, int roomId){
 		cost = posCost.z;
 		exploredTiles.emplace(index, actualPos);
 		actualPos = index;
+		
 	}
 	path.emplace_back(index);
 	while (allPaths[index] != -1){
@@ -603,7 +649,7 @@ void StageState::SelectCharacter(){
 	for (int i = 0; i < objectArray.size(); i++){
 		if (objectArray[i]->IsCharacter()){
 			if (objectArray[i]->box.IsInside(InputManager::GetInstance().GetMouseX()-Camera::pos.x, InputManager::GetInstance().GetMouseY()-Camera::pos.y)){
-				//Camera::Follow(objectArray[i]);
+				Camera::Follow(objectArray[i].get());
 				sheet.SetRace(to_string(i));
 				sheet.SetHunger(to_string(objectArray[i]->GetHunger()));
 				sheet.SetSatisfaction(to_string(objectArray[i]->satisfaction));
@@ -614,4 +660,112 @@ void StageState::SelectCharacter(){
 			}
 		}
 	}
+}
+
+void StageState::ParseObject(vector<string> objList){
+	Attributes attributes;
+	ifstream objectFile;
+	string attribute;
+	size_t size;
+	int counter;
+	unordered_map<string, Attributes> list;
+	for (int i = 0; i < objList.size(); i++){
+		objectFile.open(objList[i]);
+		cout << "New object : " << objList[i] << "." << endl;
+		counter = 0;
+		while (!objectFile.eof()){
+			getline(objectFile, attribute);
+			size = attribute.find(":");
+			if (size != string::npos){
+				counter++;
+				attribute = attribute.substr(size + 1);
+				switch (counter){
+				case 1:
+					attributes.name = attribute;
+					break;
+				case 2:
+					attributes.cost = stoi(attribute);
+					break;
+				case 3:
+					attributes.type = attribute;
+					break;
+				case 4:
+					attributes.activeHunger = stoi(attribute);
+					break;
+				case 5:
+					attributes.activeSatisfaction = stof(attribute);
+					break;
+				case 6:
+					attributes.activeMoney = stoi(attribute);
+					break;
+				case 7:
+					attributes.radius = stoi(attribute);
+					break;
+				case 8:
+					attributes.passiveHunger = stoi(attribute);
+					break;
+				case 9:
+					attributes.passiveSatisfaction = stof(attribute);
+					break;
+				case 10:
+					attributes.passiveMoney = stoi(attribute);
+					break;
+				case 11:
+					attributes.sprite = attribute;
+					break;
+				case 12:
+					attributes.description = attribute;
+					break;
+				default:
+					break;
+				}
+			}
+		}
+		cout << endl;
+		objectFile.close();
+		for (int j = 1; j <= counter; j++){
+			switch (j){
+			case 1:
+				cout << "name: " << attributes.name << endl;
+				break;
+			case 2:
+				cout << "cost: " << attributes.cost << endl;
+				break;
+			case 3:
+				cout << "type: " << attributes.type << endl;
+				break;
+			case 4:
+				cout << "AHunger: " << attributes.activeHunger << endl;
+				break;
+			case 5:
+				cout << "ASatisfaction: " << attributes.activeSatisfaction << endl;
+				break;
+			case 6:
+				cout << "AMoney: " << attributes.activeMoney << endl;
+				break;
+			case 7:
+				cout << "Radius: " << attributes.radius << endl;
+				break;
+			case 8:
+				cout << "pHunger: " << attributes.passiveHunger << endl;
+				break;
+			case 9:
+				cout << "pSatisfaction: " << attributes.passiveSatisfaction << endl;
+				break;
+			case 10:
+				cout << "pMoney: " << attributes.passiveMoney << endl;
+				break;
+			case 11:
+				cout << "Sprite: " << attributes.sprite << endl;
+				break;
+			case 12:
+				cout << "Description: " << attributes.description << endl;
+				break;
+			default:
+				break;
+			}
+		}
+		list.emplace(attributes.name, attributes);
+	}
+	buySheet.SetObjectList(list);
 }

@@ -38,6 +38,7 @@
     <ClCompile Include="Rect.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="SelectionBox.cpp" />
+    <ClCompile Include="Sheet.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="StageState.cpp" />
@@ -80,6 +81,7 @@
     <ClInclude Include="Rect.h" />
     <ClInclude Include="Room.h" />
     <ClInclude Include="SelectionBox.h" />
+    <ClInclude Include="Sheet.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="StageState.h" />

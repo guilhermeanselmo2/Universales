@@ -4,11 +4,11 @@
 #include "Game.h"
 
 TitleState::TitleState() :bg("img/fundo_espaco.png"),
-text("font/LCALLIG.TTF", 40, Text::TEXT_BLENDED, "Cultura Univer$ale", WHITE, 100),
-startButton("start", 30, 512, 300),
-optionsButton("options", 30, 512, 370),
-quitButton("quit", 30, 512, 440){
-	text.SetPos(512, 60, true, true);
+text("font/LCALLIG.TTF", 40, Text::TEXT_BLENDED, "Cultura Univer$ales", WHITE, 100),
+startButton("start", 30, 700, 280),
+optionsButton("options", 30, 700, 350),
+quitButton("quit", 30, 700, 420){
+	text.SetPos(700, 60, true, true);
 
 }
 
@@ -21,6 +21,9 @@ void TitleState::Update(float dt){
 
 void TitleState::Render(){
 	bg.Render(0, 0);
+	bg.Render(bg.GetWidth(), 0);
+	bg.Render(0, bg.GetHeight());
+	bg.Render(bg.GetWidth(), bg.GetHeight());
 	text.Render();
 	startButton.Render();
 	optionsButton.Render();

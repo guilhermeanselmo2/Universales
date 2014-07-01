@@ -1,14 +1,14 @@
 #include "CharacterSheet.h"
 
 
-CharacterSheet::CharacterSheet(CharType type) : picture("img/permacaco.png"), sheet("img/characterSheet.png"), race("font/SFPixelate.ttf", 15, Text::TEXT_SOLID, "Permonkey", WHITE, 1024 - sheet.GetWidth() + 20, 20), hunger("font/SFPixelate.ttf", 15, Text::TEXT_SOLID, "Hunger:", WHITE, 1024 - sheet.GetWidth() + 110, 45), satisfaction("font/SFPixelate.ttf", 15, Text::TEXT_SOLID, "Satisfaction:", WHITE, 1024 - sheet.GetWidth() + 110, 105), money("font/SFPixelate.ttf", 15, Text::TEXT_SOLID, "Money:", WHITE, 1024 - sheet.GetWidth() + 110, 165){
+CharacterSheet::CharacterSheet(CharType type) : picture("img/permacaco.png"), sheet("img/characterSheet.png"), race("font/SFPixelate.ttf", 15, Text::TEXT_SOLID, "Permonkey", WHITE, 1400 - sheet.GetWidth() + 20, 20), hunger("font/SFPixelate.ttf", 15, Text::TEXT_SOLID, "Hunger:", WHITE, 1400 - sheet.GetWidth() + 110, 45), satisfaction("font/SFPixelate.ttf", 15, Text::TEXT_SOLID, "Satisfaction:", WHITE, 1400 - sheet.GetWidth() + 110, 105), money("font/SFPixelate.ttf", 15, Text::TEXT_SOLID, "Money:", WHITE, 1400 - sheet.GetWidth() + 110, 165){
 	hungerVal = hunger;
-	hungerVal.SetPos(1024 - sheet.GetWidth() + 110, 60);
+	hungerVal.SetPos(1400 - sheet.GetWidth() + 110, 60);
 	moneyVal = money;
-	moneyVal.SetPos(1024 - sheet.GetWidth() + 110, 180);
+	moneyVal.SetPos(1400 - sheet.GetWidth() + 110, 180);
 	satisfactionVal = satisfaction;
-	satisfactionVal.SetPos(1024 - sheet.GetWidth() + 110, 120);
-	sheetBox.x = 1024 - sheet.GetWidth();
+	satisfactionVal.SetPos(1400 - sheet.GetWidth() + 110, 120);
+	sheetBox.x = 1400 - sheet.GetWidth();
 	sheetBox.y = 5;
 	sheetBox.h = sheet.GetHeight();
 	sheetBox.w = sheet.GetWidth();
