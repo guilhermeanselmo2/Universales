@@ -3,6 +3,7 @@
 #include "Sprite.h"
 #include "Rect.h"
 #include "GameObject.h"
+#include "TileMap.h"
 
 struct Attributes{
 	string name;
@@ -21,7 +22,7 @@ struct Attributes{
 
 class Object : public GameObject{
 public:
-	Object(int x, int y, Attributes attributes);
+	Object(int x, int y, Attributes attributes, TileMap tileMap);
 	~Object();
 
 	void Update(float dt);
@@ -44,5 +45,6 @@ public:
 
 private:
 	Attributes attributes;
+	TileMap tileMap;
 };
 

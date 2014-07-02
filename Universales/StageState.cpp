@@ -378,7 +378,7 @@ void StageState::Input() {
 			if (buySheet.IsBuy(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY())){
 				Point Tiles = Point(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 				Tiles = tileMap.GetTileCenterFromScreen(Tiles);
-				Object* object = new Object(Tiles.x, Tiles.y, buySheet.GetAttributes());
+				Object* object = new Object(Tiles.x, Tiles.y, buySheet.GetAttributes(), tileMap);
 				selectedObject = objectArray.size();
 				objectArray.emplace_back(object);
 				action = EDIT_OBJECT;
@@ -436,6 +436,8 @@ void StageState::Input() {
 			action = NONE;
 			break;
 		case EDIT_OBJECT:
+			cout << "Obstacle : " << endl;
+			obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
 			action = NONE;
 		default:
 			break;

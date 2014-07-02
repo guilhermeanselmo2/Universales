@@ -15,9 +15,18 @@ OccupancyMap::~OccupancyMap()
 vector<int> OccupancyMap::Update(TileMap *tileMap, vector<unique_ptr<GameObject>> *objectArray){
 	Point pos;
 	int index;
+	cout << "Size : " << objectArray->size() << endl;
 	occupancyMap.resize(occupancyMap.size(), 0);
+	cout << "Aqui1" << endl;
 	for (int i = 0; i < objectArray->size(); i++){
-		if (!(objectArray->at(i)->Is("PerMonkey"))){
+		if (!(objectArray->at(i)->IsCharacter())){
+
+			if (objectArray->at(i)->Type() == "Object"){
+				int x = objectArray->at(i)->tile.x;
+				int y = objectArray->at(i)->tile.y;
+				index = y*tileMap->GetHeight() + x;
+				occupancyMap[index] = -1;
+			}
 
 			if (objectArray->at(i)->Type() == "LEFT_CORNER" || objectArray->at(i)->Type() == "RIGHT_CORNER"){
 				if (objectArray->at(i)->Type() == "LEFT_CORNER"){
@@ -48,6 +57,7 @@ vector<int> OccupancyMap::Update(TileMap *tileMap, vector<unique_ptr<GameObject>
 			}
 		}
 	}
+	cout << "Aqui1" << endl;
 	return occupancyMap;
 }
 
