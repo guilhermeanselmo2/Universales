@@ -112,3 +112,30 @@ Choice Wall::GetChoice(){
 	Choice a = DECIDING;
 	return a;
 }
+
+void Wall::MoveTo(int x, int y){
+	int centerX = x;
+	int centerY = y;
+	switch (style) {
+	case UPPER_RIGHT:
+		box = Rect(centerX, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		break;
+	case UPPER_LEFT:
+		box = Rect(centerX, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		break;
+	case UPPER_CORNER:
+		box = Rect(centerX - wall.GetWidth() / 2, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		break;
+	case LEFT_CORNER:
+		box = Rect(centerX - wall.GetWidth() / 2, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		break;
+	case RIGHT_CORNER:
+		box = Rect(centerX - wall.GetWidth() / 2, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		break;
+	case INF_CORNER:
+		box = Rect(centerX - wall.GetWidth() / 2, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		break;
+	default:
+		break;
+	}
+}

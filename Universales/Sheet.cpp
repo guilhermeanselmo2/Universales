@@ -2,8 +2,9 @@
 #include "InputManager.h"
 
 
-Sheet::Sheet() : sheet("img/objectPrev.png"), objectSprite(""){
+Sheet::Sheet() : sheet("img/objectPrev.png"), objectSprite(""), buy("img/icons/buy2.png"){
 	box = Rect(700 - sheet.GetWidth() / 2, 20, sheet.GetWidth(), sheet.GetHeight());
+	buyBox = Rect(box.x + box.w - 100, box.y + box.h - 100, buy.GetWidth(), buy.GetHeight());
 	itemSelected = -1;
 	attributesInfo[0] = Text("font/SFPixelate.ttf", 15, Text::TEXT_SOLID, "", WHITE, box.x + 450, 55);
 	attributesInfo[1] = Text("font/SFPixelate.ttf", 15, Text::TEXT_SOLID, "", WHITE, box.x + 450, 225);
@@ -46,7 +47,6 @@ void Sheet::UpdateObjectSheet(){
 	for (int i = 0; i < objNames.size(); i++){
 		if (objNames[i]->box.IsInside(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY())){
 			objNames[i]->SetStyle(Text::TEXT_SHADED);
-			cout << "Shade : " << i << endl;
 		}
 
 		else{
@@ -68,11 +68,16 @@ void Sheet::RenderObjectSheet(){
 			attributesInfo[i].Render();
 		}
 		objectSprite.Render(box.x + 450, 80);
+		buy.Render(buyBox.x, buyBox.y);
 	}
 }
 
 bool Sheet::IsInside(int px, int py){
 	return box.IsInside(px, py);
+}
+
+bool Sheet::IsBuy(int mouseX, int mouseY){
+	return buyBox.IsInside(mouseX, mouseY);
 }
 
 void Sheet::SetObjectList(unordered_map<string, Attributes> objects){
@@ -84,4 +89,9 @@ void Sheet::SetObjectList(unordered_map<string, Attributes> objects){
 		counter++;
 		objNames.emplace_back(name);
 	}
+}
+
+Attributes Sheet::GetAttributes(){
+	string name = objNames[itemSelected]->GetText();
+	return objects[name];
 }

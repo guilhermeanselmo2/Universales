@@ -31,6 +31,8 @@ public:
 	void MakeChoice();
 	int GetHunger();
 	Choice GetChoice();
+	
+	void MoveTo(int x, int y);
 
     
 

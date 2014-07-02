@@ -2,6 +2,7 @@
 
 #include "Sprite.h"
 #include "Rect.h"
+#include "GameObject.h"
 
 struct Attributes{
 	string name;
@@ -18,16 +19,30 @@ struct Attributes{
 	string description;
 };
 
-class Object{
+class Object : public GameObject{
 public:
-	Object();
+	Object(int x, int y, Attributes attributes);
 	~Object();
-	int cost;
+
+	void Update(float dt);
+	void Render(int cameraX, int cameraY);
+
+	void MoveTo(int x, int y);
+
+	bool IsDead();
+	bool Is(string type);
+	void Editing(bool editing);
+	void AddObjective(float x, float y, Point tile);
+	void AddObjective(vector<int> path);
+	bool IsCharacter();
+	string Type();
+	Choice GetChoice();
+	int GetHunger();
+
 	Sprite sp;
 	Rect box;
 
 private:
-	void Parse(vector<string> objList);
-	Attributes atributes;
+	Attributes attributes;
 };
 

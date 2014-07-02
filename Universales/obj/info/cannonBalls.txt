@@ -1,0 +1,14 @@
+Name:CannonBalls
+Cost:500
+Type:Pirate
+Active Effects
+Hunger:0
+Satisfaction:10
+Money:30
+Passive Efects
+Radius:3
+Hunger:0
+Satisfaction:0.3
+Money:0
+Path:img/obj/cannonBalls.png
+Description:So, it seems that the humans used to throw these round pieces of metal at each other, during wars.It's seems so much more fun than laser or plasma guns! These humans sure know how to make a great war!!!

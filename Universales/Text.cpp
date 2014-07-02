@@ -60,7 +60,6 @@ void Text::SetPos(int x, int y, bool centerX, bool centerY){
 
 void Text::SetText(string text) {
 	this->text = text;
-	cout << "width : " << box.w << endl;
 	RemakeTexture();
 }
 
@@ -123,11 +122,9 @@ void Text::RemakeTexture() {
 		surface = TTF_RenderText_Blended(font, text.c_str(), color);
 		break;
 	case TEXT_WRAPPED:
-		cout << "Width3 : " << width << endl;
 		surface = TTF_RenderText_Blended_Wrapped(font, text.c_str(), color, width);
 		break;
 	default:
-		cout << "Style : " << style << endl;
 		cout << "Estilo desconhecido!" << endl;
 	}
 	

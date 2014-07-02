@@ -35,6 +35,7 @@ public:
 	void AddObjective(vector<int> path);
 	Choice GetChoice();
 	int GetHunger();
+	void MoveTo(int x, int y);
 
 private:
 	Timer editTimer;

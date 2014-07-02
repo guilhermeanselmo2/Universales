@@ -25,7 +25,6 @@ public:
 	virtual void Update(float dt) = 0;
 	virtual void Render(int cameraX, int cameraY) = 0;
 	virtual bool IsDead() = 0;
-	virtual void NotifyCollision(GameObject& other) = 0;
 	virtual bool Is(string type) = 0;
 	virtual void Editing(bool editing) = 0;
 	//string Type();
@@ -34,8 +33,9 @@ public:
 	virtual bool IsCharacter() = 0;
 	virtual string Type() = 0;
 	virtual Choice GetChoice() = 0;
-
 	virtual int GetHunger() = 0;
+
+	virtual void MoveTo(int x, int y) = 0;
 	
 	//void ConvertToTile(TileMap *tileMap);
 	//void ConvertToScreen(TileMap *tileMap);

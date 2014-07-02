@@ -8,17 +8,19 @@ public:
 	Sheet();
 	~Sheet();
 
-	void GetAtributes();
 	void SetObjectList(unordered_map<string, Attributes> objects);
 
 	void RenderObjectSheet();
 	void UpdateObjectSheet();
 
 	bool IsInside(int px, int py);
+	bool IsBuy(int mouseX, int mouseY);
+
+	Attributes GetAttributes();
 
 private:
 	Sprite sheet, objectSprite, buy;
-	Rect box;
+	Rect box, buyBox;
 	unordered_map<string, Attributes> objects;
 	vector<Text*> objNames;
 	//vector<Text*> attributesInfo;

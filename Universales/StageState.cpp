@@ -7,6 +7,7 @@
 #include "Permonkey.h"
 #include "CostComparator.h"
 #include "Camera.h"
+#include "Object.h"
 
 #include <fstream>
 #include <string>
@@ -118,6 +119,13 @@ void StageState::Update(float dt) {
 		break;
 	case BUY:
 		buySheet.UpdateObjectSheet();
+		break;
+	case EDIT_OBJECT:{
+		Point tiles = Point(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
+		tiles = tileMap.GetTileCenterFromScreen(tiles);
+		objectArray[selectedObject]->MoveTo(tiles.x, tiles.y);
+	}
+		break;
 	default:
 		break;
 	}
@@ -367,7 +375,15 @@ void StageState::Input() {
 			if (!buySheet.IsInside(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY())){
 				action = NONE;
 			}
-			data->money -= 100;
+			if (buySheet.IsBuy(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY())){
+				Point Tiles = Point(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
+				Tiles = tileMap.GetTileCenterFromScreen(Tiles);
+				Object* object = new Object(Tiles.x, Tiles.y, buySheet.GetAttributes());
+				selectedObject = objectArray.size();
+				objectArray.emplace_back(object);
+				action = EDIT_OBJECT;
+			}
+			//data->money -= 100;
 			break;
 		case AREA_SELECT:
 			break;
@@ -419,6 +435,8 @@ void StageState::Input() {
 			}
 			action = NONE;
 			break;
+		case EDIT_OBJECT:
+			action = NONE;
 		default:
 			break;
 		}

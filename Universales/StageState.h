@@ -34,6 +34,7 @@ enum Action{
 	BUY,
 	EDIT_WALL,
 	EDIT_DOOR,
+	EDIT_OBJECT
 };
 
 class StageState : public State {
@@ -72,6 +73,7 @@ private:
 	Choice charChoice;
 	CharacterSheet sheet;
 	Sheet buySheet;
+	int selectedObject;
 };
 
 #endif

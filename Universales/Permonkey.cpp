@@ -252,3 +252,8 @@ void Permonkey::MakeChoice(){
 	}
 
 }
+
+
+void Permonkey::MoveTo(int x, int y){
+	box = Rect(x - character.GetWidth() / 2, y - character.GetHeight(), character.GetWidth(), character.GetHeight());
+}
