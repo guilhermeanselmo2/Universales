@@ -168,3 +168,8 @@ vector<int> Wall::GetAttributes(){
 void Wall::UseObject(vector<unique_ptr<GameObject>> *objectArray, int index){
 
 }
+
+vector<Point> Wall::GetAccessPoints(){
+	vector<Point> a;
+	return a;
+}

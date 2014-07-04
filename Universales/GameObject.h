@@ -47,10 +47,12 @@ public:
 	virtual int GetHunger() = 0;
 	virtual void SetHunger(int hunger) = 0;
 	virtual vector<int> GetHeuristic(int i) = 0;
+	virtual vector<Point> GetAccessPoints() = 0;
 
 	virtual void MoveTo(int x, int y) = 0;
 
 	virtual vector<int> GetAttributes() = 0;
+
 	
 	//void ConvertToTile(TileMap *tileMap);
 	//void ConvertToScreen(TileMap *tileMap);

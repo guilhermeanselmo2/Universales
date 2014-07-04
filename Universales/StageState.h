@@ -52,7 +52,7 @@ public:
 private:
 	void Input();
 	void ParseObject(vector<string> objList);
-	Sprite bg;
+	Sprite bg, okTile, noTile;
 	MultiTileSet tileSet;
 	TileMap tileMap;
 	Action action;

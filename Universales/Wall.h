@@ -45,6 +45,7 @@ public:
 	vector<int> GetHeuristic(int i);
 	void UseObject(vector<unique_ptr<GameObject>> *objectArray, int index);
 	vector<int> GetAttributes();
+	vector<Point> GetAccessPoints();
 
 private:
 	Timer editTimer;

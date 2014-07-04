@@ -10,6 +10,38 @@ Object::Object(int x, int y, Attributes attributes, TileMap tileMap): sp(""), ti
 	box = Rect(x - sp.GetWidth() / 2, y - 3*sp.GetHeight()/4, sp.GetWidth(), sp.GetHeight());
 	timer.Restart();
 	type = "Editting";
+
+	int counter = 0;
+	for (int i = tile.x; i >= tile.x - attributes.width + 1; i--){
+		if (attributes.access[counter] == 1){
+			Point accessPoint(i, tile.y - attributes.height);
+			accessPoints.emplace_back(accessPoint);
+		}
+		counter++;
+	}
+	for (int i = tile.y - attributes.height + 1; i <= tile.y; i++){
+		if (attributes.access[counter] == 1){
+			Point accessPoint(tile.x - attributes.width, i);
+			accessPoints.emplace_back(accessPoint);
+		}
+		counter++;
+	}
+	for (int i = tile.x - attributes.width + 1; i <= tile.x; i++){
+		if (attributes.access[counter] == 1){
+			Point accessPoint(i, tile.y + 1);
+			accessPoints.emplace_back(accessPoint);
+		}
+		counter++;
+	}
+	for (int i = tile.y; i >= tile.y - attributes.height + 1; i--){
+		if (attributes.access[counter] == 1){
+			Point accessPoint(tile.x + 1, i);
+			accessPoints.emplace_back(accessPoint);
+		}
+		counter++;
+	}
+
+
 }
 
 
@@ -41,6 +73,38 @@ void Object::MoveTo(int x, int y){
 	tile = tileMap.GetTile(x, y);
 	Point pos = tileMap.GetTileCenter(tile);
 	box = Rect(pos.x - sp.GetWidth() / 2, pos.y - 3 * sp.GetHeight() / 4, sp.GetWidth(), sp.GetHeight());
+	vector<Point> accessPoints;
+
+	int counter = 0;
+	for (int i = tile.x; i >= tile.x - attributes.width + 1; i--){
+		if (attributes.access[counter] == 1){
+			Point accessPoint(i, tile.y - attributes.height);
+			accessPoints.emplace_back(accessPoint);
+		}
+		counter++;
+	}
+	for (int i = tile.y - attributes.height + 1; i <= tile.y; i++){
+		if (attributes.access[counter] == 1){
+			Point accessPoint(tile.x - attributes.width, i);
+			accessPoints.emplace_back(accessPoint);
+		}
+		counter++;
+	}
+	for (int i = tile.x - attributes.width + 1; i <= tile.x; i++){
+		if (attributes.access[counter] == 1){
+			Point accessPoint(i, tile.y + 1);
+			accessPoints.emplace_back(accessPoint);
+		}
+		counter++;
+	}
+	for (int i = tile.y; i >= tile.y - attributes.height + 1; i--){
+		if (attributes.access[counter] == 1){
+			Point accessPoint(tile.x + 1, i);
+			accessPoints.emplace_back(accessPoint);
+		}
+		counter++;
+	}
+	this->accessPoints = accessPoints;
 }
 
 bool Object::SettlePos(vector<int> obstacleMap){
@@ -183,4 +247,8 @@ vector<int> Object::GetAttributes(){
 	att.emplace_back(attributes.activeMoney);
 	att.emplace_back(attributes.activeSatisfaction);
 	return att;
+}
+
+vector<Point> Object::GetAccessPoints(){
+	return accessPoints;
 }

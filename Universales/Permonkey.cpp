@@ -350,3 +350,8 @@ void Permonkey::UseObject(vector<unique_ptr<GameObject>> *objectArray, int index
 		cout << "ERROR: Permonkey UseObject method: Index is less than 0" << endl;
 	}
 }
+
+vector<Point> Permonkey::GetAccessPoints(){
+	vector<Point> a;
+	return a;
+}

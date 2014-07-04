@@ -45,6 +45,7 @@ public:
 	Choice GetChoice();
 
 	vector<int> GetAttributes();
+	vector<Point> GetAccessPoints();
 
 	vector<int> CreateHeuristic(Point door);
 	vector<int> GetHeuristic(int i);
@@ -61,9 +62,11 @@ public:
 
 private:
 	vector<vector<int>> heuristicArray;
+	vector<Point> accessPoints;
 	Attributes attributes;
 	TileMap tileMap;
 	Timer timer;
 	string type;
+
 };
 

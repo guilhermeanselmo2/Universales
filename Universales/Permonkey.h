@@ -42,6 +42,7 @@ public:
 	bool SettlePos(vector<int> obstacleMap);
 	vector<int> GetHeuristic(int i);
 	vector<int> GetAttributes();
+	vector<Point> GetAccessPoints();
     
 
 private:

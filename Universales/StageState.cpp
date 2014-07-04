@@ -14,7 +14,8 @@
 #include <vector>
 
 StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet),
-moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()), sheet(PERMONKEY), subGuiEdit("img/icons/door.png", "img/icons/wall.jpg"){
+moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()), sheet(PERMONKEY), subGuiEdit("img/icons/door.png", "img/icons/wall.jpg"),
+okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"){
 	string file, file2, tile, line, endLine("\n"), initFile("img/tileset/");
 	FILE *tileFile, *objectFile;
 	Point roomBegin, roomEnd;
@@ -237,6 +238,26 @@ void StageState::Render() {
 	case BUY:
 		RenderArray();
 		buySheet.RenderObjectSheet();
+		break;
+	case EDIT_OBJECT:{
+			vector<Point> tiles = objectArray[selectedObject]->GetAccessPoints();
+			for (int i = 0; i < tiles.size(); i++){
+				cout << "Tile " << i << " : " << tiles[i].x << "," << tiles[i].y << endl;
+				Point center = tileMap.GetTileCenter(tiles[i]);
+				center.x = center.x - tileMap.GetTileWidth()/2;
+				center.y = center.y - tileMap.GetTileHeight()/2;
+
+				if (obstacleMap[(tiles[i].y)*tileMap.GetWidth() + tiles[i].x] != -1){
+					okTile.Render(center.x, center.y);
+				}
+				else{
+					noTile.Render(center.x, center.y);
+				}
+			}
+
+		}
+
+		RenderArray();
 		break;
 	default:
 		RenderArray();
