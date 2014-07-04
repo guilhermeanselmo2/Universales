@@ -46,7 +46,7 @@ public:
 	void DestroyRoom(int roomID);
 	void CreateCharacter(int x, int y);
 	void DestroyCharacter(int id);
-	vector<int> PathAStar(int posX, int posY, int roomId);
+	vector<int> PathAStar(int posX, int posY, Point door, vector<int> heuristic);
 	void SelectCharacter();
 
 private:
@@ -73,7 +73,7 @@ private:
 	Choice charChoice;
 	CharacterSheet sheet;
 	Sheet buySheet;
-	int selectedObject;
+	int selectedObject, selectedCharacter;
 };
 
 #endif

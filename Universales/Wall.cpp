@@ -37,7 +37,7 @@ Wall::~Wall(){
 
 }
 
-void Wall::Update(float dt){
+void Wall::Update(float dt, vector<unique_ptr<GameObject>> *objectArray){
 	editTimer.Update(dt);
 }
 
@@ -108,8 +108,12 @@ int Wall::GetHunger(){
 	return 0;
 }
 
+void Wall::SetHunger(int hunger){
+	
+}
+
 Choice Wall::GetChoice(){
-	Choice a = DECIDING;
+	Choice a = NO_CHOICE;
 	return a;
 }
 
@@ -138,4 +142,29 @@ void Wall::MoveTo(int x, int y){
 	default:
 		break;
 	}
+}
+
+bool Wall::SettlePos(vector<int> obstacleMap){
+	return false;
+}
+
+ActionCharacter Wall::GetAction(){
+	return DECIDING_ROOM;
+}
+
+int Wall::GetObjectIndex(){
+	return -1;
+}
+
+vector<int> Wall::GetHeuristic(int i){
+	vector<int> a;
+	return a;
+}
+vector<int> Wall::GetAttributes(){
+	vector<int> a;
+	return a;
+}
+
+void Wall::UseObject(vector<unique_ptr<GameObject>> *objectArray, int index){
+
 }

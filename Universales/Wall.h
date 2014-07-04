@@ -23,7 +23,7 @@ public:
     Wall(float centerX, float centerY, string file, WallStyle lStyle, Point lTile, int lRoom = 0);
     ~Wall();
 
-    void Update(float dt);
+	void Update(float dt, vector<unique_ptr<GameObject>> *objectArray);
     void Render(int cameraX, int cameraY);
     bool IsDead();
     void NotifyCollision(GameObject& other);
@@ -34,8 +34,17 @@ public:
 	void AddObjective(float x, float y, Point tile);
 	void AddObjective(vector<int> path);
 	Choice GetChoice();
+
+	//Non Wall functions
+	void SetHunger(int hunger);
 	int GetHunger();
 	void MoveTo(int x, int y);
+	bool SettlePos(vector<int> obstacleMap);
+	ActionCharacter GetAction();
+	int GetObjectIndex();
+	vector<int> GetHeuristic(int i);
+	void UseObject(vector<unique_ptr<GameObject>> *objectArray, int index);
+	vector<int> GetAttributes();
 
 private:
 	Timer editTimer;

@@ -5,7 +5,7 @@
 #include "Sprite.h"
 #include "Timer.h"
 #include "Character.h"
-#include "GameObject.h"
+#include "Timer.h"
 #include <queue>
 
 
@@ -13,7 +13,7 @@ class Permonkey : public GameObject{
 public:
     Permonkey(float x, float y, Point lTile, TileMap tileMap);
     ~Permonkey();
-	void Update(float dt);
+	void Update(float dt, vector<unique_ptr<GameObject>> *objectArray);
     void Render(int cameraX, int cameraY);
     bool IsDead();
     void NotifyCollision (GameObject& other);
@@ -30,14 +30,22 @@ public:
     void Move (float dt);
 	void MakeChoice();
 	int GetHunger();
+	void SetHunger(int hunger);
 	Choice GetChoice();
+	int SearchObject(vector<unique_ptr<GameObject>> *objectArray);
+	ActionCharacter GetAction();
+	int GetObjectIndex();
+	void UseObject(vector<unique_ptr<GameObject>> *objectArray, int index);
 	
+	//Object functions
 	void MoveTo(int x, int y);
-
+	bool SettlePos(vector<int> obstacleMap);
+	vector<int> GetHeuristic(int i);
+	vector<int> GetAttributes();
     
 
 private:
-	Character::ActionCharacter actionCharacter;
+	ActionCharacter actionCharacter;
 	Sprite character;
 	Point permonkeyTile;
 	Point objectiveTile;
@@ -50,7 +58,10 @@ private:
 	TileMap tileMap;
 	vector<int> path;
 	int hunger;
-	Choice choice;
+	int objectSelect;
+	Choice choice, state;
+	Timer timer, rest;
+	bool arrived, found, inRoom;
 
 };
 

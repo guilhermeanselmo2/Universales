@@ -22,6 +22,8 @@ moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE,
 	char c;
 	vector<string> objectList;
 
+	obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
+
 	creationTimer.Restart();
 
 	rType = CORRIDOR;
@@ -132,32 +134,44 @@ void StageState::Update(float dt) {
 	UpdateArray(dt,&tileMap);
 	
 	for (int i = 0; i < objectArray.size(); i++){
-		
-		if (objectArray[i]->IsCharacter() && objectArray[i]->GetChoice() != GOING_P && objectArray[i]->GetChoice() != GOING_S){
-			charChoice = objectArray[i]->GetChoice();
-			charRoom = CORRIDOR;
-			if (charChoice == PIRATE_C){
-				charRoom = PIRATE;
+
+		if (objectArray[i]->IsCharacter()){
+			if (objectArray[i]->GetAction() == DECIDING_ROOM){
+				charChoice = objectArray[i]->GetChoice();
+				charRoom = CORRIDOR;
+				if (charChoice == PIRATE_C){
+					charRoom = PIRATE;
+				}
+				if (charChoice == SAMURAI_C){
+					charRoom = SAMURAI;
+				}
+				if (!roomArray.empty()){
+					for (int j = 0; j < roomArray.size(); j++){
+						if ((roomArray[j]->GetState() == charRoom) && (roomArray[j]->roomState != Room::EDITING)){
+							int x, y;
+							Point t;
+							x = objectArray[i]->box.x + objectArray[i]->box.w / 2;
+							y = objectArray[i]->box.y + objectArray[i]->box.h;
+							t = tileMap.GetTile(x, y);
+							objectArray[i]->AddObjective(PathAStar(t.x, t.y, roomArray[j]->GetDoor(), heuristicsArray[roomArray[j]->GetID()]));
+						}
+					}
+				}
 			}
-			if (charChoice == SAMURAI_C){
-				charRoom = SAMURAI;
-			}
-			if (!roomArray.empty()){
-				for (int j = 0; j < roomArray.size(); j++){
-					if ((roomArray[j]->GetState() == charRoom) && (roomArray[j]->roomState != Room::EDITING)){
-						int x, y;
-						Point t;
-						x = objectArray[i]->box.x + objectArray[i]->box.w / 2;
-						y = objectArray[i]->box.y + objectArray[i]->box.h;
-						t = tileMap.GetTile(x, y);
-						objectArray[i]->AddObjective(PathAStar(t.x, t.y, roomArray[j]->GetID()));
+			else{ 
+				if (objectArray[i]->GetAction() == DECIDING_OBJECT){
+					int objectIndex = objectArray[i]->GetObjectIndex();
+					if (objectIndex != -1){
+						Point objective = Point(objectArray[objectIndex]->tile.x, objectArray[objectIndex]->tile.y-1);
+						Point t = objectArray[i]->tile;
+						objectArray[i]->AddObjective(PathAStar(t.x, t.y, objective, objectArray[objectIndex]->GetHeuristic(0)));
 					}
 				}
 			}
 		}
 	}
 	if (creationTimer.Get() > 10){
-		CreateCharacter(5, 5);
+		//CreateCharacter(5, 5);
 		creationTimer.Restart();
 	}
 	
@@ -221,14 +235,21 @@ void StageState::Render() {
 		RenderArray();
 		break;
 	case BUY:
+		RenderArray();
 		buySheet.RenderObjectSheet();
 		break;
 	default:
 		RenderArray();
 		break;
 	}
-	if (sheet.GetRender())
+	if (sheet.GetRender()){
+		sheet.SetHunger(to_string(objectArray[selectedCharacter]->GetHunger()));
+		sheet.SetSatisfaction(to_string(int(objectArray[selectedCharacter]->satisfaction)));
+		sheet.SetMoney(to_string(objectArray[selectedCharacter]->money));
 		sheet.Render();
+	}
+
+		
 }
 
 void StageState::Input() {
@@ -349,7 +370,7 @@ void StageState::Input() {
 
 			Room *newRoom = new Room(selectionBox.begin, selectionBox.end, &tileMap, &objectArray, roomArray.size(), rType);
             roomArray.emplace_back(newRoom);
-			vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[roomArray.size() - 1]->GetDoor(), 0);
+			vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[roomArray.size() - 1]->GetDoor());
 			heuristicsArray.emplace(newRoom->GetID(),heuristc);
 			obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
 			//Point tileC = tileMap.GetTile(objectArray[0]->box.x + objectArray[0]->box.w / 2, objectArray[0]->box.y + objectArray[0]->box.h);
@@ -410,7 +431,7 @@ void StageState::Input() {
 							}
 						}
 					}
-					vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[i]->GetDoor(), 0);
+					vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[i]->GetDoor());
 					heuristicsArray[roomArray[i]->GetID()] = heuristc;
 					obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
 					obstacleMap = occupancyMap.CleanTile(&tileMap, roomArray[i]->GetDoor());
@@ -436,9 +457,25 @@ void StageState::Input() {
 			action = NONE;
 			break;
 		case EDIT_OBJECT:
-			cout << "Obstacle : " << endl;
-			obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
-			action = NONE;
+			for (int  i = 0; i < roomArray.size(); i++)	{
+				switch (roomArray[i]->GetState()){
+				case CORRIDOR:
+					break;
+				case SAMURAI:
+					break;
+				case PIRATE:
+					objectArray[selectedObject];
+					break;
+				case STEAM:
+					break;
+				default:
+					break;
+				}
+			}
+			if (objectArray[selectedObject]->SettlePos(obstacleMap)){
+				obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
+				action = NONE;
+			}
 		default:
 			break;
 		}
@@ -552,21 +589,21 @@ void StageState::DestroyRoom(int roomID){
     }
 }
 
-vector<int> StageState::PathAStar(int posX, int posY, int roomId){
-	cout << "RoomID : " << roomId << endl;
+vector<int> StageState::PathAStar(int posX, int posY, Point door, vector<int> heuristic){
 	cout <<"Size : " <<roomArray.size() << endl;
-	Point door = roomArray[roomId-1]->GetDoor();
 	int index, cost, actualPos, movements = 0;
+	cout << "Doors: " << door.x << "," << door.y << endl;
+	cout << "Pos: " << posX << "," << posY << endl;
 	Point posCost;
 	bool arrived = false;
 	priority_queue<Point, vector<Point>, CostComparator> costQueue;
 	unordered_map<int, int> exploredTiles;
 	unordered_map<int, int> allPaths;
-	vector<int> heuristic = heuristicsArray[roomId];
 	vector<int> path;
 
 	index = posY*tileMap.GetWidth() + posX;
 	if (door.x == posX && door.y == posY){
+		cout << "ENTROU??????????" << endl;
 		path.emplace_back(index);
 		return path;
 	}
@@ -576,6 +613,12 @@ vector<int> StageState::PathAStar(int posX, int posY, int roomId){
 	exploredTiles.emplace(index, -1);
 	allPaths.emplace(actualPos, -1);
 	costQueue.emplace(posCost);
+
+	if (posX == door.x && posY == door.y) {
+		arrived = true;
+		cout << "Achou : " << posX << "," << posY << endl;
+		cout << "Movements : " << movements << endl;
+	}
 	//cout << door.y*tileMap.GetWidth() + door.x << endl;
 	//cout << "obs : " << obstacleMap[door.y*tileMap.GetWidth() + door.x] << endl;
 	while (!arrived){
@@ -670,9 +713,10 @@ void StageState::SelectCharacter(){
 		if (objectArray[i]->IsCharacter()){
 			if (objectArray[i]->box.IsInside(InputManager::GetInstance().GetMouseX()-Camera::pos.x, InputManager::GetInstance().GetMouseY()-Camera::pos.y)){
 				Camera::Follow(objectArray[i].get());
+				selectedCharacter = i;
 				sheet.SetRace(to_string(i));
 				sheet.SetHunger(to_string(objectArray[i]->GetHunger()));
-				sheet.SetSatisfaction(to_string(objectArray[i]->satisfaction));
+				sheet.SetSatisfaction(to_string(int(objectArray[i]->satisfaction)));
 				sheet.SetMoney(to_string(objectArray[i]->money));
 				sheet.SetRender(true);
 				cout << "Character is : " << objectArray[i]->hunger << endl;
@@ -736,6 +780,18 @@ void StageState::ParseObject(vector<string> objList){
 				case 12:
 					attributes.description = attribute;
 					break;
+				case 13:{
+					string a;
+					a = attribute[0];
+					attributes.access[0] = stoi(a);
+					a = attribute[1];
+					attributes.access[1] = stoi(a);
+					a = attribute[2];
+					attributes.access[2] = stoi(a);
+					a = attribute[3];
+					attributes.access[3] = stoi(a);
+				}
+					break;
 				default:
 					break;
 				}
@@ -781,6 +837,8 @@ void StageState::ParseObject(vector<string> objList){
 			case 12:
 				cout << "Description: " << attributes.description << endl;
 				break;
+			case 13:
+				cout << "Access: " << attributes.access[0] << attributes.access[1] << attributes.access[2] << attributes.access[3] << endl;
 			default:
 				break;
 			}
