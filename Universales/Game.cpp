@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Penguins.h"
 #include <stdio.h>
 #include <cstring>
 #include "Collision.h"
@@ -28,33 +29,8 @@ void Game::Run() {
 	storedState = NULL;
 
 	while (!stateStack.top()->RequestedQuit()) {
-
-		if (StateData::fullscreen){
-			SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-		}
-		else{
-			SDL_SetWindowFullscreen(window, 0);
-
-			//trecho abaixo garante que a tela sempre vai estar em 0,0 (minimo)
-			//era um saco sair da tela cheia e a tela estar em valores negativos...
-			int *x = new int(0), *y = new int (0);
-			SDL_GetWindowPosition(window, x, y);
-			if ((*x<0) && (*y<0)) SDL_SetWindowPosition(window, 0, 0);
-			else{
-				if (*x < 0)	SDL_SetWindowPosition(window, 0, *y);
-				if (*y < 0)	SDL_SetWindowPosition(window, *x, 0);
-			}
-		}
-
-		if (resIndReal != StateData::resInd){
-			SDL_SetWindowSize(window, StateData::resolution[StateData::resInd].x, StateData::resolution[StateData::resInd].y);
-			resIndReal = StateData::resInd;
-			if (StateData::fullscreen){
-				//não funciona fora da gambiarra.
-				SDL_SetWindowFullscreen(window, 0);
-				SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-			}
-		}
+		if (Penguins::player == NULL)
+			Camera::Unfollow();
 		CalculateDeltaTime();
 		if (stateStack.top()->RequestedDelete()) {
 			stateStack.pop();
@@ -83,9 +59,6 @@ void Game::CalculateDeltaTime() {
 }
 
 Game::Game(string title, int width, int height) {
-	StateData::GetSysData();
-	Language::selectLang(Language::names[StateData::langInd]);
-	resIndReal = StateData::resInd;
 	storedState = NULL;
 	srand(time(NULL));
 	frameStart = SDL_GetTicks();
@@ -110,10 +83,7 @@ Game::Game(string title, int width, int height) {
 
 	TTF_Init();
 
-	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-		StateData::resolution[StateData::resInd].x, StateData::resolution[StateData::resInd].y, 0);
-	//SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-
+	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, 0);
 
 	if (window == NULL) {
 		cout << "Erro ao abrir janela..." << SDL_GetError() << endl;
@@ -136,7 +106,6 @@ float Game::GetDeltaTime() {
 }
 
 Game::~Game() {
-	StateData::SaveSysData();
 	IMG_Quit();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);

@@ -1,6 +1,7 @@
 #ifndef StageStateH
 #define StageStateH
 
+#include "Wall.h"
 #include "State.h"
 #include "Sprite.h"
 #include "BlockTileSet.h"
@@ -20,9 +21,6 @@
 #include "CharacterSheet.h"
 #include "Object.h"
 #include "Sheet.h"
-#include "ObjectSheet.h"
-#include "RoomSheet.h"
-#include "Music.h"
 
 enum Action{
 
@@ -33,10 +31,14 @@ enum Action{
 	DESTROY_ROOM,
 	AREA_SELECT,
 	GUI_A,
-	SUB_GUI_EDIT,
+	GUI_EDIT,
+	EXPAND_WALL,
+	GUI_WALL,
 	BUY,
-	EDIT_WALL,
+	MOVE_WALL,
 	EDIT_DOOR,
+	SELECT_ROOM,
+	SELECT_WALL,
 	EDIT_OBJECT
 };
 
@@ -49,49 +51,39 @@ public:
 	void DestroyRoom(int roomID);
 	void CreateCharacter(int x, int y);
 	void DestroyCharacter(int id);
-	vector<int> PathAStar(int posX, int posY, Point door, vector<int> heuristic);
+	vector<int> PathAStar(int posX, int posY, int roomId);
 	void SelectCharacter();
-	void Load();
-	void Save();
-	static StageState *instance;
-	Music music;
-	int cMusic;
-	Sound click;
+	void CreateStationWalls(Point begin,Point end,TileMap *tileMap, vector<unique_ptr<GameObject> > *objectArray);
 
 private:
 	void Input();
 	void ParseObject(vector<string> objList);
-	void ParseRoom(vector<string> roomList);
-
-
-	Sprite bg, okTile, noTile;
+	Sprite bg;
 	MultiTileSet tileSet;
 	TileMap tileMap;
 	Action action;
 	SelectionBox selectionBox;
 	Point p;
+	Point move;
+	Point selectedWall;
+	Point tileBegin;
+	Point tileEnd;
 	Point ptile;
 	RoomType rType;
-	string charRoom;
+	RoomType charRoom;
 	vector<unique_ptr<Room>> roomArray;
 	vector<int> obstacleMap;
 	unordered_map<int, vector<int>> heuristicsArray;
-	unordered_map<string, vector<string>> objList, roomList;
 	
 	Timer creationTimer;
 	GUI gui;
-	GUI subGuiEdit;
 	Text moneyText;
-	Text costText;
 	OccupancyMap occupancyMap;
-	string charChoice;
+	Choice charChoice;
 	CharacterSheet sheet;
-	ObjectSheet objSheet;
-	RoomSheet roomSheet;
 	Sheet buySheet;
-	int selectedObject, selectedCharacter;
-	RoomAttributes roomAttributes;
-	static vector<string> musicNames;
+	int selectedObject;
+	int selectedRoom;
 };
 
 #endif

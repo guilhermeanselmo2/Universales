@@ -5,13 +5,16 @@ bool Comparator::operator()(const Point& lhs, const Point& rhs) {
         return true;
     }
     else{
-        if((lhs.z + lhs.y< rhs.z + rhs.y))
-            return false;
+		if ((lhs.z + lhs.y< rhs.z + rhs.y)){
+			return false;
+		}
         else{
-            if(lhs.z < lhs.y)
-                return true;
-            else
-                false;
+			if (lhs.z > rhs.z){
+				return true;
+			}
+			else{
+				return false;
+			}
         }
     }
 }

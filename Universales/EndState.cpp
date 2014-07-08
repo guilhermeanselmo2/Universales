@@ -2,7 +2,7 @@
 #include "StageState.h"
 #include "TitleState.h"
 
-EndState::EndState(StateData stateData) : instruction("font/Call_me_maybe.ttf", 30, Text::TEXT_BLENDED, "Pressione Space para tentar novamente ou ESC para ir ao MENU", cor, 0, 0) {
+EndState::EndState(StateData stateData) : instruction("font/Call me maybe.ttf", 30, Text::TEXT_BLENDED, "Pressione Space para tentar novamente ou ESC para ir ao MENU", cor, 0, 0) {
 	instruction.SetPos(100, 462, true, true);
 
 	if (stateData.playerVictory == true) {

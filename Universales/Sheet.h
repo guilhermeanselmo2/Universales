@@ -9,7 +9,6 @@ public:
 	~Sheet();
 
 	void SetObjectList(unordered_map<string, Attributes> objects);
-	void SetTypeList(unordered_map<string, unordered_map<string, Attributes>> objects);
 
 	void RenderObjectSheet();
 	void UpdateObjectSheet();
@@ -22,11 +21,10 @@ public:
 private:
 	Sprite sheet, objectSprite, buy;
 	Rect box, buyBox;
-	unordered_map<string, unordered_map<string, Attributes>> objectsTypes;
 	unordered_map<string, Attributes> objects;
-	vector<Text*> objNames, objTypes;
+	vector<Text*> objNames;
 	//vector<Text*> attributesInfo;
 	Text attributesInfo[3];
-	int itemSelected, typeSelected;
+	int itemSelected;
 };
 

@@ -12,8 +12,6 @@
 #include <memory>
 #include <ctime>
 #include <cstdlib>
-#include "Language.h"
-#include "StateData.h"
 
 using std::cout;
 using std::string;
@@ -43,7 +41,6 @@ public:
 	void Run();
 	Game(string title, int width, int height);
 	~Game();
-	int resIndReal;
 
 };
 

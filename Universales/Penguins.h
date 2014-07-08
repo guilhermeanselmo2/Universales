@@ -17,7 +17,7 @@ public:
 	static Penguins* player;
 	Penguins(float x, float y);
 	~Penguins();
-	void Update(float df);
+	void Update(float dt);
 	void Render(int cameraX, int cameraY);
 	bool IsDead();
 	void Shoot();

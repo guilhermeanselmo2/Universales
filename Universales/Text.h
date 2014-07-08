@@ -7,7 +7,6 @@ static const SDL_Color WHITE = { 255, 255, 255 };
 static const SDL_Color BLUE = { 0, 0, 255 };
 static const SDL_Color LIGHT_BLUE = { 33, 211, 203 };
 static const SDL_Color BLACK = { 0, 0, 0 };
-static const SDL_Color RED = { 255, 0, 0 };
 
 class Text {
 

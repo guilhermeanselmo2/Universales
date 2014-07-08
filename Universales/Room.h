@@ -15,35 +15,32 @@ enum RoomType{
 	STEAM,
 };
 
-struct RoomAttributes{
-	string type;
-	int cost;
-	string tileSprite;
-	string description;
-};
-
 class Room{
 public:
 	enum RoomState{
 		NONE = 0,
 		EDITING
 	};
-	Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject>> *objectArray, int roomCount, RoomAttributes attributes);
-	Room(ifstream &readFile, TileMap *tileMap, vector<unique_ptr<GameObject>> *objectArray, int RoomCount);
-    void Update(float dt);
+    Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject>> *objectArray, int roomCount, RoomType type);
     void Render(TileMap *tileMap);
 	void EditRoom(bool editing);
     int GetID();
-	string GetState();
+	RoomType GetState();
     bool IsInside(float x, float y);
     bool IsInside(Point tile);
     bool Is(string type);
+	void SetEnd(Point end);
+	void DeleteTileWall(Point p, int RoomID, vector<unique_ptr<GameObject>> *objectArray);
+	void InsertTileWall(Point p, int RoomID, vector<unique_ptr<GameObject>> *objectArray);
+	void SetBegin(Point begin);
+	Point GetTileCenterRoom();
+	Point GetBegin();
+	Point GetEnd();
 	void SetDoor(float x, float y, int RoomID, vector<unique_ptr<GameObject>> *objectArray);
 	RoomState roomState;
 	Point GetDoor();
 	Timer editTimer;
-	int cost;
-	void Save(ofstream &file);
+	vector<unique_ptr<GameObject>> wall1Array, wall2Array;
 
 private:
 	TileMap tileMap;
@@ -53,9 +50,9 @@ private:
     Point end;
     Point door;
     int RoomID;
-	RoomAttributes attributes;
+	RoomType roomType;
     SelectionBox floor;
-    vector<unique_ptr<GameObject>> wallArray;
+    
 };
 
 #endif // ROOM_H

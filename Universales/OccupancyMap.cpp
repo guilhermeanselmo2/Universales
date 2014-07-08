@@ -15,8 +15,9 @@ OccupancyMap::~OccupancyMap()
 vector<int> OccupancyMap::Update(TileMap *tileMap, vector<unique_ptr<GameObject>> *objectArray){
 	Point pos;
 	int index;
-	cout << "Size : " << objectArray->size() << endl;
+	//cout << "Size : " << objectArray->size() << endl;
 	occupancyMap.resize(occupancyMap.size(), 0);
+	//cout << "Aqui1" << endl;
 	for (int i = 0; i < objectArray->size(); i++){
 		if (!(objectArray->at(i)->IsCharacter())){
 
@@ -27,61 +28,38 @@ vector<int> OccupancyMap::Update(TileMap *tileMap, vector<unique_ptr<GameObject>
 				occupancyMap[index] = -1;
 			}
 
-			if (objectArray->at(i)->Type() == "LEFT_CORNER" || objectArray->at(i)->Type() == "RIGHT_CORNER"){
-				if (objectArray->at(i)->Type() == "LEFT_CORNER"){
-					pos.x = objectArray->at(i)->box.x;
-					pos.y = objectArray->at(i)->box.y + objectArray->at(i)->box.h;
-					
-					pos = tileMap->GetTile(pos.x, pos.y);
-					index = pos.y*tileMap->GetHeight() + pos.x;
-					occupancyMap[index] = -1;
-				}
-				else{
-					pos.x = objectArray->at(i)->box.x + objectArray->at(i)->box.w;
-					pos.y = objectArray->at(i)->box.y + objectArray->at(i)->box.h;
-					
-					pos = tileMap->GetTile(pos.x, pos.y);
-					index = pos.y*tileMap->GetHeight() + pos.x;
-					occupancyMap[index] = -1;
-
-				}
-			}
-			else{
-				pos.x = objectArray->at(i)->box.x + objectArray->at(i)->box.w / 2;
-				pos.y = objectArray->at(i)->box.y + objectArray->at(i)->box.h;
-				pos = tileMap->GetTile(pos.x, pos.y);
-
+			if (objectArray->at(i)->Is("Wall")) {
+				pos = objectArray->at(i)->tile;
 				index = pos.y*tileMap->GetHeight() + pos.x;
 				occupancyMap[index] = -1;
 			}
+			
 		}
 	}
+	//cout << "Aqui1" << endl;
 	return occupancyMap;
 }
 
-vector<int> OccupancyMap::CreateHeuristic(TileMap *tileMap, Point pos){
+vector<int> OccupancyMap::CreateHeuristic(TileMap *tileMap, Point door, int RoomID){
 	vector<int> heuristic;
 	int distX, distY;
 	heuristic.resize(occupancyMap.size());
 	heuristics.resize(occupancyMap.size());
 	for (int i = 0; i < heuristic.size(); i++){
-		distX = i%tileMap->GetWidth() - pos.x;
-		distY = ((int)(i / tileMap->GetWidth())) - pos.y;
+		distX = i%tileMap->GetWidth() - door.x;
+		distY = ((int)(i / tileMap->GetWidth())) - door.y;
 		heuristic[i] = abs(distX) + abs(distY);
 		heuristics[i] = heuristic[i];
 	}
 	return heuristic;
 }
 
-bool OccupancyMap::IsOccupied(int index){
-	return occupancyMap[index] == 1;
-}
-
 
 //Debug only! Very heavy! Caused my game to crash! Don't use it!
 void OccupancyMap::Render(TileMap *tileMap){ 
 	Text text("font/LCALLIG.TTF", 40, Text::TEXT_BLENDED, "  ", WHITE, 100);
-	int x, y;/*
+	int x, y;
+	/*
 	for (int i = 0; i < heuristics.size(); i++){
 		string h = to_string(heuristics[i]);
 		text.SetText(h);
@@ -109,9 +87,8 @@ void OccupancyMap::Render(TileMap *tileMap){
 vector<int> OccupancyMap::CleanTile(TileMap *tileMap, Point tile){
 	int index = tile.y*tileMap->GetWidth() + tile.x;
 	occupancyMap[index] = 0;
-	cout << index << endl;
+	cout << "index: " << index << endl;
 	return occupancyMap;
 }
-
 
 

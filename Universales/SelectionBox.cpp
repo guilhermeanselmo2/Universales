@@ -78,6 +78,6 @@ void SelectionBox::SetBegin(Point pos){
     begin.y = pos.y;
 }
 
-void SelectionBox::SetSprite(string path){
-	sp.Open(path);
+void SelectionBox::SetEnd(Point end) {
+	this->end = end;
 }

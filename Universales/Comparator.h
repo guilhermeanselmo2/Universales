@@ -3,6 +3,9 @@
 
 #include "Point.h"
 #include <memory>
+#include <iostream>
+
+using namespace std;
 
 class Comparator
 {

@@ -12,9 +12,7 @@ Music::Music(string file) {
 }
 
 void Music::Play(int times) {
-	isOverInd = false;
-	Mix_FadeInMusic(music,times,1000);
-	Mix_HookMusicFinished(*Music::musicFinished);
+	Mix_PlayMusic(music,times);
 }
 
 void Music::Stop() {
@@ -22,7 +20,6 @@ void Music::Stop() {
 }
 
 void Music::Open(string file) {
-	isOverInd = false;
 
 	if (assetTable.find(file) != assetTable.end()){
 		//std::cout << "Arquivo carregado ..." << std::endl;
@@ -47,16 +44,4 @@ void Music::Clear() {
 	for (auto element = assetTable.begin(); element != assetTable.end(); element++) {
 		Mix_FreeMusic(element->second);
 	}
-}
-
-void Music::musicFinished(){
-	isOverInd = true;
-	cout << "terminou" << endl;
-}
-
-bool Music::isOverInd = false;
-
-void Music::SetVolume(int vol){
-	if ((vol >= 0) && (vol <= 128))
-		Mix_VolumeMusic(vol);
 }

@@ -12,7 +12,7 @@ public:
     void Render(TileMap *tileMap);
     void SetBegin(float x, float y);
     void SetBegin(Point pos);
-	void SetSprite(string path);
+	void SetEnd (Point pos);
     Point begin;
     Point end;
 
