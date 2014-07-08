@@ -66,6 +66,9 @@ void CheatState::Input(){
 }
 void CheatState::ChechCheat(){
 	if (msg == "gibemonipls"){
+		data->money += 2000;
+	}
+	if (msg == "klapaucius"){
 		data->money += 1000;
 	}
 	if (msg == "fabulous"){

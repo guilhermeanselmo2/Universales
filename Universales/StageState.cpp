@@ -1,6 +1,5 @@
 #include "StageState.h"
 #include "EndState.h"
-#include "Alien.h"
 #include "Music.h"
 #include "StateData.h"
 #include "Permonkey.h"
@@ -14,7 +13,13 @@
 
 StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet),
 moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()), sheet(PERMONKEY), subGuiEdit("img/icons/door.png", "img/icons/wall.jpg"),
-okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"){
+okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"),
+music("music/can_o do vinho.ogg"),
+click("music/click_interface.wav"){
+	cMusic = 0;
+	music.Play(1);
+	cout << music.isOverInd << endl;
+	instance = this;
 	string file, file2, tile, line, endLine("\n"), initFile("img/tileset/");
 	FILE *tileFile, *objectFile;
 	Point roomBegin, roomEnd;
@@ -59,10 +64,16 @@ okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"){
             tileSet.Open(tile);
     }
 	fclose(tileFile);
-
-	objFile.open("obj/objects.txt");
-
-	
+	cout << "Aqui inicio" << endl;
+	switch (StateData::langInd){
+	case 0:
+		objFile.open("obj/pt-br-objects.txt");
+		break;
+	case 1:
+		objFile.open("obj/en-objects.txt");
+		break;
+	}
+	cout << "Aqui inicio" << endl;
 	
 
 	while (!objFile.eof()){
@@ -70,7 +81,7 @@ okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"){
 		objectList.emplace_back(file);
 	}
 
-
+	
 	for (int i = 0; i < objectList.size(); i++){
 		cout << objectList[i] << endl;
 	}
@@ -100,8 +111,8 @@ okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"){
 	objectArray.emplace_back(pM);
 
 	data = new StateData();
-	data->money = 0;
-	data->fame = 0;
+	data->money = 5000;
+	data->fame = 128;
 	moneyText.SetText(to_string(data->money));
 	moneyText.SetPos(20, 20, false, false);
 }
@@ -115,6 +126,16 @@ StageState::~StageState() {
 }
 
 void StageState::Update(float dt) {
+	if (music.isOverInd){
+		cMusic++;
+		if (cMusic == musicNames.size()){
+			cMusic = 0;
+		}
+		music.Open(musicNames[cMusic]);
+		music.Play(1);
+	}
+	int size = 0;
+	int cost = 0;
 	Input();
 	creationTimer.Update(dt);
 	switch (action)	{
@@ -131,6 +152,8 @@ void StageState::Update(float dt) {
 		break;
 	case CONSTRUCT_ROOM:
 		selectionBox.Update(&tileMap);
+		size = (abs(selectionBox.end.x - selectionBox.begin.x) + 1)*(abs(selectionBox.end.y - selectionBox.begin.y) + 1);
+		cost = size * 5;
 		break;
 	case DESTROY_ROOM:
 		break;
@@ -196,6 +219,9 @@ void StageState::Update(float dt) {
 		creationTimer.Restart();
 	}
 	
+	if (cost > 0)	costText.SetText(to_string(-cost));
+	else costText.SetText(" ");
+	costText.SetPos(InputManager::GetInstance().GetMouseX() + 10, InputManager::GetInstance().GetMouseY() + 5, false, false);
 }
 
 void StageState::Render() {
@@ -292,8 +318,27 @@ void StageState::Render() {
 		objSheet.Open(objectArray[selectedCharacter]->GetTextAttributes());
 		objSheet.Render();
 	}
+
+	//Dinheiro e fama
 	
 		
+	moneyText.SetText(to_string(data->money));
+	moneyText.SetPos(20, 20, false, false);
+	moneyText.Render();
+
+	costText.Render();
+
+	if (data->fame <= 255){
+		SDL_SetRenderDrawColor(Game::GetInstance().GetRenderer(), 255 - data->fame, 0, data->fame, 255);
+	}
+	if (data->fame >= 255){
+		SDL_SetRenderDrawColor(Game::GetInstance().GetRenderer(), 255, 255, 255, 255);
+	}
+	SDL_RenderFillRect(Game::GetInstance().GetRenderer(), &fillRect);
+	int anchorx = data->fame * 100 / 255;
+	SDL_SetRenderDrawColor(Game::GetInstance().GetRenderer(), 153, 153, 0, 255);
+	fillRect = { 20 + anchorx, 68, 3, 14 };
+	SDL_RenderFillRect(Game::GetInstance().GetRenderer(), &fillRect);
 }
 
 void StageState::Input() {
@@ -335,19 +380,23 @@ void StageState::Input() {
 			break;
 		case GUI_A:
 			if(gui.BuildIconPressed()){
+				click.Play(1);
 				action = GUI_ROOM;
 				gui.SetState(ROOMS);
             }
 			else{
 				if (gui.DestroyIconPressed()){
+					click.Play(1);
 					action = DESTROY_ROOM;
 				}
 				else{
 					if (gui.BuyIconPressed()){
+						click.Play(1);
 						action = BUY;
 					}
 					else{
 						if (gui.EditIconPressed()){
+							click.Play(1);
 							subGuiEdit.SetPositionSubGUI(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
 							action = SUB_GUI_EDIT;
 							subGuiEdit.SetState(EDIT);
@@ -361,11 +410,13 @@ void StageState::Input() {
 			break;
 		case SUB_GUI_EDIT:
 			if (subGuiEdit.DoorIconPressed()){
+				click.Play(1);
 				cout << "editando porta..." << endl;
 				action = EDIT_DOOR;
 			}
 			else{
 				if (subGuiEdit.WallIconPressed()){
+					click.Play(1);
 					cout << "editando parede..." << endl;
 					action = EDIT_WALL;
 				}
@@ -409,6 +460,7 @@ void StageState::Input() {
 			asd.tileSprite = "img/tileset/tile_madeira.png";
 			asd.type = "Pirate";
 			Room *newRoom = new Room(selectionBox.begin, selectionBox.end, &tileMap, &objectArray, roomArray.size(), roomAttributes);
+			data->money -= newRoom->cost;
             roomArray.emplace_back(newRoom);
 			vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[roomArray.size() - 1]->GetDoor());
 			heuristicsArray.emplace(newRoom->GetID(),heuristc);
@@ -958,3 +1010,85 @@ void StageState::ParseRoom(vector<string> roomList){
 	roomSheet.SetRoomList(list);
 
 }
+void StageState::Load(){
+	objectArray.clear();
+	//unico jeito até o momento em que o 'save' não implica em crash.
+
+	ifstream loadFile("save.bin", ios::in | ios::binary);
+
+	int size = 0;
+	loadFile.read(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < size; p++){
+		cout << "P : " << p << endl;;
+		cout << "Size : " << size << endl;
+		Point begin, end;
+		loadFile.read(reinterpret_cast<char*> (&begin), sizeof(Point));
+		loadFile.read(reinterpret_cast<char*> (&end), sizeof(Point));
+		RoomAttributes attributes;
+		loadFile.read(reinterpret_cast<char*> (&attributes), sizeof(RoomAttributes));
+		Point door;
+		loadFile.read(reinterpret_cast<char*> (&door), sizeof(Point));
+		cout << "Go room!" << endl;
+		Room *room = new Room(begin, end, &tileMap, &objectArray, roomArray.size(),attributes);
+		cout << "Foi room" << endl;
+		roomArray.emplace_back(room);
+		//posicionamento da porta não está funcionando.
+		cout << room->GetID() << endl;
+	}
+	cout << "Saiu p" << endl;
+	//---------------------------------------------------------
+	loadFile.read(reinterpret_cast<char*> (&size), sizeof(int));
+	obstacleMap.resize(size);
+	for (int p = 0; p < size; p++){
+		loadFile.read(reinterpret_cast<char*> (&obstacleMap[p]), sizeof(int));
+	}
+	//---------------------------------------------------------
+	loadFile.read(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < size; p++){
+		char tipo[15];
+		loadFile.read(reinterpret_cast<char*> (&tipo), sizeof(tipo));
+		string type(tipo);
+		cout << type << endl;
+		if (type == "PerMonkey"){
+			Permonkey *pm = new Permonkey(loadFile, tileMap);
+			objectArray.emplace_back(pm);
+		}
+		if (type == "Object"){
+			Object *ob = new Object(loadFile, tileMap);
+			objectArray.emplace_back(ob);
+		}
+	}
+	loadFile.read(reinterpret_cast<char*> (&data->money), sizeof(int));
+	loadFile.read(reinterpret_cast<char*> (&data->fame), sizeof(int));
+	cout << "end" << endl;
+	loadFile.close();
+};
+void StageState::Save(){
+	ofstream saveFile("save.bin", ios::out | ios::binary);
+
+	int size = roomArray.size();
+	saveFile.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < roomArray.size(); p++){
+		roomArray[p]->Save(saveFile);
+	}
+
+	size = obstacleMap.size();
+	saveFile.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < size; p++){
+		saveFile.write(reinterpret_cast<char*> (&obstacleMap[p]), sizeof(int));
+	}
+
+	size = objectArray.size();
+	saveFile.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < size; p++){
+		char tipo[15];
+		strcpy(tipo, objectArray[p]->Type().c_str());
+		saveFile.write(reinterpret_cast<char*> (&tipo), sizeof(tipo));
+		objectArray[p]->Save(saveFile);
+	}
+	saveFile.write(reinterpret_cast<char*> (&data->money), sizeof(int));
+	saveFile.write(reinterpret_cast<char*> (&data->fame), sizeof(int));
+	saveFile.close();
+};
+StageState *StageState::instance = nullptr;
+vector<string> StageState::musicNames = { "music/can_o do vinho.ogg", "music/feliz1.2.ogg" };

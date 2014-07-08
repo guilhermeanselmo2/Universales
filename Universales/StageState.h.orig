@@ -17,6 +17,11 @@
 #include "Object.h"
 #include "OccupancyMap.h"
 #include "Permonkey.h"
+#include "CharacterSheet.h"
+#include "Object.h"
+#include "Sheet.h"
+#include "ObjectSheet.h"
+#include "RoomSheet.h"
 
 enum Action{
 
@@ -31,6 +36,7 @@ enum Action{
 	BUY,
 	EDIT_WALL,
 	EDIT_DOOR,
+	EDIT_OBJECT
 };
 
 class StageState : public State {
@@ -42,11 +48,16 @@ public:
 	void DestroyRoom(int roomID);
 	void CreateCharacter(int x, int y);
 	void DestroyCharacter(int id);
-	vector<int> PathAStar(int posX, int posY, int roomId);
+	vector<int> PathAStar(int posX, int posY, Point door, vector<int> heuristic);
+	void SelectCharacter();
 
 private:
 	void Input();
-	Sprite bg;
+	void ParseObject(vector<string> objList);
+	void ParseRoom(vector<string> roomList);
+
+
+	Sprite bg, okTile, noTile;
 	MultiTileSet tileSet;
 	TileMap tileMap;
 	Action action;
@@ -54,20 +65,24 @@ private:
 	Point p;
 	Point ptile;
 	RoomType rType;
-	RoomType charRoom;
+	string charRoom;
 	vector<unique_ptr<Room>> roomArray;
 	vector<int> obstacleMap;
 	unordered_map<int, vector<int>> heuristicsArray;
+	unordered_map<string, vector<string>> objList, roomList;
 	
-<<<<<<< HEAD
 	Timer creationTimer;
-=======
->>>>>>> 6181a235ba01b48a12a0698f9fb91b6324f75047
 	GUI gui;
 	GUI subGuiEdit;
 	Text moneyText;
 	OccupancyMap occupancyMap;
-	Choice charChoice;
+	string charChoice;
+	CharacterSheet sheet;
+	ObjectSheet objSheet;
+	RoomSheet roomSheet;
+	Sheet buySheet;
+	int selectedObject, selectedCharacter;
+	RoomAttributes roomAttributes;
 };
 
 #endif

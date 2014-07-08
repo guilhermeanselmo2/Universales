@@ -24,12 +24,14 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GUI.cpp" />
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="Language.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MultiTileSet.cpp" />
     <ClCompile Include="Music.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="ObjectSheet.cpp" />
     <ClCompile Include="OccupancyMap.cpp" />
+    <ClCompile Include="OptionsState.cpp" />
     <ClCompile Include="PauseState.cpp" />
     <ClCompile Include="Permonkey.cpp" />
     <ClCompile Include="Point.cpp" />
@@ -67,6 +69,7 @@
     <ClInclude Include="Header.h" />
     <ClInclude Include="Header1.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Language.h" />
     <ClInclude Include="Minio.h" />
     <ClInclude Include="Minion.h" />
     <ClInclude Include="MultiTileSet.h" />
@@ -74,6 +77,7 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectSheet.h" />
     <ClInclude Include="OccupancyMap.h" />
+    <ClInclude Include="OptionsState.h" />
     <ClInclude Include="PauseState.h" />
     <ClInclude Include="Permonkey.h" />
     <ClInclude Include="Point.h" />

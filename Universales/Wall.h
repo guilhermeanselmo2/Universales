@@ -49,6 +49,7 @@ public:
 	vector<Point> GetAccessPoints();
 	vector<string>GetTextAttributes();
 	Rect GetBox();
+	void Save(ofstream &file);
 
 private:
 	Timer editTimer;

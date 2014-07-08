@@ -8,12 +8,19 @@ Button::Button(string text, int size, int x, int y)
 	texto->SetPos(x, y, true, true);
 	area = texto->box;
 	pressed = false;
+	pt.SetPoint(x,y);
 }
 
 
 Button::~Button()
 {
 	delete texto;
+}
+
+void Button::UpdateTxt(string txt){
+	texto->SetText(txt);
+	texto->SetPos(pt.x, pt.y, true, true);
+	area = texto->box;
 }
 
 void Button::Update(float dt){
@@ -39,4 +46,9 @@ void Button::Update(float dt){
 
 void Button::Render(){
 	texto->Render();
+}
+void Button::UpdatePos(int x, int y){
+	texto->SetPos(x, y, true, true);
+	area = texto->box;
+	pt.SetPoint(x, y);
 }

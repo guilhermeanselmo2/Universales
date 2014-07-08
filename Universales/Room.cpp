@@ -2,8 +2,9 @@
 #include "Camera.h"
 #include "Wall.h"
 
-Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject> > *objectArray, int RoomCount, RoomAttributes attributes) : tileSp("img/tileset/tile_tatami.png"), tileMap(*tileMap){
-
+Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject> > *objectArray, int RoomCount, RoomAttributes attributes) : tileSp("img/tileset/tile_tatami.png"){
+	this->tileMap = *tileMap;
+	
 	Point tile;
     begin = lBegin;
     end = lEnd;
@@ -12,7 +13,7 @@ Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObj
     RoomID = RoomCount+1;
 	this->attributes = attributes;
 	tileSp.Open(this->attributes.tileSprite);
-
+	
 	file = "img/wall_corner_upper.png";
     Point pos(begin.x,begin.y);
 	tile = pos;
@@ -41,6 +42,9 @@ Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObj
     pos = tileMap->GetTileCenter(pos);
 	wall = new Wall(pos.x, pos.y, file, INF_CORNER, tile, RoomID);
     objectArray->emplace_back(wall);
+
+	int size = (abs(end.x - begin.x) + 1)*(abs(end.y - begin.y) + 1);
+	cost = size * 5;
 
 
     file = "img/wall_2.png";
@@ -262,4 +266,15 @@ Point Room::GetDoor(){
 
 string Room::GetState(){
 	return attributes.type;
+}
+
+void Room::Save(ofstream &file){
+	cout << RoomID << endl;
+	file.write(reinterpret_cast<char*> (&begin), sizeof(begin));
+	file.write(reinterpret_cast<char*> (&end), sizeof(end));
+	file.write(reinterpret_cast<char*> (&tileMap), sizeof(TileMap));
+	file.write(reinterpret_cast<char*> (&attributes), sizeof(RoomAttributes));
+	file.write(reinterpret_cast<char*> (&door), sizeof(Point));
+	cout << "Save" << endl;
+	cout << door.x << "," << door.y << endl;
 }

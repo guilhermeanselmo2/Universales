@@ -41,6 +41,8 @@ public:
 	RoomState roomState;
 	Point GetDoor();
 	Timer editTimer;
+	int cost;
+	void Save(ofstream &file);
 
 private:
 	TileMap tileMap;

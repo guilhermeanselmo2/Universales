@@ -186,3 +186,7 @@ Rect Wall::GetBox(){
 Point Wall::GetTile(){
 	return tile;
 }
+
+void Wall::Save(ofstream &file){
+
+}

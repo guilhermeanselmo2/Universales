@@ -22,6 +22,7 @@
 #include "Sheet.h"
 #include "ObjectSheet.h"
 #include "RoomSheet.h"
+#include "Music.h"
 
 enum Action{
 
@@ -50,6 +51,12 @@ public:
 	void DestroyCharacter(int id);
 	vector<int> PathAStar(int posX, int posY, Point door, vector<int> heuristic);
 	void SelectCharacter();
+	void Load();
+	void Save();
+	static StageState *instance;
+	Music music;
+	int cMusic;
+	Sound click;
 
 private:
 	void Input();
@@ -75,6 +82,7 @@ private:
 	GUI gui;
 	GUI subGuiEdit;
 	Text moneyText;
+	Text costText;
 	OccupancyMap occupancyMap;
 	string charChoice;
 	CharacterSheet sheet;
@@ -83,6 +91,7 @@ private:
 	Sheet buySheet;
 	int selectedObject, selectedCharacter;
 	RoomAttributes roomAttributes;
+	static vector<string> musicNames;
 };
 
 #endif
