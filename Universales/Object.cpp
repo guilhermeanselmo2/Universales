@@ -75,7 +75,17 @@ Object::Object(ifstream &file, TileMap tileMap) : sp(""), tileMap(tileMap){
 	file.read(reinterpret_cast<char*> (&attributes.passiveMoney), sizeof(int));
 	file.read(reinterpret_cast<char*> (&box), sizeof(Rect));
 	file.read(reinterpret_cast<char*> (&tile), sizeof(Point));
+	file.read(reinterpret_cast<char*> (&attributes.access), sizeof(attributes.access));
+	file.read(reinterpret_cast<char*> (&attributes.width), sizeof(int));
+	file.read(reinterpret_cast<char*> (&attributes.height), sizeof(int));
+	file.read(reinterpret_cast<char*> (&timer), sizeof(Timer));
+	file.read(reinterpret_cast<char*> (&size), sizeof(int));
+	accessPoints.resize(size);
+	for (int p = 0; p < size; p++){
+		file.read(reinterpret_cast<char*> (&accessPoints[p]), sizeof(Point));
+	}
 	sp.Open(attributes.sprite);
+	type = "Object";
 }
 
 void Object::Save(ofstream &file){
@@ -109,6 +119,15 @@ void Object::Save(ofstream &file){
 	file.write(reinterpret_cast<char*> (&attributes.passiveMoney), sizeof(int));
 	file.write(reinterpret_cast<char*> (&box), sizeof(Rect));
 	file.write(reinterpret_cast<char*> (&tile), sizeof(Point));
+	file.write(reinterpret_cast<char*> (&attributes.access), sizeof(attributes.access));
+	file.write(reinterpret_cast<char*> (&attributes.width), sizeof(int));
+	file.write(reinterpret_cast<char*> (&attributes.height), sizeof(int));
+	file.write(reinterpret_cast<char*> (&timer), sizeof(Timer));
+	size = accessPoints.size();
+	file.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < size; p++){
+		file.write(reinterpret_cast<char*> (&accessPoints[p]), sizeof(Point));
+	}
 }
 
 Object::~Object(){

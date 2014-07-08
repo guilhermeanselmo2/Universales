@@ -40,7 +40,6 @@ click("music/click_interface.wav"){
 
 
 	bg.Open("img/fundo_espaco.png");
-	Music musica("audio/stageState.ogg");
 
 	//Room *newRoom = new Room(roomBegin, roomEnd, &tileMap, &objectArray, roomArray.size(), rType);
 	//roomArray.emplace_back(newRoom);
@@ -1057,6 +1056,7 @@ void StageState::Load(){
 	int size = 0;
 	loadFile.read(reinterpret_cast<char*> (&size), sizeof(int));
 	for (int p = 0; p < size; p++){
+<<<<<<< HEAD
 		Point begin, end;
 		loadFile.read(reinterpret_cast<char*> (&begin), sizeof(Point));
 		loadFile.read(reinterpret_cast<char*> (&end), sizeof(Point));
@@ -1065,9 +1065,11 @@ void StageState::Load(){
 		Point door;
 		loadFile.read(reinterpret_cast<char*> (&door), sizeof(Point));
 		Room *room = new Room(begin, end, &tileMap, &objectArray, roomArray.size(),attributes);
+=======
+		Room *room = new Room(loadFile,&tileMap,&objectArray,roomArray.size());
+>>>>>>> b4f62f26bc4c9ad9e39c1597132de7a73436f001
 		roomArray.emplace_back(room);
-		//posicionamento da porta não está funcionando.
-		cout << room->GetID() << endl;
+
 	}
 	cout << "Saiu p" << endl;
 	//---------------------------------------------------------
@@ -1084,7 +1086,7 @@ void StageState::Load(){
 		string type(tipo);
 		cout << type << endl;
 		if (type == "PerMonkey"){
-			Permonkey *pm = new Permonkey(loadFile, tileMap);
+			Permonkey *pm = new Permonkey(loadFile, tileMap, objList);
 			objectArray.emplace_back(pm);
 		}
 		if (type == "Object"){
@@ -1111,14 +1113,15 @@ void StageState::Save(){
 	for (int p = 0; p < size; p++){
 		saveFile.write(reinterpret_cast<char*> (&obstacleMap[p]), sizeof(int));
 	}
-
 	size = objectArray.size();
 	saveFile.write(reinterpret_cast<char*> (&size), sizeof(int));
 	for (int p = 0; p < size; p++){
-		char tipo[15];
-		strcpy(tipo, objectArray[p]->Type().c_str());
-		saveFile.write(reinterpret_cast<char*> (&tipo), sizeof(tipo));
-		objectArray[p]->Save(saveFile);
+		//if (objectArray[p]->Type() == "PerMonkey"){
+			char tipo[15];
+			strcpy(tipo, objectArray[p]->Type().c_str());
+			saveFile.write(reinterpret_cast<char*> (&tipo), sizeof(tipo));
+			objectArray[p]->Save(saveFile);
+		//}
 	}
 	saveFile.write(reinterpret_cast<char*> (&data->money), sizeof(int));
 	saveFile.write(reinterpret_cast<char*> (&data->fame), sizeof(int));
