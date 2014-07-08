@@ -1,31 +1,27 @@
 #pragma once
-
 #include "State.h"
-#include "Text.h"
 #include "Button.h"
 #include "Sprite.h"
 #include "Language.h"
-#include "OptionsState.h"
-#include "StageState.h"
+#include "StateData.h"
 #include "Sound.h"
 
-class PauseState : public State
-{
+class OptionsState : public State {
 public:
-	PauseState();
-	~PauseState();
+	OptionsState();
+	~OptionsState();
 	void Update(float dt);
 	void Render();
-
 private:
 	void Input();
-
+	int ind1;
 	Text text;
-	Button resumeButton;
-	Button saveButton;
-	Button optionsButton;
-	Button quitButton;
+	Button resButton;
+	Button fsButton;
+	Button langButton;
+	Button backButton;
 	Sprite bg;
+	string add1, add2;
 	Sound click;
 };
 

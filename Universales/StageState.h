@@ -20,8 +20,7 @@
 #include "CharacterSheet.h"
 #include "Object.h"
 #include "Sheet.h"
-#include "ObjectSheet.h"
-#include "RoomSheet.h"
+#include "Music.h"
 
 enum Action{
 
@@ -48,16 +47,19 @@ public:
 	void DestroyRoom(int roomID);
 	void CreateCharacter(int x, int y);
 	void DestroyCharacter(int id);
-	vector<int> PathAStar(int posX, int posY, Point door, vector<int> heuristic);
+	vector<int> PathAStar(int posX, int posY, int roomId);
 	void SelectCharacter();
+	void Load();
+	void Save();
+	static StageState *instance;
+	Music music;
+	int cMusic;
+	Sound click;
 
 private:
 	void Input();
 	void ParseObject(vector<string> objList);
-	void ParseRoom(vector<string> roomList);
-
-
-	Sprite bg, okTile, noTile;
+	Sprite bg;
 	MultiTileSet tileSet;
 	TileMap tileMap;
 	Action action;
@@ -65,24 +67,23 @@ private:
 	Point p;
 	Point ptile;
 	RoomType rType;
-	string charRoom;
+	RoomType charRoom;
 	vector<unique_ptr<Room>> roomArray;
 	vector<int> obstacleMap;
 	unordered_map<int, vector<int>> heuristicsArray;
-	unordered_map<string, vector<string>> objList, roomList;
 	
 	Timer creationTimer;
 	GUI gui;
 	GUI subGuiEdit;
 	Text moneyText;
+	Text costText;
 	OccupancyMap occupancyMap;
-	string charChoice;
+	Choice charChoice;
 	CharacterSheet sheet;
-	ObjectSheet objSheet;
-	RoomSheet roomSheet;
 	Sheet buySheet;
-	int selectedObject, selectedCharacter;
-	RoomAttributes roomAttributes;
+	int selectedObject;
+
+	static vector<string> musicNames;
 };
 
 #endif

@@ -2,7 +2,7 @@
 #include "Camera.h"
 #include "Wall.h"
 
-Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject> > *objectArray, int RoomCount, RoomAttributes attributes) : tileSp("img/tileset/tile_tatami.png"), tileMap(*tileMap){
+Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject> > *objectArray, int RoomCount, RoomType type) : tileSp("img/tileset/tile_tatami.png"), tileMap(*tileMap){
 
 	Point tile;
     begin = lBegin;
@@ -10,10 +10,24 @@ Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObj
     string file;
     door = Point(end.x, begin.y+2);
     RoomID = RoomCount+1;
-	this->attributes = attributes;
-	tileSp.Open(this->attributes.tileSprite);
+	roomType = type;
+	switch (roomType)
+	{
+	case CORRIDOR:
+		tileSp.Open("img/tileset/fundo_espaco.png");
+		break;
+	case SAMURAI:
+		break;
+	case PIRATE:
+		tileSp.Open("img/tileset/tile_madeira.png");
+		break;
+	case STEAM:
+		break;
+	default:
+		break;
+	}
 
-	file = "img/wall_corner_upper.png";
+    file = "img/wall_corner_upper.png";
     Point pos(begin.x,begin.y);
 	tile = pos;
     pos = tileMap->GetTileCenter(pos);
@@ -41,6 +55,9 @@ Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObj
     pos = tileMap->GetTileCenter(pos);
 	wall = new Wall(pos.x, pos.y, file, INF_CORNER, tile, RoomID);
     objectArray->emplace_back(wall);
+
+	int size = (abs(end.x - begin.x) + 1)*(abs(end.y - begin.y) + 1);
+	cost = size * 5;
 
 
     file = "img/wall_2.png";
@@ -260,6 +277,14 @@ Point Room::GetDoor(){
 	return door;
 }
 
-string Room::GetState(){
-	return attributes.type;
+RoomType Room::GetState(){
+	return roomType;
+}
+
+void Room::Save(ofstream &file){
+	cout << RoomID << endl;
+	file.write(reinterpret_cast<char*> (&begin), sizeof(begin));
+	file.write(reinterpret_cast<char*> (&end), sizeof(end));
+	file.write(reinterpret_cast<char*> (&roomType), sizeof(RoomType));
+	file.write(reinterpret_cast<char*> (&door), sizeof(Point));
 }

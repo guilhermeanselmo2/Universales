@@ -15,25 +15,18 @@ enum RoomType{
 	STEAM,
 };
 
-struct RoomAttributes{
-	string type;
-	int cost;
-	string tileSprite;
-	string description;
-};
-
 class Room{
 public:
 	enum RoomState{
 		NONE = 0,
 		EDITING
 	};
-	Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject>> *objectArray, int roomCount, RoomAttributes attributes);
+    Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject>> *objectArray, int roomCount, RoomType type);
     void Update(float dt);
     void Render(TileMap *tileMap);
 	void EditRoom(bool editing);
     int GetID();
-	string GetState();
+	RoomType GetState();
     bool IsInside(float x, float y);
     bool IsInside(Point tile);
     bool Is(string type);
@@ -41,6 +34,8 @@ public:
 	RoomState roomState;
 	Point GetDoor();
 	Timer editTimer;
+	int cost;
+	void Save(ofstream &file);
 
 private:
 	TileMap tileMap;
@@ -50,7 +45,7 @@ private:
     Point end;
     Point door;
     int RoomID;
-	RoomAttributes attributes;
+	RoomType roomType;
     SelectionBox floor;
     vector<unique_ptr<GameObject>> wallArray;
 };

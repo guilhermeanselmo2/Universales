@@ -25,10 +25,10 @@ bool State::RequestedQuit() {
 
 void State::UpdateArray(float dt, TileMap *tileMap) {
 	for (int i = objectArray.size() - 1; i >= 0; --i) {
-		objectArray[i]->Update(dt, &objectArray);
+		objectArray[i]->Update(dt);
 	}
 	for(int i = 0; i < objectArray.size(); i++){
-        objectArray[i]->Update(dt, &objectArray);
+        objectArray[i]->Update(dt);
         Point p(objectArray[i]->box.x,objectArray[i]->box.y+objectArray[i]->box.h);
         if(objectArray[i]->Is("Wall")){
             p.SetPoint(p.x + tileMap->GetTileWidth()/2,p.y-tileMap->GetTileHeight()/4);
