@@ -1056,18 +1056,7 @@ void StageState::Load(){
 	int size = 0;
 	loadFile.read(reinterpret_cast<char*> (&size), sizeof(int));
 	for (int p = 0; p < size; p++){
-<<<<<<< HEAD
-		Point begin, end;
-		loadFile.read(reinterpret_cast<char*> (&begin), sizeof(Point));
-		loadFile.read(reinterpret_cast<char*> (&end), sizeof(Point));
-		RoomAttributes attributes;
-		loadFile.read(reinterpret_cast<char*> (&attributes), sizeof(RoomAttributes));
-		Point door;
-		loadFile.read(reinterpret_cast<char*> (&door), sizeof(Point));
-		Room *room = new Room(begin, end, &tileMap, &objectArray, roomArray.size(),attributes);
-=======
 		Room *room = new Room(loadFile,&tileMap,&objectArray,roomArray.size());
->>>>>>> b4f62f26bc4c9ad9e39c1597132de7a73436f001
 		roomArray.emplace_back(room);
 
 	}
