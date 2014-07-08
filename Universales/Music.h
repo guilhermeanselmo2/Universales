@@ -17,10 +17,6 @@ private:
 public:
 	Music();
 	Music(string file);
-	void SetVolume(int vol);
-	static void musicFinished();
-	bool isOver;
-	static bool isOverInd;
 	void Play(int times);
 	void Stop();
 	void Open(string file);

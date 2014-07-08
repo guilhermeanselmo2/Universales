@@ -36,7 +36,7 @@ void Sprite::Update(float dt) {
 	if (frameCount == 1)
 		SetClip(0, 0, clipRect.w, clipRect.h);
 	if (frameTime == -1)
-		SetClip(0, 0, clipRect.w, clipRect.h);
+		SetClip(0, clipRect.h*currentHeight, clipRect.w, clipRect.h);
 }
 
 void Sprite::SetFrame(int frame) {

@@ -36,19 +36,10 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Minio.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Minion.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MultiTileSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Music.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Penguins.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Point.cpp">
@@ -135,10 +126,10 @@
     <ClCompile Include="Sheet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OptionsState.cpp">
+    <ClCompile Include="ObjectSheet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Language.cpp">
+    <ClCompile Include="RoomSheet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -174,9 +165,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Music.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Penguins.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Point.h">
@@ -269,10 +257,10 @@
     <ClInclude Include="Sheet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OptionsState.h">
+    <ClInclude Include="ObjectSheet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Language.h">
+    <ClInclude Include="RoomSheet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

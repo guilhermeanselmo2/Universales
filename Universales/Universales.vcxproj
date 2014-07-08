@@ -24,21 +24,18 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GUI.cpp" />
     <ClCompile Include="InputManager.cpp" />
-    <ClCompile Include="Language.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Minio.cpp" />
-    <ClCompile Include="Minion.cpp" />
     <ClCompile Include="MultiTileSet.cpp" />
     <ClCompile Include="Music.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="ObjectSheet.cpp" />
     <ClCompile Include="OccupancyMap.cpp" />
-    <ClCompile Include="OptionsState.cpp" />
     <ClCompile Include="PauseState.cpp" />
-    <ClCompile Include="Penguins.cpp" />
     <ClCompile Include="Permonkey.cpp" />
     <ClCompile Include="Point.cpp" />
     <ClCompile Include="Rect.cpp" />
     <ClCompile Include="Room.cpp" />
+    <ClCompile Include="RoomSheet.cpp" />
     <ClCompile Include="SelectionBox.cpp" />
     <ClCompile Include="Sheet.cpp" />
     <ClCompile Include="Sound.cpp" />
@@ -70,20 +67,19 @@
     <ClInclude Include="Header.h" />
     <ClInclude Include="Header1.h" />
     <ClInclude Include="InputManager.h" />
-    <ClInclude Include="Language.h" />
     <ClInclude Include="Minio.h" />
     <ClInclude Include="Minion.h" />
     <ClInclude Include="MultiTileSet.h" />
     <ClInclude Include="Music.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="ObjectSheet.h" />
     <ClInclude Include="OccupancyMap.h" />
-    <ClInclude Include="OptionsState.h" />
     <ClInclude Include="PauseState.h" />
-    <ClInclude Include="Penguins.h" />
     <ClInclude Include="Permonkey.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="Rect.h" />
     <ClInclude Include="Room.h" />
+    <ClInclude Include="RoomSheet.h" />
     <ClInclude Include="SelectionBox.h" />
     <ClInclude Include="Sheet.h" />
     <ClInclude Include="Sound.h" />
@@ -128,7 +124,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -136,6 +134,7 @@
       <AdditionalIncludeDirectories>"C:\SDL2-2.0.3\include"</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

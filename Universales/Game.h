@@ -12,8 +12,6 @@
 #include <memory>
 #include <ctime>
 #include <cstdlib>
-#include "Language.h"
-#include "StateData.h"
 
 using std::cout;
 using std::string;
@@ -33,6 +31,7 @@ private:
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	std::stack < std::unique_ptr<State>> stateStack;
+
 public:
 	static Game& GetInstance();
 	static State& GetCurrentState();
@@ -42,7 +41,6 @@ public:
 	void Run();
 	Game(string title, int width, int height);
 	~Game();
-	int resIndReal;
 
 };
 
