@@ -1,0 +1,108 @@
+#include "TitleState.h"
+#include "StageState.h"
+#include "InputManager.h"
+#include "Game.h"
+
+TitleState::TitleState() :bg("img/fundo_espaco.png"),
+<<<<<<< .merge_file_a05488
+text("font/LCALLIG.TTF", 40, Text::TEXT_BLENDED, "Cultura Univer$ales", WHITE, 100),
+startButton(Language::base[0].c_str(), 30, StateData::resolution[StateData::resInd].x/2, 280),
+optionsButton(Language::base[1].c_str(), 30, StateData::resolution[StateData::resInd].x / 2, 350),
+loadButton(Language::base[2].c_str(), 30, StateData::resolution[StateData::resInd].x / 2, 420),
+quitButton(Language::base[3].c_str(), 30, StateData::resolution[StateData::resInd].x / 2, 490),
+music("music/tela_inicial.ogg"),
+press("music/click_interface.wav"){
+	text.SetPos(StateData::resolution[StateData::resInd].x / 2, 60, true, true);
+	music.Play(-1);
+=======
+text("font/LCALLIG.TTF", 40, Text::TEXT_BLENDED, "Cultura Univer$ale", WHITE, 100),
+startButton("start", 30, 512, 300),
+optionsButton("options", 30, 512, 370),
+quitButton("quit", 30, 512, 440){
+	text.SetPos(512, 60, true, true);
+
+>>>>>>> .merge_file_a10188
+}
+
+void TitleState::Update(float dt){
+	Input();
+<<<<<<< .merge_file_a05488
+	int x = StateData::resolution[StateData::resInd].x / 2;
+	text.SetPos(x, 60, true, true);
+
+	startButton.UpdateTxt(Language::base[0].c_str());
+	startButton.UpdatePos(x, 280);
+	startButton.Update(dt);
+
+	optionsButton.UpdateTxt(Language::base[1].c_str());
+	optionsButton.UpdatePos(x,350);
+	optionsButton.Update(dt);
+
+	quitButton.UpdateTxt(Language::base[3].c_str());
+	quitButton.UpdatePos(x, 490);
+	quitButton.Update(dt);
+
+	loadButton.UpdateTxt(Language::base[2].c_str());
+	loadButton.UpdatePos(x, 420);
+	loadButton.Update(dt);
+=======
+	startButton.Update(dt);
+	optionsButton.Update(dt);
+	quitButton.Update(dt);
+>>>>>>> .merge_file_a10188
+}
+
+void TitleState::Render(){
+	bg.Render(0, 0);
+<<<<<<< .merge_file_a05488
+	bg.Render(bg.GetWidth(), 0);
+	bg.Render(0, bg.GetHeight());
+	bg.Render(bg.GetWidth(), bg.GetHeight());
+=======
+>>>>>>> .merge_file_a10188
+	text.Render();
+	startButton.Render();
+	optionsButton.Render();
+	quitButton.Render();
+<<<<<<< .merge_file_a05488
+	loadButton.Render();
+=======
+>>>>>>> .merge_file_a10188
+}
+
+void TitleState::Input(){
+
+	requestQuit = InputManager::GetInstance().ShouldQuit();
+
+	if (quitButton.pressed){
+<<<<<<< .merge_file_a05488
+		press.Play(1);
+		requestQuit = true;
+	}
+	if (loadButton.pressed){
+		press.Play(1);
+		StageState* s = new StageState();
+		s->Load();
+		Game::GetInstance().Push(s);
+		requestDelete = true;
+	}
+	if (optionsButton.pressed){
+		press.Play(1);
+		OptionsState* s = new OptionsState();
+		Game::GetInstance().Push(s);
+	}
+	if (startButton.pressed){
+		music.Stop();
+		press.Play(1);
+=======
+		requestQuit = true;
+	}
+	if (startButton.pressed){
+>>>>>>> .merge_file_a10188
+		StageState* s = new StageState();
+		Game::GetInstance().Push(s);
+		requestDelete = true;
+	}
+}
+
+

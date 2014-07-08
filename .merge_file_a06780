@@ -1,0 +1,42 @@
+#ifndef TitleStateH
+#define TitleStateH
+
+#include "State.h"
+#include "Sprite.h"
+#include "Text.h"
+#include "Timer.h"
+#include "Button.h"
+<<<<<<< .merge_file_a06780
+#include "OptionsState.h"
+#include "Language.h"
+#include "Music.h"
+#include "Sound.h"
+=======
+>>>>>>> .merge_file_a11288
+
+class TitleState : public State {
+
+private:
+	void Input();
+	Sprite bg;
+	SDL_Color cor;
+	Text text;
+<<<<<<< .merge_file_a06780
+	Sound press;
+	Music music;
+	Button startButton;
+	Button optionsButton;
+	Button quitButton;
+	Button loadButton;
+=======
+	Button startButton;
+	Button optionsButton;
+	Button quitButton;
+>>>>>>> .merge_file_a11288
+public:
+	TitleState();
+	void Update(float dt);
+	void Render();
+};
+
+#endif

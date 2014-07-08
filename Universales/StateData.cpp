@@ -2,7 +2,7 @@
 
 int StateData::langInd = 1;
 bool StateData::fullscreen = false;
-vector<Point> StateData::resolution = { Point(800, 600), Point(1024, 768), Point(1440, 960) };
+vector<Point> StateData::resolution = { Point(800, 600), Point(1024, 768), Point(1400, 800) };
 int StateData::resInd = 2;
 
 void StateData::GetSysData(){

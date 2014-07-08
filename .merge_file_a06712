@@ -1,0 +1,60 @@
+#ifndef GUI_H
+#define GUI_H
+
+#include "Sprite.h"
+#include "Rect.h"
+
+
+<<<<<<< .merge_file_a06712
+enum GuiState{
+	BASIC = 0,
+	ROOMS,
+	EDIT,
+};
+
+class GUI{
+public:
+	GUI();
+    GUI(string file1, string file2, string file3, string file4);
+	GUI(string file1, string file2);
+=======
+class GUI{
+public:
+    GUI();
+>>>>>>> .merge_file_a10328
+    ~GUI();
+    void Render();
+    void SetPosition(float x, float y);
+    void SetPosition(Point p);
+<<<<<<< .merge_file_a06712
+	void SetState(GuiState newState);
+	void SetPositionSubGUI(float x, float y);
+	void SetPositionSubGUI(Point p);
+	bool DoorIconPressed();
+	bool WallIconPressed();
+    bool BuildIconPressed();
+    bool DestroyIconPressed();
+	bool BuyIconPressed();
+	bool EditIconPressed();
+	bool PirateIconPressed();
+	bool SamuraiIconPressed();
+    bool IsInside();
+
+private:
+    Rect box, buildBox, destroyBox, buyBox, editBox, roomBox, pirateBox, samuraiBox, doorBox, wallBox;
+    Sprite buildIcon, destroyIcon, buyIcon, editIcon, pirateIcon, samuraiIcon, doorIcon, wallIcon;
+	GuiState guiState;
+=======
+    bool BuildIconPressed();
+    bool DestroyIconPressed();
+	bool BuyIconPressed();
+    bool IsInside();
+
+private:
+    Rect box, buildBox, destroyBox, buyBox;
+    Sprite buildIcon, destroyIcon, buyIcon;
+>>>>>>> .merge_file_a10328
+
+};
+
+#endif // GUI_H

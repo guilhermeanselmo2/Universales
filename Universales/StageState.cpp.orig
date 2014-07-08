@@ -1,6 +1,5 @@
 #include "StageState.h"
 #include "EndState.h"
-#include "Alien.h"
 #include "Music.h"
 #include "StateData.h"
 #include "Permonkey.h"
@@ -14,7 +13,13 @@
 
 StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet),
 moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()), sheet(PERMONKEY), subGuiEdit("img/icons/door.png", "img/icons/wall.jpg"),
-okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"){
+okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"),
+music("music/can_o do vinho.ogg"), costText("font/Deltoid-sans.ttf", 35, Text::TEXT_BLENDED, "-", RED),
+click("music/click_interface.wav"){
+	cMusic = 0;
+	music.Play(1);
+	cout << music.isOverInd << endl;
+	instance = this;
 	string file, file2, tile, line, endLine("\n"), initFile("img/tileset/");
 	FILE *tileFile, *objectFile;
 	Point roomBegin, roomEnd;
@@ -35,7 +40,6 @@ okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"){
 
 
 	bg.Open("img/fundo_espaco.png");
-	Music musica("audio/stageState.ogg");
 
 	//Room *newRoom = new Room(roomBegin, roomEnd, &tileMap, &objectArray, roomArray.size(), rType);
 	//roomArray.emplace_back(newRoom);
@@ -59,10 +63,16 @@ okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"){
             tileSet.Open(tile);
     }
 	fclose(tileFile);
-
-	objFile.open("obj/objects.txt");
-
-	
+	cout << "Aqui inicio" << endl;
+	switch (StateData::langInd){
+	case 0:
+		objFile.open("obj/pt-br-objects.txt");
+		break;
+	case 1:
+		objFile.open("obj/en-objects.txt");
+		break;
+	}
+	cout << "Aqui inicio" << endl;
 	
 
 	while (!objFile.eof()){
@@ -70,7 +80,7 @@ okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"){
 		objectList.emplace_back(file);
 	}
 
-
+	
 	for (int i = 0; i < objectList.size(); i++){
 		cout << objectList[i] << endl;
 	}
@@ -100,8 +110,8 @@ okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"){
 	objectArray.emplace_back(pM);
 
 	data = new StateData();
-	data->money = 0;
-	data->fame = 0;
+	data->money = 5000;
+	data->fame = 128;
 	moneyText.SetText(to_string(data->money));
 	moneyText.SetPos(20, 20, false, false);
 }
@@ -115,6 +125,17 @@ StageState::~StageState() {
 }
 
 void StageState::Update(float dt) {
+	if (music.isOverInd){
+		cMusic++;
+		if (cMusic == musicNames.size()){
+			cMusic = 0;
+		}
+		music.Open(musicNames[cMusic]);
+		music.Play(1);
+	}
+	
+	int size = 0;
+	int cost = 0;
 	Input();
 	creationTimer.Update(dt);
 	switch (action)	{
@@ -131,6 +152,8 @@ void StageState::Update(float dt) {
 		break;
 	case CONSTRUCT_ROOM:
 		selectionBox.Update(&tileMap);
+		size = (abs(selectionBox.end.x - selectionBox.begin.x) + 1)*(abs(selectionBox.end.y - selectionBox.begin.y) + 1);
+		cost = size * 5;
 		break;
 	case DESTROY_ROOM:
 		break;
@@ -148,7 +171,21 @@ void StageState::Update(float dt) {
 	default:
 		break;
 	}
-	UpdateArray(dt,&tileMap);
+	
+
+	for (unsigned int i = 0; i < objectArray.size(); i++) {
+		if (objectArray[i]->IsDead()) {
+			DestroyCharacter(i);
+			for (unsigned int j = 0; j < objectArray.size(); j++) {
+				if (objectArray[j]->IsCharacter()) {
+					objectArray[j]->ChangeSelection(i);
+				}
+			}
+			i--;
+		}
+	}
+
+	UpdateArray(dt, &tileMap);
 	
 	for (int i = 0; i < objectArray.size(); i++){
 
@@ -174,13 +211,16 @@ void StageState::Update(float dt) {
 					}
 				}
 			}
-			else{ 
+			else{
 				if (objectArray[i]->GetAction() == DECIDING_OBJECT){
 					int objectIndex = objectArray[i]->GetObjectIndex();
 					if (objectIndex != -1){
 						Point objective = Point(objectArray[objectIndex]->GetTile().x, objectArray[objectIndex]->GetTile().y - 1);
 						Point t = objectArray[i]->GetTile();
-						cout << "Tile : " << t.x << "," << t.y << endl;
+						cout << endl << "Debug action DO" << endl << endl;
+						cout << "X,Y : " << t.x << "," << t.y << endl;
+						cout << "Object index : " << objectIndex << endl;
+						cout << objectArray[objectIndex]->GetHeuristic(0).size() << endl;
 						vector<int> path = PathAStar(t.x, t.y, objective, objectArray[objectIndex]->GetHeuristic(0));
 						if (!path.empty())
 							objectArray[i]->AddObjective(path);
@@ -188,13 +228,34 @@ void StageState::Update(float dt) {
 							cout << "No path!!!!" << endl;
 					}
 				}
+				else{
+					if (objectArray[i]->GetAction() == EXITING){
+						cout << "Entrou exitting!!!!!!!!!!" << endl;
+						int objectIndex = objectArray[i]->GetObjectIndex();
+						if (objectIndex != -1){
+							Point objective = Point(objectArray[objectIndex]->GetTile().x, objectArray[objectIndex]->GetTile().y - 1);
+							Point t = objectArray[i]->GetTile();
+							vector<int> path = PathAStar(t.x, t.y, objective, objectArray[objectIndex]->GetHeuristic(0));
+							if (!path.empty())
+								objectArray[i]->AddObjective(path);
+							else
+								cout << "No path!!!!" << endl;
+						}
+					}
+
+				}
 			}
 		}
 	}
 	if (creationTimer.Get() > 10){
-		//CreateCharacter(5, 5);
+		CreateCharacter(5, 5);
 		creationTimer.Restart();
 	}
+	if (cost > 0)
+		costText.SetText(to_string(-cost));
+	else
+		costText.SetText(" ");
+	costText.SetPos(InputManager::GetInstance().GetMouseX() + 10, InputManager::GetInstance().GetMouseY() + 5, false, false);
 	
 }
 
@@ -292,8 +353,27 @@ void StageState::Render() {
 		objSheet.Open(objectArray[selectedCharacter]->GetTextAttributes());
 		objSheet.Render();
 	}
+
+	//Dinheiro e fama
 	
 		
+	moneyText.SetText(to_string(data->money));
+	moneyText.SetPos(20, 20, false, false);
+	moneyText.Render();
+
+	costText.Render();
+
+	if (data->fame <= 255){
+		SDL_SetRenderDrawColor(Game::GetInstance().GetRenderer(), 255 - data->fame, 0, data->fame, 255);
+	}
+	if (data->fame >= 255){
+		SDL_SetRenderDrawColor(Game::GetInstance().GetRenderer(), 255, 255, 255, 255);
+	}
+	SDL_RenderFillRect(Game::GetInstance().GetRenderer(), &fillRect);
+	int anchorx = data->fame * 100 / 255;
+	SDL_SetRenderDrawColor(Game::GetInstance().GetRenderer(), 153, 153, 0, 255);
+	fillRect = { 20 + anchorx, 68, 3, 14 };
+	SDL_RenderFillRect(Game::GetInstance().GetRenderer(), &fillRect);
 }
 
 void StageState::Input() {
@@ -335,19 +415,23 @@ void StageState::Input() {
 			break;
 		case GUI_A:
 			if(gui.BuildIconPressed()){
+				click.Play(1);
 				action = GUI_ROOM;
 				gui.SetState(ROOMS);
             }
 			else{
 				if (gui.DestroyIconPressed()){
+					click.Play(1);
 					action = DESTROY_ROOM;
 				}
 				else{
 					if (gui.BuyIconPressed()){
+						click.Play(1);
 						action = BUY;
 					}
 					else{
 						if (gui.EditIconPressed()){
+							click.Play(1);
 							subGuiEdit.SetPositionSubGUI(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
 							action = SUB_GUI_EDIT;
 							subGuiEdit.SetState(EDIT);
@@ -361,11 +445,13 @@ void StageState::Input() {
 			break;
 		case SUB_GUI_EDIT:
 			if (subGuiEdit.DoorIconPressed()){
+				click.Play(1);
 				cout << "editando porta..." << endl;
 				action = EDIT_DOOR;
 			}
 			else{
 				if (subGuiEdit.WallIconPressed()){
+					click.Play(1);
 					cout << "editando parede..." << endl;
 					action = EDIT_WALL;
 				}
@@ -409,6 +495,7 @@ void StageState::Input() {
 			asd.tileSprite = "img/tileset/tile_madeira.png";
 			asd.type = "Pirate";
 			Room *newRoom = new Room(selectionBox.begin, selectionBox.end, &tileMap, &objectArray, roomArray.size(), roomAttributes);
+			data->money -= newRoom->cost;
             roomArray.emplace_back(newRoom);
 			vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[roomArray.size() - 1]->GetDoor());
 			heuristicsArray.emplace(newRoom->GetID(),heuristc);
@@ -452,7 +539,6 @@ void StageState::Input() {
 			for (int i = 0; i < roomArray.size(); i++){
 				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 				if (roomArray[i]->IsInside(p)){
-					cout << "editando quarto: " << roomArray[i]->GetID() << endl;
 					roomArray[i]->EditRoom(true);
 					for (int j = 0; j < objectArray.size(); j++){
 						if (objectArray[j]->Is("Wall")){
@@ -483,7 +569,6 @@ void StageState::Input() {
 			for (int i = 0; i < roomArray.size(); i++){
 				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 				if (roomArray[i]->IsInside(p)){
-					cout << "editando quarto: " << roomArray[i]->GetID() << endl;
 					roomArray[i]->EditRoom(true);
 					for (int j = 0; j < objectArray.size(); j++){
 						if (objectArray[j]->Is("Wall")){
@@ -645,6 +730,8 @@ vector<int> StageState::PathAStar(int posX, int posY, Point door, vector<int> he
 		cout << "Achou : " << posX << "," << posY << endl;
 		cout << "Movements : " << movements << endl;
 	}
+	cout << endl << "A* debug:" << endl << endl;
+	cout << "X,Y : " << posX << "," << posY << endl;
 
 	while (!arrived){
 		costQueue.pop();
@@ -653,6 +740,9 @@ vector<int> StageState::PathAStar(int posX, int posY, Point door, vector<int> he
 		//Up Right
 		posY--;
 		index = posY*tileMap.GetWidth() + posX;
+		
+		cout << "Index : " << index << endl;
+		cout << "ObMap size : " << obstacleMap.size() << endl;
 		if (allPaths.find(index) == allPaths.end() && posX >= 0 && posY >= 0 && obstacleMap[index] != -1 && posY < 25 && posX < 25){
 			cost = heuristic[index] + movements;
 			posCost.SetPoint(index, movements, cost);
@@ -737,8 +827,9 @@ vector<int> StageState::PathAStar(int posX, int posY, Point door, vector<int> he
 
 void StageState::CreateCharacter(int x, int y){
 	Point tile(x, y);
+	Point tiles = tile;
 	tile = tileMap.GetTileCenter(tile);
-	Permonkey* pM = new Permonkey(tile.x, tile.y, tile, tileMap, objList);
+	Permonkey* pM = new Permonkey(tile.x, tile.y, tiles, tileMap, objList);
 	objectArray.emplace_back(pM);
 }
 
@@ -758,7 +849,7 @@ void StageState::SelectCharacter(){
 				sheet.SetMoney(to_string(objectArray[i]->money));
 				sheet.SetRender(true);
 				objSheet.SetRender(false);
-				cout << "Character is : " << objectArray[i]->hunger << endl;
+
 				break;
 			}
 		}
@@ -783,7 +874,6 @@ void StageState::ParseObject(vector<string> objList){
 	unordered_map<string, unordered_map<string, Attributes>> typeList;
 	for (int i = 0; i < objList.size(); i++){
 		objectFile.open(objList[i]);
-		cout << "New object : " << objList[i] << "." << endl;
 		counter = 0;
 		while (!objectFile.eof()){
 			getline(objectFile, attribute);
@@ -846,7 +936,7 @@ void StageState::ParseObject(vector<string> objList){
 			}
 		}
 		objectFile.close();
-		for (int j = 1; j <= counter; j++){
+		/*for (int j = 1; j <= counter; j++){
 			switch (j){
 			case 1:
 				cout << "name: " << attributes.name << endl;
@@ -890,7 +980,7 @@ void StageState::ParseObject(vector<string> objList){
 				break;
 			}
 		}
-		cout << endl;
+		cout << endl;*/
 		list.emplace(attributes.name, attributes);
 		typeList[attributes.type].emplace(attributes.name, attributes);
 		this->objList[attributes.type].emplace_back(attributes.name);
@@ -908,9 +998,8 @@ void StageState::ParseRoom(vector<string> roomList){
 	int counter;
 	unordered_map<string, RoomAttributes> list;
 	unordered_map<string, unordered_map<string, RoomAttributes>> typeList;
-	for (int i = 0; i < objList.size(); i++){
+	for (int i = 0; i < roomList.size(); i++){
 		roomFile.open(roomList[i]);
-		cout << "New room : " << roomList[i] << "." << endl;
 		counter = 0;
 		while (!roomFile.eof()){
 			getline(roomFile, attribute);
@@ -935,7 +1024,7 @@ void StageState::ParseRoom(vector<string> roomList){
 		}
 		
 		roomFile.close();
-		for (int j = 1; j <= counter; j++){
+		/*for (int j = 1; j <= counter; j++){
 			switch (j){
 			case 1:
 				cout << "name: " << attributes.type << endl;
@@ -948,7 +1037,7 @@ void StageState::ParseRoom(vector<string> roomList){
 				break;
 			}
 		}
-		cout << endl;
+		cout << endl;*/
 		list.emplace(attributes.type, attributes);
 		typeList[attributes.type].emplace(attributes.type, attributes);
 		this->roomList[attributes.type].emplace_back(attributes.type);
@@ -958,3 +1047,81 @@ void StageState::ParseRoom(vector<string> roomList){
 	roomSheet.SetRoomList(list);
 
 }
+void StageState::Load(){
+	objectArray.clear();
+	//unico jeito até o momento em que o 'save' não implica em crash.
+
+	ifstream loadFile("save.bin", ios::in | ios::binary);
+
+	int size = 0;
+	loadFile.read(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < size; p++){
+		Point begin, end;
+		loadFile.read(reinterpret_cast<char*> (&begin), sizeof(Point));
+		loadFile.read(reinterpret_cast<char*> (&end), sizeof(Point));
+		RoomAttributes attributes;
+		loadFile.read(reinterpret_cast<char*> (&attributes), sizeof(RoomAttributes));
+		Point door;
+		loadFile.read(reinterpret_cast<char*> (&door), sizeof(Point));
+		Room *room = new Room(loadFile,&tileMap,&objectArray,roomArray.size());
+		roomArray.emplace_back(room);
+
+	}
+	cout << "Saiu p" << endl;
+	//---------------------------------------------------------
+	loadFile.read(reinterpret_cast<char*> (&size), sizeof(int));
+	obstacleMap.resize(size);
+	for (int p = 0; p < size; p++){
+		loadFile.read(reinterpret_cast<char*> (&obstacleMap[p]), sizeof(int));
+	}
+	//---------------------------------------------------------
+	loadFile.read(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < size; p++){
+		char tipo[15];
+		loadFile.read(reinterpret_cast<char*> (&tipo), sizeof(tipo));
+		string type(tipo);
+		cout << type << endl;
+		if (type == "PerMonkey"){
+			Permonkey *pm = new Permonkey(loadFile, tileMap, objList);
+			objectArray.emplace_back(pm);
+		}
+		if (type == "Object"){
+			Object *ob = new Object(loadFile, tileMap);
+			objectArray.emplace_back(ob);
+		}
+	}
+	loadFile.read(reinterpret_cast<char*> (&data->money), sizeof(int));
+	loadFile.read(reinterpret_cast<char*> (&data->fame), sizeof(int));
+	cout << "end" << endl;
+	loadFile.close();
+};
+void StageState::Save(){
+	ofstream saveFile("save.bin", ios::out | ios::binary);
+
+	int size = roomArray.size();
+	saveFile.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < roomArray.size(); p++){
+		roomArray[p]->Save(saveFile);
+	}
+
+	size = obstacleMap.size();
+	saveFile.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < size; p++){
+		saveFile.write(reinterpret_cast<char*> (&obstacleMap[p]), sizeof(int));
+	}
+	size = objectArray.size();
+	saveFile.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < size; p++){
+		//if (objectArray[p]->Type() == "PerMonkey"){
+			char tipo[15];
+			strcpy(tipo, objectArray[p]->Type().c_str());
+			saveFile.write(reinterpret_cast<char*> (&tipo), sizeof(tipo));
+			objectArray[p]->Save(saveFile);
+		//}
+	}
+	saveFile.write(reinterpret_cast<char*> (&data->money), sizeof(int));
+	saveFile.write(reinterpret_cast<char*> (&data->fame), sizeof(int));
+	saveFile.close();
+};
+StageState *StageState::instance = nullptr;
+vector<string> StageState::musicNames = { "music/can_o do vinho.ogg", "music/feliz1.2.ogg" };

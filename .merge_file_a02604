@@ -1,0 +1,95 @@
+#include "State.h"
+#include "Collision.h"
+#include "Camera.h"
+#include "TileMap.h"
+
+
+State::State() {
+	requestDelete = false;
+	requestQuit = false;
+}
+
+State::~State() {}
+
+void State::AddObject(GameObject* object) {
+	objectArray.emplace_back(object);
+}
+
+bool State::RequestedDelete() {
+	return requestDelete;
+}
+
+bool State::RequestedQuit() {
+	return requestQuit;
+}
+
+void State::UpdateArray(float dt, TileMap *tileMap) {
+	for (int i = objectArray.size() - 1; i >= 0; --i) {
+<<<<<<< .merge_file_a02604
+		objectArray[i]->Update(dt, &objectArray);
+	}
+	for(int i = 0; i < objectArray.size(); i++){
+        objectArray[i]->Update(dt, &objectArray);
+=======
+		objectArray[i]->Update(dt);
+	}
+	for(int i = 0; i < objectArray.size(); i++){
+        objectArray[i]->Update(dt);
+>>>>>>> .merge_file_a10024
+        Point p(objectArray[i]->box.x,objectArray[i]->box.y+objectArray[i]->box.h);
+        if(objectArray[i]->Is("Wall")){
+            p.SetPoint(p.x + tileMap->GetTileWidth()/2,p.y-tileMap->GetTileHeight()/4);
+        }
+<<<<<<< .merge_file_a02604
+		p.SetPoint(p.x + tileMap->GetTileWidth() / 2, p.y - tileMap->GetTileHeight() / 4);
+=======
+>>>>>>> .merge_file_a10024
+        p = tileMap->GetTile(p.x, p.y);
+        if(objectArray[i]->Is("Wall")){
+        }
+		p.SetPoint(i,p.x,p.y);
+        renderQueue.emplace(p);
+    }
+<<<<<<< .merge_file_a02604
+	/*vector<unique_ptr<GameObject>> newObjectArray;
+	for (unsigned int i = 0; i < objectArray.size(); i++) {
+=======
+	/*for (unsigned int i = 0; i < objectArray.size(); i++) {
+>>>>>>> .merge_file_a10024
+		if (objectArray[i]->IsDead()) {
+			objectArray.erase(objectArray.begin() + i);
+			i--;
+		}
+<<<<<<< .merge_file_a02604
+		else{
+			newObjectArray.emplace_back(objectArray[i]);
+		}
+	}
+	objectArray = newObjectArray;*/
+	/*for (unsigned int i = 0; i < objectArray.size(); i++) {
+=======
+	}
+	for (unsigned int i = 0; i < objectArray.size(); i++) {
+>>>>>>> .merge_file_a10024
+		for (int k = 0; k < objectArray.size(); k++) {
+			if (Collision::IsColliding(objectArray[i]->box, objectArray[k]->box, objectArray[i]->rotation, objectArray[k]->rotation)) {
+				objectArray[i]->NotifyCollision(*objectArray[k]);
+				objectArray[k]->NotifyCollision(*objectArray[i]);
+				break;
+			}
+		}
+	}*/
+}
+
+void State::RenderArray() {
+	/*for (unsigned int i = 0; i < objectArray.size(); i++) {
+		objectArray[i]->Render((int)Camera::pos.GetXpoint(), (int)Camera::pos.GetYpoint());
+	}*/
+	while (!renderQueue.empty()) {
+        //cout  << renderQueue.top().x << "," << renderQueue.top().y << "," << renderQueue.top().z << endl;
+        //cout << "Rendering "<< objectArray[renderQueue.top().x]->Type() << " at : " << renderQueue.top().y << "," << renderQueue.top().z << endl;
+        objectArray[renderQueue.top().x]->Render(0,0);
+
+        renderQueue.pop();
+    }
+}

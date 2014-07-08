@@ -1,0 +1,2 @@
+room/info/pirate.txt
+room/info/med_japan.txt
