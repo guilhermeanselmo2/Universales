@@ -1041,8 +1041,8 @@ void StageState::Load(){
 			objectArray.emplace_back(pm);
 		}
 		if (type == "Object"){
-			//Object *ob = new Object(loadFile, tileMap);
-			//objectArray.emplace_back(ob);
+			Object *ob = new Object(loadFile, tileMap);
+			objectArray.emplace_back(ob);
 		}
 	}
 	loadFile.read(reinterpret_cast<char*> (&data->money), sizeof(int));
@@ -1067,12 +1067,12 @@ void StageState::Save(){
 	size = objectArray.size();
 	saveFile.write(reinterpret_cast<char*> (&size), sizeof(int));
 	for (int p = 0; p < size; p++){
-		if (objectArray[p]->Type() == "PerMonkey"){
+		//if (objectArray[p]->Type() == "PerMonkey"){
 			char tipo[15];
 			strcpy(tipo, objectArray[p]->Type().c_str());
 			saveFile.write(reinterpret_cast<char*> (&tipo), sizeof(tipo));
 			objectArray[p]->Save(saveFile);
-		}
+		//}
 	}
 	saveFile.write(reinterpret_cast<char*> (&data->money), sizeof(int));
 	saveFile.write(reinterpret_cast<char*> (&data->fame), sizeof(int));
