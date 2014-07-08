@@ -42,13 +42,17 @@ public:
 	void AddObjective(vector<int> path);
 	bool IsCharacter();
 	string Type();
-	Choice GetChoice();
+	string GetChoice();
+	vector<string>GetTextAttributes();
 
 	vector<int> GetAttributes();
 	vector<Point> GetAccessPoints();
 
 	vector<int> CreateHeuristic(Point door);
 	vector<int> GetHeuristic(int i);
+
+	Rect GetBox();
+	Point GetTile();
 
 	//Char functions
 	int GetHunger();

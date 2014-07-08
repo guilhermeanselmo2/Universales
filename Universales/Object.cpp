@@ -216,8 +216,9 @@ string Object::Type(){
 	return type;
 }
 
-Choice Object::GetChoice(){
-	return NO_CHOICE;
+string Object::GetChoice(){
+	string a;
+	return a;
 }
 
 int Object::GetHunger(){
@@ -251,4 +252,21 @@ vector<int> Object::GetAttributes(){
 
 vector<Point> Object::GetAccessPoints(){
 	return accessPoints;
+}
+
+vector<string> Object::GetTextAttributes(){
+	vector<string> textAttributes;
+	textAttributes.emplace_back(attributes.name);
+	textAttributes.emplace_back(attributes.description);
+	textAttributes.emplace_back(attributes.sprite);
+	textAttributes.emplace_back(to_string(attributes.cost));
+	return textAttributes;
+}
+
+Rect Object::GetBox(){
+	return box;
+}
+
+Point Object::GetTile(){
+	return tile;
 }

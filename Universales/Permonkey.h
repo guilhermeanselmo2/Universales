@@ -9,9 +9,10 @@
 #include <queue>
 
 
+
 class Permonkey : public GameObject{
 public:
-    Permonkey(float x, float y, Point lTile, TileMap tileMap);
+	Permonkey(float x, float y, Point lTile, TileMap tileMap, unordered_map<string, vector<string>> objList);
     ~Permonkey();
 	void Update(float dt, vector<unique_ptr<GameObject>> *objectArray);
     void Render(int cameraX, int cameraY);
@@ -31,11 +32,15 @@ public:
 	void MakeChoice();
 	int GetHunger();
 	void SetHunger(int hunger);
-	Choice GetChoice();
+	string GetChoice();
 	int SearchObject(vector<unique_ptr<GameObject>> *objectArray);
 	ActionCharacter GetAction();
 	int GetObjectIndex();
 	void UseObject(vector<unique_ptr<GameObject>> *objectArray, int index);
+	void Classify(unordered_map<string, vector<string>> objList);
+	Rect GetBox();
+	Point GetTile();
+	void ChooseGoals();
 	
 	//Object functions
 	void MoveTo(int x, int y);
@@ -43,6 +48,8 @@ public:
 	vector<int> GetHeuristic(int i);
 	vector<int> GetAttributes();
 	vector<Point> GetAccessPoints();
+	vector<string>GetTextAttributes();
+	vector<pair<string,string>> preferredObjects, otherObjects;
     
 
 private:
@@ -63,6 +70,9 @@ private:
 	Choice choice, state;
 	Timer timer, rest;
 	bool arrived, found, inRoom;
+	string preference, roomChoice;
+	vector<pair<string,string>> goals;
+	int actualGoal;
 
 };
 

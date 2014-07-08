@@ -20,6 +20,8 @@
 #include "CharacterSheet.h"
 #include "Object.h"
 #include "Sheet.h"
+#include "ObjectSheet.h"
+#include "RoomSheet.h"
 
 enum Action{
 
@@ -52,6 +54,9 @@ public:
 private:
 	void Input();
 	void ParseObject(vector<string> objList);
+	void ParseRoom(vector<string> roomList);
+
+
 	Sprite bg, okTile, noTile;
 	MultiTileSet tileSet;
 	TileMap tileMap;
@@ -60,20 +65,24 @@ private:
 	Point p;
 	Point ptile;
 	RoomType rType;
-	RoomType charRoom;
+	string charRoom;
 	vector<unique_ptr<Room>> roomArray;
 	vector<int> obstacleMap;
 	unordered_map<int, vector<int>> heuristicsArray;
+	unordered_map<string, vector<string>> objList, roomList;
 	
 	Timer creationTimer;
 	GUI gui;
 	GUI subGuiEdit;
 	Text moneyText;
 	OccupancyMap occupancyMap;
-	Choice charChoice;
+	string charChoice;
 	CharacterSheet sheet;
+	ObjectSheet objSheet;
+	RoomSheet roomSheet;
 	Sheet buySheet;
 	int selectedObject, selectedCharacter;
+	RoomAttributes roomAttributes;
 };
 
 #endif

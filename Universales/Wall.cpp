@@ -112,8 +112,8 @@ void Wall::SetHunger(int hunger){
 	
 }
 
-Choice Wall::GetChoice(){
-	Choice a = NO_CHOICE;
+string Wall::GetChoice(){
+	string a;
 	return a;
 }
 
@@ -172,4 +172,17 @@ void Wall::UseObject(vector<unique_ptr<GameObject>> *objectArray, int index){
 vector<Point> Wall::GetAccessPoints(){
 	vector<Point> a;
 	return a;
+}
+
+vector<string> Wall::GetTextAttributes(){
+	vector<string> a;
+	return a;
+}
+
+Rect Wall::GetBox(){
+	return box;
+}
+
+Point Wall::GetTile(){
+	return tile;
 }

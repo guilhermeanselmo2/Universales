@@ -12,3 +12,4 @@ Satisfaction:0.3
 Money:0
 Path:img/obj/cannonBalls.png
 Description:Uuhh, shiny!
+Access:1111

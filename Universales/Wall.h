@@ -33,7 +33,8 @@ public:
     string Type();
 	void AddObjective(float x, float y, Point tile);
 	void AddObjective(vector<int> path);
-	Choice GetChoice();
+	string GetChoice();
+	Point GetTile();
 
 	//Non Wall functions
 	void SetHunger(int hunger);
@@ -46,6 +47,8 @@ public:
 	void UseObject(vector<unique_ptr<GameObject>> *objectArray, int index);
 	vector<int> GetAttributes();
 	vector<Point> GetAccessPoints();
+	vector<string>GetTextAttributes();
+	Rect GetBox();
 
 private:
 	Timer editTimer;

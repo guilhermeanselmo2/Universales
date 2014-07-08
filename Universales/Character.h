@@ -12,6 +12,7 @@ enum ActionCharacter{
 	DECIDING_ROOM,
 	DECIDING_OBJECT,
 	USING_OBJECT,
+	EXITING,
 };
 
 class Character {

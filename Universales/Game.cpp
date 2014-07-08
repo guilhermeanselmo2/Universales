@@ -1,5 +1,4 @@
 #include "Game.h"
-#include "Penguins.h"
 #include <stdio.h>
 #include <cstring>
 #include "Collision.h"
@@ -29,8 +28,6 @@ void Game::Run() {
 	storedState = NULL;
 
 	while (!stateStack.top()->RequestedQuit()) {
-		if (Penguins::player == NULL)
-			Camera::Unfollow();
 		CalculateDeltaTime();
 		if (stateStack.top()->RequestedDelete()) {
 			stateStack.pop();

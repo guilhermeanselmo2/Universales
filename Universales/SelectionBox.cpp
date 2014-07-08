@@ -77,3 +77,7 @@ void SelectionBox::SetBegin(Point pos){
     begin.x = pos.x;
     begin.y = pos.y;
 }
+
+void SelectionBox::SetSprite(string path){
+	sp.Open(path);
+}

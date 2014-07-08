@@ -1,7 +1,8 @@
 #include "Permonkey.h"
 #include "Camera.h"
+#include "Object.h"
 
-Permonkey::Permonkey(float x, float y, Point lTile, TileMap tileMap) : character("img/permacaco_anim_ss.png", 4, -1, 4), tileMap(tileMap) {
+Permonkey::Permonkey(float x, float y, Point lTile, TileMap tileMap, unordered_map<string, vector<string>> objList) : character("img/permacaco_anim_ss.png", 4, -1, 4), tileMap(tileMap) {
     box = Rect(x-character.GetWidth()/2,y-character.GetHeight(), character.GetWidth(), character.GetHeight());
 	rotation = 0;
 	roomID = 0;
@@ -9,7 +10,7 @@ Permonkey::Permonkey(float x, float y, Point lTile, TileMap tileMap) : character
 	objective.x = 994;
 	objective.y = 470;
 	tile = lTile;
-	actionCharacter = DECIDING_ROOM;
+	actionCharacter = RESTING;
 	choice = NO_CHOICE;
 	timer.Restart();
 	rest.Restart();
@@ -18,6 +19,12 @@ Permonkey::Permonkey(float x, float y, Point lTile, TileMap tileMap) : character
 	money = rand()%900+101;
 	found = true;
 	satisfaction = 50;
+
+	preference = "Pirate";
+	roomChoice = "";
+	actualGoal = 0;
+
+	Classify(objList);
 
 	objectSelect = -1;
 	
@@ -76,12 +83,15 @@ void Permonkey::Update(float dt, vector<unique_ptr<GameObject>> *objectArray){
 			found = true;
 		}
 		break;
+	case EXITING:
+		cout << "Bye!!" << endl;
 	}
+	cout << "Action : " << actionCharacter << endl;
 	//tile = tileMap.GetTile(box.x+box.w/2, box.y+box.y);
 }
 
-Choice Permonkey::GetChoice(){
-	return choice;
+string Permonkey::GetChoice(){
+	return goals[actualGoal].first;
 }
 
 void Permonkey::Render(int cameraX, int cameraY){
@@ -288,13 +298,28 @@ void Permonkey::Move(float dt){
 }
 
 void Permonkey::MakeChoice(){
-	int decision = rand() % 100 + 1;
-	if (decision >= 66){
-		choice = PIRATE_C;
-	}else{
-		choice = SAMURAI_C;
-	}
+	bool sameRoom = false;
+	if (!goals.empty()){
+		if (roomChoice == ""){
+			roomChoice = goals[0].first;
+		}
+		else{
+			actualGoal++;
+			for (int i = actualGoal; i < goals.size(); i++){
+				if (goals[i].first == roomChoice){
+					sameRoom = true;
+					break;
+				}
+			}
+			if (sameRoom == false){
+				roomChoice = goals[actualGoal].first;
+			}
 
+		}
+	}
+	else{
+		actionCharacter = EXITING;
+	}
 }
 
 bool Permonkey::SettlePos(vector<int> obstacleMap){
@@ -307,11 +332,19 @@ void Permonkey::MoveTo(int x, int y){
 
 int Permonkey::SearchObject(vector<unique_ptr<GameObject>> *objectArray){
 	found = false;
+	if (goals.empty()){
+		actionCharacter = EXITING;
+	}
+	else{
+		cout << "Searching : " << goals.size() << endl;
+	}
 	int object = -1;
 	for (int i = 0; i < objectArray->size(); i++){
 		if (objectArray->at(i)->Is("Object")){
-			cout << "Object = " << i << endl;
-			object =  i;
+			if (objectArray->at(i)->GetTextAttributes()[0] == goals[actualGoal].second){
+				cout << "Object = " << i << endl;
+				object = i;
+			}
 		}
 	}
 	objectSelect = object;
@@ -339,12 +372,22 @@ vector<int> Permonkey::GetAttributes(){
 
 void Permonkey::UseObject(vector<unique_ptr<GameObject>> *objectArray, int index){
 	cout << "Index : " << index << endl;
+	vector<pair<string, string>> newGoals;
 	if (index >= 0){
 		vector<int> activeAttributes = objectArray->at(index)->GetAttributes();
 		hunger -= activeAttributes[0];
 		money -= activeAttributes[1];
 		satisfaction += activeAttributes[2];
 		objectSelect = -1;
+		goals[actualGoal].first = "";
+		for (int i = 0; i < goals.size(); i++){
+			if (goals[i].first != ""){
+				newGoals.emplace_back(goals[i]);
+			}
+		}
+		goals = newGoals;
+		cout << "New Size : " << goals.size() << endl;
+
 	}
 	else{
 		cout << "ERROR: Permonkey UseObject method: Index is less than 0" << endl;
@@ -354,4 +397,74 @@ void Permonkey::UseObject(vector<unique_ptr<GameObject>> *objectArray, int index
 vector<Point> Permonkey::GetAccessPoints(){
 	vector<Point> a;
 	return a;
+}
+
+vector<string> Permonkey::GetTextAttributes(){
+	vector<string> a;
+	return a;
+}
+
+Rect Permonkey::GetBox(){
+	return box;
+}
+
+void Permonkey::Classify(unordered_map<string, vector<string>> objList){
+	pair<string, string> nameType;
+
+	for (auto i = objList.begin(); i != objList.end(); ++i){
+		for (int j = 0; j < i->second.size(); j++){
+			if (i->first == preference){
+				nameType.first = i->first;
+				nameType.second = i->second[j];
+				preferredObjects.emplace_back(nameType);
+			}
+			else{
+				nameType.first = i->first;
+				nameType.second = i->second[j];
+				otherObjects.emplace_back(nameType);
+			}
+		}
+	}
+	for (int i = 0; i < 3; i++)
+		ChooseGoals();
+	for (int i = 0; i < goals.size(); i++){
+		//cout << goals[i].first << " : " << goals[i].second << endl;
+	}
+}
+
+void Permonkey::ChooseGoals(){
+	int typeChoice = rand() % 101;
+	int objChoice;
+	vector<pair<string, string>> newVector;
+	
+	if (typeChoice <= 60 && preferredObjects.size()>0){
+		objChoice = rand() % preferredObjects.size();
+		goals.emplace_back(preferredObjects[objChoice]);
+		preferredObjects[objChoice].first = "";
+		for (int i = 0; i < preferredObjects.size(); i++){
+			if (preferredObjects[i].first != "")
+				newVector.emplace_back(preferredObjects[i]);
+		}
+		preferredObjects = newVector;
+		
+	}
+	else{
+		if (otherObjects.size() > 0){
+			cout << "Entrou other" << otherObjects.size() << endl;
+			objChoice = rand() % otherObjects.size();
+			goals.emplace_back(otherObjects[objChoice]);
+			otherObjects[objChoice].first = "";
+			otherObjects.shrink_to_fit();
+
+			for (int i = 0; i < otherObjects.size(); i++){
+				if (otherObjects[i].first != "")
+					newVector.emplace_back(otherObjects[i]);
+			}
+			otherObjects = newVector;
+		}
+	}
+}
+
+Point Permonkey::GetTile(){
+	return tile;
 }

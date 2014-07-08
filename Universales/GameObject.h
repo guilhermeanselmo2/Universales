@@ -35,13 +35,16 @@ public:
 	virtual void AddObjective(vector<int> path) = 0;
 	virtual bool IsCharacter() = 0;
 	virtual string Type() = 0;
-	virtual Choice GetChoice() = 0;
+	virtual string GetChoice() = 0;
 	virtual ActionCharacter GetAction() = 0;
 	virtual int GetObjectIndex() = 0;
 	virtual void UseObject(vector<unique_ptr<GameObject>> *objectArray, int index) = 0;
+	virtual Rect GetBox() = 0;
+	virtual Point GetTile() = 0;
 
 	//For object only
 	virtual bool SettlePos(vector<int> obstacleMap) = 0;
+	virtual vector<string>GetTextAttributes()=0;
 
 	//Only way to make it work
 	virtual int GetHunger() = 0;
