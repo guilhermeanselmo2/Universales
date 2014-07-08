@@ -47,7 +47,7 @@ void Game::Run() {
 		}
 
 		if (resIndReal != StateData::resInd){
-			SDL_SetWindowSize(window, 1400, 800);
+			SDL_SetWindowSize(window, StateData::resolution[StateData::resInd].x, StateData::resolution[StateData::resInd].y);
 			resIndReal = StateData::resInd;
 			if (StateData::fullscreen){
 				//não funciona fora da gambiarra.
@@ -111,7 +111,7 @@ Game::Game(string title, int width, int height) {
 	TTF_Init();
 
 	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-		1400, 800, 0);
+		StateData::resolution[StateData::resInd].x, StateData::resolution[StateData::resInd].y, 0);
 	//SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
 
 

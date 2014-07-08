@@ -29,6 +29,7 @@ public:
 		EDITING
 	};
 	Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject>> *objectArray, int roomCount, RoomAttributes attributes);
+	Room(ifstream &readFile, TileMap *tileMap, vector<unique_ptr<GameObject>> *objectArray, int RoomCount);
     void Update(float dt);
     void Render(TileMap *tileMap);
 	void EditRoom(bool editing);

@@ -1,3 +1,0 @@
-obj/info/cannonBalls.txt
-obj/info/monolith.txt
-obj/info/treasureChest.txt

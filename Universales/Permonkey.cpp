@@ -32,7 +32,8 @@ step("music/passo_et_verde.wav") {
 	
 }
 
-Permonkey::Permonkey(ifstream &file, TileMap tileMap) : character("img/permacaco_anim_ss.png", 4, -1, 4), tileMap(tileMap) {
+Permonkey::Permonkey(ifstream &file, TileMap tileMap, unordered_map<string, vector<string>> objList) : 
+character("img/permacaco_anim_ss.png", 4, -1, 4), tileMap(tileMap) {
 	file.read(reinterpret_cast<char*> (&box), sizeof(Rect));
 	file.read(reinterpret_cast<char*> (&rotation), sizeof(float));
 	file.read(reinterpret_cast<char*> (&roomID), sizeof(int));
@@ -43,7 +44,24 @@ Permonkey::Permonkey(ifstream &file, TileMap tileMap) : character("img/permacaco
 	file.read(reinterpret_cast<char*> (&choice), sizeof(Choice));
 	file.read(reinterpret_cast<char*> (&hunger), sizeof(int));
 	file.read(reinterpret_cast<char*> (&money), sizeof(int));
+	file.read(reinterpret_cast<char*> (&found), sizeof(bool));
 	file.read(reinterpret_cast<char*> (&satisfaction), sizeof(int));
+	file.read(reinterpret_cast<char*> (&actualGoal), sizeof(int));
+	file.read(reinterpret_cast<char*> (&objectSelect), sizeof(int));
+	int size;
+	file.read(reinterpret_cast<char*> (&size), sizeof(int));
+	preference.resize(size);
+	for (int p = 0; p < preference.size(); p++){
+		file.read(reinterpret_cast<char*> (&preference[p]), sizeof(char));
+	}
+	file.read(reinterpret_cast<char*> (&size), sizeof(int));
+	roomChoice.resize(size);
+	for (int p = 0; p < roomChoice.size(); p++){
+		file.read(reinterpret_cast<char*> (&roomChoice[p]), sizeof(char));
+	}
+	file.read(reinterpret_cast<char*> (&timer), sizeof(Timer));
+	file.read(reinterpret_cast<char*> (&rest), sizeof(Timer));
+	Classify(objList);
 }
 void Permonkey::Save(ofstream &file){
 	file.write(reinterpret_cast<char*> (&box), sizeof(Rect));
@@ -56,7 +74,22 @@ void Permonkey::Save(ofstream &file){
 	file.write(reinterpret_cast<char*> (&choice), sizeof(Choice));
 	file.write(reinterpret_cast<char*> (&hunger), sizeof(int));
 	file.write(reinterpret_cast<char*> (&money), sizeof(int));
+	file.write(reinterpret_cast<char*> (&found), sizeof(bool));
 	file.write(reinterpret_cast<char*> (&satisfaction), sizeof(int));
+	file.write(reinterpret_cast<char*> (&actualGoal), sizeof(int));
+	file.write(reinterpret_cast<char*> (&objectSelect), sizeof(int));
+	int size = preference.size();
+	file.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < preference.size(); p++){
+		file.write(reinterpret_cast<char*> (&preference[p]), sizeof(char));
+	}
+	size = roomChoice.size();
+	file.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < roomChoice.size(); p++){
+		file.write(reinterpret_cast<char*> (&roomChoice[p]), sizeof(char));
+	}
+	file.write(reinterpret_cast<char*> (&timer), sizeof(Timer));
+	file.write(reinterpret_cast<char*> (&rest), sizeof(Timer));
 }
 Permonkey::~Permonkey(){
 

@@ -13,7 +13,7 @@
 class Permonkey : public GameObject{
 public:
 	Permonkey(float x, float y, Point lTile, TileMap tileMap, unordered_map<string, vector<string>> objList);
-	Permonkey(ifstream &file, TileMap tileMap);
+	Permonkey(ifstream &file, TileMap tileMap, unordered_map<string, vector<string>> objList);
     ~Permonkey();
 	void Update(float dt, vector<unique_ptr<GameObject>> *objectArray);
 	void Save(ofstream &file);
@@ -76,6 +76,7 @@ private:
 	string preference, roomChoice;
 	vector<pair<string,string>> goals;
 	int actualGoal;
+
 	Sound step;
 	float soundControl;
 

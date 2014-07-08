@@ -272,9 +272,133 @@ void Room::Save(ofstream &file){
 	cout << RoomID << endl;
 	file.write(reinterpret_cast<char*> (&begin), sizeof(begin));
 	file.write(reinterpret_cast<char*> (&end), sizeof(end));
-	file.write(reinterpret_cast<char*> (&tileMap), sizeof(TileMap));
-	file.write(reinterpret_cast<char*> (&attributes), sizeof(RoomAttributes));
 	file.write(reinterpret_cast<char*> (&door), sizeof(Point));
+
+	int size = attributes.type.size();
+	file.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < attributes.type.size(); p++){
+		file.write(reinterpret_cast<char*> (&attributes.type[p]), sizeof(char));
+	}
+	size = attributes.description.size();
+	file.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < attributes.description.size(); p++){
+		file.write(reinterpret_cast<char*> (&attributes.description[p]), sizeof(char));
+	}
+	size = attributes.tileSprite.size();
+	file.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < attributes.tileSprite.size(); p++){
+		file.write(reinterpret_cast<char*> (&attributes.tileSprite[p]), sizeof(char));
+	}
+	file.write(reinterpret_cast<char*> (&attributes.cost), sizeof(int));
+	
 	cout << "Save" << endl;
 	cout << door.x << "," << door.y << endl;
+}
+
+Room::Room(ifstream &readFile, TileMap *tileMap, vector<unique_ptr<GameObject>> *objectArray, int RoomCount){
+	this->tileMap = *tileMap;
+
+	readFile.read(reinterpret_cast<char*> (&begin), sizeof(begin));
+	readFile.read(reinterpret_cast<char*> (&end), sizeof(end));
+	readFile.read(reinterpret_cast<char*> (&door), sizeof(Point));
+	//read attributes;
+	int size;
+	readFile.read(reinterpret_cast<char*> (&size), sizeof(int));
+	attributes.type.resize(size);
+	for (int p = 0; p < attributes.type.size(); p++){
+		readFile.read(reinterpret_cast<char*> (&attributes.type[p]), sizeof(char));
+	}
+	readFile.read(reinterpret_cast<char*> (&size), sizeof(int));
+	attributes.description.resize(size);
+	for (int p = 0; p < attributes.description.size(); p++){
+		readFile.read(reinterpret_cast<char*> (&attributes.description[p]), sizeof(char));
+	}
+	readFile.read(reinterpret_cast<char*> (&size), sizeof(int));
+	attributes.tileSprite.resize(size);
+	for (int p = 0; p < attributes.tileSprite.size(); p++){
+		readFile.read(reinterpret_cast<char*> (&attributes.tileSprite[p]), sizeof(char));
+	}
+	readFile.read(reinterpret_cast<char*> (&attributes.cost), sizeof(int));
+
+	Point tile;
+	string file;
+	RoomID = RoomCount + 1;
+	tileSp.Open(this->attributes.tileSprite);
+
+	file = "img/wall_corner_upper.png";
+	Point pos(begin.x, begin.y);
+	tile = pos;
+	pos = tileMap->GetTileCenter(pos);
+	//cout << begin.x << "," << begin.y << endl;
+	Wall *wall = new Wall(pos.x, pos.y + tileMap->GetTileHeight() / 4, file, UPPER_CORNER, tile, RoomID);
+	objectArray->emplace_back(wall);
+
+	file = "img/wall_corner_left.png";
+	pos.SetPoint(begin.x, end.y);
+	tile = pos;
+	pos = tileMap->GetTileCenter(pos);
+	wall = new Wall(pos.x + tileMap->GetTileWidth() / 4, pos.y + tileMap->GetTileHeight() / 4, file, LEFT_CORNER, tile, RoomID);
+	objectArray->emplace_back(wall);
+
+	file = "img/wall_corner_right.png";
+	pos.SetPoint(end.x, begin.y);
+	tile = pos;
+	pos = tileMap->GetTileCenter(pos);
+	wall = new Wall(pos.x - tileMap->GetTileWidth() / 4, pos.y + tileMap->GetTileHeight() / 4, file, RIGHT_CORNER, tile, RoomID);
+	objectArray->emplace_back(wall);
+
+	file = "img/wall_corner_lower.png";
+	pos.SetPoint(end.x, end.y);
+	tile = pos;
+	pos = tileMap->GetTileCenter(pos);
+	wall = new Wall(pos.x, pos.y, file, INF_CORNER, tile, RoomID);
+	objectArray->emplace_back(wall);
+
+	size = (abs(end.x - begin.x) + 1)*(abs(end.y - begin.y) + 1);
+	cost = size * 5;
+
+
+	file = "img/wall_2.png";
+	for (int i = begin.x + 1; i< end.x; i++){
+		Point pos(i, begin.y);
+		tile = pos;
+		if (i != door.x || pos.y != door.y){
+			pos = tileMap->GetTileCenter(pos);
+			wall = new Wall(pos.x - tileMap->GetTileWidth() / 4, pos.y + tileMap->GetTileHeight() / 4, file, UPPER_RIGHT, tile, RoomID);
+			objectArray->emplace_back(wall);
+		}
+
+		if (i != door.x || pos.y != door.y){
+			pos.SetPoint(i, end.y);
+			tile = pos;
+			pos = tileMap->GetTileCenter(pos);
+			wall = new Wall(pos.x - tileMap->GetTileWidth() / 4, pos.y + tileMap->GetTileHeight() / 4, file, UPPER_RIGHT, tile, RoomID);
+			objectArray->emplace_back(wall);
+		}
+	}
+	/*for(int i = begin.x+1; i< end.x; i++){
+	Point pos(i,begin.y-1);
+	pos = tileMap->GetTileCenter(pos);
+	Wall *wall = new Wall(pos.x-tileMap->GetTileWidth()/4, pos.y+tileMap->GetTileHeigh()/4, file, UPPER_RIGHT);
+	objectArray->emplace_back(wall);
+	}*/
+	file = "img/wall_1.png";
+	for (int i = begin.y + 1; i< end.y; i++){
+		Point pos(begin.x, i);
+		tile = pos;
+		if (i != door.x || pos.y != door.y){
+			pos = tileMap->GetTileCenter(pos);
+			wall = new Wall(pos.x - tileMap->GetTileWidth() / 4, pos.y + tileMap->GetTileHeight() / 4, file, UPPER_LEFT, tile, RoomID);
+			objectArray->emplace_back(wall);
+		}
+
+		pos.SetPoint(end.x, i);
+		tile = pos;
+		if (((pos.x != door.x) || (pos.y != door.y))){
+			pos = tileMap->GetTileCenter(pos);
+			wall = new Wall(pos.x - tileMap->GetTileWidth() / 4, pos.y + tileMap->GetTileHeight() / 4, file, UPPER_LEFT, tile, RoomID);
+			objectArray->emplace_back(wall);
+		}
+
+	}
 }
