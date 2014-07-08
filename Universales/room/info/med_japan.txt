@@ -1,4 +1,0 @@
-Type:Japan
-TileCost:50
-Tile Sprite:img/tileset/tile_tatami.png
-Description:We shall honor our ancestors
