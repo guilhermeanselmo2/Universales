@@ -56,6 +56,10 @@ public:
 
 	virtual vector<int> GetAttributes() = 0;
 
+	virtual void ChangeSelection(int reference) = 0;
+
+
+
 	
 	//void ConvertToTile(TileMap *tileMap);
 	//void ConvertToScreen(TileMap *tileMap);

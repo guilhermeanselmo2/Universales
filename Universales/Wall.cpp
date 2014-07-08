@@ -157,6 +157,7 @@ int Wall::GetObjectIndex(){
 }
 
 vector<int> Wall::GetHeuristic(int i){
+	cout << "Wall" << endl;
 	vector<int> a;
 	return a;
 }
@@ -188,5 +189,9 @@ Point Wall::GetTile(){
 }
 
 void Wall::Save(ofstream &file){
+
+}
+
+void Wall::ChangeSelection(int reference){
 
 }

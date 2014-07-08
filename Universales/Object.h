@@ -62,6 +62,7 @@ public:
 	ActionCharacter GetAction();
 	int GetObjectIndex();
 	void UseObject(vector<unique_ptr<GameObject>> *objectArray, int index);
+	void ChangeSelection(int reference);
 
 	Sprite sp;
 	Rect box;

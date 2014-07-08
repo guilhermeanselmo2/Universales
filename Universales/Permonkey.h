@@ -44,6 +44,7 @@ public:
 	Rect GetBox();
 	Point GetTile();
 	void ChooseGoals();
+	void ChangeSelection(int reference);
 	
 	//Object functions
 	void MoveTo(int x, int y);
@@ -75,9 +76,12 @@ private:
 	bool arrived, found, inRoom;
 	string preference, roomChoice;
 	vector<pair<string,string>> goals;
+	pair<string, string> lastGoal;
 	int actualGoal;
 	Sound step;
 	float soundControl;
+	bool gone;
+
 
 };
 

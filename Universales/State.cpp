@@ -40,13 +40,18 @@ void State::UpdateArray(float dt, TileMap *tileMap) {
 		p.SetPoint(i,p.x,p.y);
         renderQueue.emplace(p);
     }
-	/*for (unsigned int i = 0; i < objectArray.size(); i++) {
+	/*vector<unique_ptr<GameObject>> newObjectArray;
+	for (unsigned int i = 0; i < objectArray.size(); i++) {
 		if (objectArray[i]->IsDead()) {
 			objectArray.erase(objectArray.begin() + i);
 			i--;
 		}
+		else{
+			newObjectArray.emplace_back(objectArray[i]);
+		}
 	}
-	for (unsigned int i = 0; i < objectArray.size(); i++) {
+	objectArray = newObjectArray;*/
+	/*for (unsigned int i = 0; i < objectArray.size(); i++) {
 		for (int k = 0; k < objectArray.size(); k++) {
 			if (Collision::IsColliding(objectArray[i]->box, objectArray[k]->box, objectArray[i]->rotation, objectArray[k]->rotation)) {
 				objectArray[i]->NotifyCollision(*objectArray[k]);

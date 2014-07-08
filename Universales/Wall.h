@@ -50,6 +50,7 @@ public:
 	vector<string>GetTextAttributes();
 	Rect GetBox();
 	void Save(ofstream &file);
+	void ChangeSelection(int reference);
 
 private:
 	Timer editTimer;

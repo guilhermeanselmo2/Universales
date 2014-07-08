@@ -27,6 +27,9 @@ step("music/passo_et_verde.wav") {
 
 	Classify(objList);
 
+	gone = false;
+	
+
 	objectSelect = -1;
 	
 	
@@ -116,7 +119,13 @@ void Permonkey::Update(float dt, vector<unique_ptr<GameObject>> *objectArray){
 		}
 		break;
 	case EXITING:
-		cout << "Bye!!" << endl;
+		SearchObject(objectArray);
+		cout << arrived << endl;
+		if (arrived){
+			gone = true;
+		}
+		cout << found << endl;
+		break;
 	}
 	//tile = tileMap.GetTile(box.x+box.w/2, box.y+box.y);
 }
@@ -130,7 +139,7 @@ void Permonkey::Render(int cameraX, int cameraY){
 }
 
 bool Permonkey::IsDead(){
-	return false;
+	return gone;
 
 }
 
@@ -363,17 +372,27 @@ void Permonkey::MoveTo(int x, int y){
 
 int Permonkey::SearchObject(vector<unique_ptr<GameObject>> *objectArray){
 	found = false;
+	int object = -1;
 	if (goals.empty()){
 		actionCharacter = EXITING;
+		for (int i = 0; i < objectArray->size(); i++){
+			if (objectArray->at(i)->Is("Object")){
+				if (objectArray->at(i)->GetTextAttributes()[0] == "Teleporter"){
+					cout << "Last Object = " << i << endl;
+
+					object = i;
+				}
+			}
+		}
+		cout << "New object select : " << object << endl;;
 	}
 	else{
-	}
-	int object = -1;
-	for (int i = 0; i < objectArray->size(); i++){
-		if (objectArray->at(i)->Is("Object")){
-			if (objectArray->at(i)->GetTextAttributes()[0] == goals[actualGoal].second){
-				cout << "Object = " << i << endl;
-				object = i;
+		for (int i = 0; i < objectArray->size(); i++){
+			if (objectArray->at(i)->Is("Object")){
+				if (objectArray->at(i)->GetTextAttributes()[0] == goals[actualGoal].second){
+					cout << "Object = " << i << endl;
+					object = i;
+				}
 			}
 		}
 	}
@@ -449,9 +468,15 @@ void Permonkey::Classify(unordered_map<string, vector<string>> objList){
 				preferredObjects.emplace_back(nameType);
 			}
 			else{
-				nameType.first = i->first;
-				nameType.second = i->second[j];
-				otherObjects.emplace_back(nameType);
+				if (i->first != "None"){
+					nameType.first = i->first;
+					nameType.second = i->second[j];
+					otherObjects.emplace_back(nameType);
+				}
+				else{
+					lastGoal.first = i->first;
+					lastGoal.second = i->second[j];
+				}
 			}
 		}
 	}
@@ -479,7 +504,7 @@ void Permonkey::ChooseGoals(){
 		
 	}
 	else{
-		if (otherObjects.size() > 0){
+		if (otherObjects.size() > 0 ){
 			cout << "Entrou other" << otherObjects.size() << endl;
 			objChoice = rand() % otherObjects.size();
 			goals.emplace_back(otherObjects[objChoice]);
@@ -497,4 +522,13 @@ void Permonkey::ChooseGoals(){
 
 Point Permonkey::GetTile(){
 	return tile;
+}
+
+void Permonkey::ChangeSelection(int reference){
+	if (objectSelect == reference){
+		objectSelect = -1;
+	}
+	if (objectSelect > reference){
+		objectSelect--;
+	}
 }

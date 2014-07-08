@@ -230,8 +230,10 @@ bool Object::SettlePos(vector<int> obstacleMap){
 	heuristicArray = heuristics;
 	if (goodPosition){
 		type = "Object";
+	
 	}
-
+	cout << "SP Heuristic size : " << heuristicArray.size() << endl;
+	cout << "SP Heuristic size : " << heuristicArray[0].size() << endl;
 	return goodPosition;
 
 }
@@ -335,4 +337,8 @@ Rect Object::GetBox(){
 
 Point Object::GetTile(){
 	return tile;
+}
+
+void Object::ChangeSelection(int reference){
+
 }

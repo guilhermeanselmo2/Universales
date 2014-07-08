@@ -14,7 +14,7 @@
 StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet),
 moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()), sheet(PERMONKEY), subGuiEdit("img/icons/door.png", "img/icons/wall.jpg"),
 okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"),
-music("music/can_o do vinho.ogg"),
+music("music/can_o do vinho.ogg"), costText("font/Deltoid-sans.ttf", 35, Text::TEXT_BLENDED, "-", RED),
 click("music/click_interface.wav"){
 	cMusic = 0;
 	music.Play(1);
@@ -134,6 +134,7 @@ void StageState::Update(float dt) {
 		music.Open(musicNames[cMusic]);
 		music.Play(1);
 	}
+	
 	int size = 0;
 	int cost = 0;
 	Input();
@@ -171,7 +172,21 @@ void StageState::Update(float dt) {
 	default:
 		break;
 	}
-	UpdateArray(dt,&tileMap);
+	
+
+	for (unsigned int i = 0; i < objectArray.size(); i++) {
+		if (objectArray[i]->IsDead()) {
+			DestroyCharacter(i);
+			for (unsigned int j = 0; j < objectArray.size(); j++) {
+				if (objectArray[j]->IsCharacter()) {
+					objectArray[j]->ChangeSelection(i);
+				}
+			}
+			i--;
+		}
+	}
+
+	UpdateArray(dt, &tileMap);
 	
 	for (int i = 0; i < objectArray.size(); i++){
 
@@ -197,13 +212,16 @@ void StageState::Update(float dt) {
 					}
 				}
 			}
-			else{ 
+			else{
 				if (objectArray[i]->GetAction() == DECIDING_OBJECT){
 					int objectIndex = objectArray[i]->GetObjectIndex();
 					if (objectIndex != -1){
 						Point objective = Point(objectArray[objectIndex]->GetTile().x, objectArray[objectIndex]->GetTile().y - 1);
 						Point t = objectArray[i]->GetTile();
-						cout << "Tile : " << t.x << "," << t.y << endl;
+						cout << endl << "Debug action DO" << endl << endl;
+						cout << "X,Y : " << t.x << "," << t.y << endl;
+						cout << "Object index : " << objectIndex << endl;
+						cout << objectArray[objectIndex]->GetHeuristic(0).size() << endl;
 						vector<int> path = PathAStar(t.x, t.y, objective, objectArray[objectIndex]->GetHeuristic(0));
 						if (!path.empty())
 							objectArray[i]->AddObjective(path);
@@ -211,17 +229,35 @@ void StageState::Update(float dt) {
 							cout << "No path!!!!" << endl;
 					}
 				}
+				else{
+					if (objectArray[i]->GetAction() == EXITING){
+						cout << "Entrou exitting!!!!!!!!!!" << endl;
+						int objectIndex = objectArray[i]->GetObjectIndex();
+						if (objectIndex != -1){
+							Point objective = Point(objectArray[objectIndex]->GetTile().x, objectArray[objectIndex]->GetTile().y - 1);
+							Point t = objectArray[i]->GetTile();
+							vector<int> path = PathAStar(t.x, t.y, objective, objectArray[objectIndex]->GetHeuristic(0));
+							if (!path.empty())
+								objectArray[i]->AddObjective(path);
+							else
+								cout << "No path!!!!" << endl;
+						}
+					}
+
+				}
 			}
 		}
 	}
 	if (creationTimer.Get() > 10){
-		//CreateCharacter(5, 5);
+		CreateCharacter(5, 5);
 		creationTimer.Restart();
 	}
-	
-	if (cost > 0)	costText.SetText(to_string(-cost));
-	else costText.SetText(" ");
+	if (cost > 0)
+		costText.SetText(to_string(-cost));
+	else
+		costText.SetText(" ");
 	costText.SetPos(InputManager::GetInstance().GetMouseX() + 10, InputManager::GetInstance().GetMouseY() + 5, false, false);
+	
 }
 
 void StageState::Render() {
@@ -504,7 +540,6 @@ void StageState::Input() {
 			for (int i = 0; i < roomArray.size(); i++){
 				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 				if (roomArray[i]->IsInside(p)){
-					cout << "editando quarto: " << roomArray[i]->GetID() << endl;
 					roomArray[i]->EditRoom(true);
 					for (int j = 0; j < objectArray.size(); j++){
 						if (objectArray[j]->Is("Wall")){
@@ -535,7 +570,6 @@ void StageState::Input() {
 			for (int i = 0; i < roomArray.size(); i++){
 				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 				if (roomArray[i]->IsInside(p)){
-					cout << "editando quarto: " << roomArray[i]->GetID() << endl;
 					roomArray[i]->EditRoom(true);
 					for (int j = 0; j < objectArray.size(); j++){
 						if (objectArray[j]->Is("Wall")){
@@ -697,6 +731,8 @@ vector<int> StageState::PathAStar(int posX, int posY, Point door, vector<int> he
 		cout << "Achou : " << posX << "," << posY << endl;
 		cout << "Movements : " << movements << endl;
 	}
+	cout << endl << "A* debug:" << endl << endl;
+	cout << "X,Y : " << posX << "," << posY << endl;
 
 	while (!arrived){
 		costQueue.pop();
@@ -705,6 +741,9 @@ vector<int> StageState::PathAStar(int posX, int posY, Point door, vector<int> he
 		//Up Right
 		posY--;
 		index = posY*tileMap.GetWidth() + posX;
+		
+		cout << "Index : " << index << endl;
+		cout << "ObMap size : " << obstacleMap.size() << endl;
 		if (allPaths.find(index) == allPaths.end() && posX >= 0 && posY >= 0 && obstacleMap[index] != -1 && posY < 25 && posX < 25){
 			cost = heuristic[index] + movements;
 			posCost.SetPoint(index, movements, cost);
@@ -789,8 +828,9 @@ vector<int> StageState::PathAStar(int posX, int posY, Point door, vector<int> he
 
 void StageState::CreateCharacter(int x, int y){
 	Point tile(x, y);
+	Point tiles = tile;
 	tile = tileMap.GetTileCenter(tile);
-	Permonkey* pM = new Permonkey(tile.x, tile.y, tile, tileMap, objList);
+	Permonkey* pM = new Permonkey(tile.x, tile.y, tiles, tileMap, objList);
 	objectArray.emplace_back(pM);
 }
 
@@ -810,7 +850,7 @@ void StageState::SelectCharacter(){
 				sheet.SetMoney(to_string(objectArray[i]->money));
 				sheet.SetRender(true);
 				objSheet.SetRender(false);
-				cout << "Character is : " << objectArray[i]->hunger << endl;
+
 				break;
 			}
 		}
@@ -835,7 +875,6 @@ void StageState::ParseObject(vector<string> objList){
 	unordered_map<string, unordered_map<string, Attributes>> typeList;
 	for (int i = 0; i < objList.size(); i++){
 		objectFile.open(objList[i]);
-		cout << "New object : " << objList[i] << "." << endl;
 		counter = 0;
 		while (!objectFile.eof()){
 			getline(objectFile, attribute);
@@ -898,7 +937,7 @@ void StageState::ParseObject(vector<string> objList){
 			}
 		}
 		objectFile.close();
-		for (int j = 1; j <= counter; j++){
+		/*for (int j = 1; j <= counter; j++){
 			switch (j){
 			case 1:
 				cout << "name: " << attributes.name << endl;
@@ -942,7 +981,7 @@ void StageState::ParseObject(vector<string> objList){
 				break;
 			}
 		}
-		cout << endl;
+		cout << endl;*/
 		list.emplace(attributes.name, attributes);
 		typeList[attributes.type].emplace(attributes.name, attributes);
 		this->objList[attributes.type].emplace_back(attributes.name);
@@ -960,9 +999,8 @@ void StageState::ParseRoom(vector<string> roomList){
 	int counter;
 	unordered_map<string, RoomAttributes> list;
 	unordered_map<string, unordered_map<string, RoomAttributes>> typeList;
-	for (int i = 0; i < objList.size(); i++){
+	for (int i = 0; i < roomList.size(); i++){
 		roomFile.open(roomList[i]);
-		cout << "New room : " << roomList[i] << "." << endl;
 		counter = 0;
 		while (!roomFile.eof()){
 			getline(roomFile, attribute);
@@ -987,7 +1025,7 @@ void StageState::ParseRoom(vector<string> roomList){
 		}
 		
 		roomFile.close();
-		for (int j = 1; j <= counter; j++){
+		/*for (int j = 1; j <= counter; j++){
 			switch (j){
 			case 1:
 				cout << "name: " << attributes.type << endl;
@@ -1000,7 +1038,7 @@ void StageState::ParseRoom(vector<string> roomList){
 				break;
 			}
 		}
-		cout << endl;
+		cout << endl;*/
 		list.emplace(attributes.type, attributes);
 		typeList[attributes.type].emplace(attributes.type, attributes);
 		this->roomList[attributes.type].emplace_back(attributes.type);
@@ -1019,8 +1057,6 @@ void StageState::Load(){
 	int size = 0;
 	loadFile.read(reinterpret_cast<char*> (&size), sizeof(int));
 	for (int p = 0; p < size; p++){
-		cout << "P : " << p << endl;;
-		cout << "Size : " << size << endl;
 		Point begin, end;
 		loadFile.read(reinterpret_cast<char*> (&begin), sizeof(Point));
 		loadFile.read(reinterpret_cast<char*> (&end), sizeof(Point));
@@ -1028,9 +1064,7 @@ void StageState::Load(){
 		loadFile.read(reinterpret_cast<char*> (&attributes), sizeof(RoomAttributes));
 		Point door;
 		loadFile.read(reinterpret_cast<char*> (&door), sizeof(Point));
-		cout << "Go room!" << endl;
 		Room *room = new Room(begin, end, &tileMap, &objectArray, roomArray.size(),attributes);
-		cout << "Foi room" << endl;
 		roomArray.emplace_back(room);
 		//posicionamento da porta não está funcionando.
 		cout << room->GetID() << endl;
