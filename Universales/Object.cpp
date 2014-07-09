@@ -5,9 +5,10 @@ Object::Object(int x, int y, Attributes attributes, TileMap tileMap): sp(""), ti
 	attributes.width = 1;
 	attributes.height = 1;
 	this->attributes = attributes;
+	deposit = 0;
 	tile = tileMap.GetTile(x, y);
 	sp.Open(attributes.sprite);
-	box = Rect(x - sp.GetWidth() / 2, y - 3*sp.GetHeight()/4, sp.GetWidth(), sp.GetHeight());
+	box = Rect(x - sp.GetWidth() / 2, y - sp.GetHeight() + tileMap.GetTileHeight()/2, sp.GetWidth(), sp.GetHeight());
 	timer.Restart();
 	type = "Editting";
 
@@ -156,8 +157,9 @@ void Object::Update(float dt, vector<unique_ptr<GameObject>> *objectArray){
 void Object::MoveTo(int x, int y){
 	type = "Editting";
 	tile = tileMap.GetTile(x, y);
+	cout << "Tile Edit : " << tile.x << "," << tile.y << endl;
 	Point pos = tileMap.GetTileCenter(tile);
-	box = Rect(pos.x - sp.GetWidth() / 2, pos.y - 3 * sp.GetHeight() / 4, sp.GetWidth(), sp.GetHeight());
+	box = Rect(x - sp.GetWidth() / 2, y - sp.GetHeight() + tileMap.GetTileHeight() / 2, sp.GetWidth(), sp.GetHeight());
 	vector<Point> accessPoints;
 
 	int counter = 0;
@@ -334,6 +336,7 @@ vector<int> Object::GetAttributes(){
 	att.emplace_back(attributes.activeHunger);
 	att.emplace_back(attributes.activeMoney);
 	att.emplace_back(attributes.activeSatisfaction);
+	deposit += attributes.activeMoney;
 	return att;
 }
 
@@ -350,6 +353,12 @@ vector<string> Object::GetTextAttributes(){
 	return textAttributes;
 }
 
+int Object::MakeDeposit(){
+	int money = deposit;
+	deposit = 0;
+	return money;
+}
+
 Rect Object::GetBox(){
 	return box;
 }
@@ -361,3 +370,9 @@ Point Object::GetTile(){
 void Object::ChangeSelection(int reference){
 
 }
+void Object::CancelGoal(){
+
+}
+void Object::SetFrameCount(int frameCount){}
+void Object::SetFrame(int frame){}
+void Object::SetCurrentHeight(int currentHeight) {}

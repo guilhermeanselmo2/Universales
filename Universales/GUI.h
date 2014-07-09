@@ -35,6 +35,12 @@ public:
     bool IsInside();
 	void SetFrameBuildIcon(int currentFrame);
 	void SetFrameDestroyIcon(int currentFrame);
+	void SetFrameBuyIcon(int currentFrame);
+	void SetFrameEditIcon(int currentFrame);
+	void SetFrameDoorIcon(int currentFrame);
+	void SetFrameWallIcon(int currentFrame);
+	void SetFrameMoveWallIcon(int currentFrame);
+	void SetFrameExpandWallIcon(int currentFrame);
 
 private:
     Rect box, buildBox, destroyBox, buyBox, editBox, roomBox, pirateBox, samuraiBox, doorBox, wallBox, movewallBox, expandwallBox;

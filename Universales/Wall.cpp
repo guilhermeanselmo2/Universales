@@ -9,6 +9,7 @@ Wall::Wall(float centerX, float centerY, string file, WallStyle lStyle, Point lT
     roomID = lRoom;
     wall.Open(file);
 	style = lStyle;
+	type = "Wall";
     switch (lStyle) {
     case UPPER_RIGHT:
         box = Rect(centerX,centerY-wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
@@ -31,11 +32,38 @@ Wall::Wall(float centerX, float centerY, string file, WallStyle lStyle, Point lT
 	case STATION_WALL:
 		box = box = Rect(centerX, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
 		break;
+	case PIRATE_DOOR:
+		box = box = Rect(centerX, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		wall.SetFrameCount(4);
+		wall.SetFrameTime(1);
+		wall.SetFrame(4);
+		wall.SetCurrentHeight(0);
+		type = "Door";
+		break;
+	case SAMURAI_DOOR:
+		box = box = Rect(centerX, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		wall.SetFrameCount(4);
+		wall.SetFrameTime(1);
+		wall.SetFrame(4);
+		wall.SetCurrentHeight(0);
+		type = "Door";
+		break;
     default:
         break;
     }
 
 }
+
+void Wall::SetFrameCount(int frameCount){
+	wall.SetFrameCount(frameCount);
+}
+void Wall::SetFrame(int frame){
+	wall.SetFrame(frame);
+}
+void Wall::SetCurrentHeight(int currentHeight){
+	wall.SetFrameTime(currentHeight);
+}
+
 
 Wall::~Wall(){
 
@@ -61,7 +89,7 @@ void Wall::NotifyCollision(GameObject &other){
 }
 
 bool Wall::Is(string type){
-    return type == "Wall";
+    return type == this->type;
 }
 
 bool Wall::IsCharacter(){
@@ -97,6 +125,12 @@ string Wall::Type(){
 		break;
 	case STATION_WALL:
 		return "STATION_WALL";
+		break;
+	case PIRATE_DOOR:
+		return "PIRATE_DOOR";
+		break;
+	case SAMURAI_DOOR:
+		return "SAMURAI_DOOR";
 		break;
 	default:
 		return "Wall";
@@ -204,4 +238,13 @@ void Wall::Save(ofstream &file){
 
 void Wall::ChangeSelection(int reference){
 
+}
+
+void Wall::CancelGoal(){
+
+}
+
+int Wall::MakeDeposit(){
+	int a;
+	return a;
 }

@@ -13,7 +13,10 @@ bool Comparator::operator()(const Point& lhs, const Point& rhs) {
 				return true;
 			}
 			else{
-				return false;
+				if (lhs.z < rhs.z)
+					return false;
+				else
+					return lhs.x<rhs.x;
 			}
         }
     }

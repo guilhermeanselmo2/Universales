@@ -11,9 +11,10 @@
 #include <string>
 #include <vector>
 
+Action building = NONE;
+
 StageState::StageState() : tileSet(152,76), tileMap("map/tileMap.txt", &tileSet),
-moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()), sheet(PERMONKEY), subGuiEdit("img/icons/door.png", "img/icons/wall.jpg"),
-okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"),
+moneyText("font/enhanced_dot_digital-7.ttf", 40, Text::TEXT_BLENDED, "-", WHITE, 100), occupancyMap(tileMap.GetWidth(), tileMap.GetWidth()), sheet(PERMONKEY), okTile("img/tileset/tile_grama_1.png"), noTile("img/tileset/tile_grama_2.png"),
 music("music/can_o do vinho.ogg"), costText("font/Deltoid-sans.ttf", 35, Text::TEXT_BLENDED, "-", RED),
 click("music/click_interface.wav"){
 	cMusic = 0;
@@ -23,9 +24,12 @@ click("music/click_interface.wav"){
 	string file, file2, tile, line, endLine("\n"), initFile("img/tileset/");
 	FILE *tileFile, *objectFile;
 	Point roomBegin, roomEnd;
-	ifstream objFile, roomFile;
+	ifstream objFile, roomFile, charFile;
 	char c;
-	vector<string> objectList, roomList;
+	Point initMap(0,0);
+	Point endsMap(24, 24);
+	CreateStationWalls(initMap,endsMap,&tileMap,&objectArray);
+	vector<string> objectList, roomList, charList;
 
 	obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
 
@@ -71,21 +75,12 @@ click("music/click_interface.wav"){
 	case 1:
 		objFile.open("obj/en-objects.txt");
 		break;
-	}
-	cout << "Aqui inicio" << endl;
-	
+	}	
 
 	while (!objFile.eof()){
 		getline(objFile, file);
 		objectList.emplace_back(file);
 	}
-
-	
-	for (int i = 0; i < objectList.size(); i++){
-		cout << objectList[i] << endl;
-	}
-
-	cout << "Ended" << endl;
 
 	ParseObject(objectList);
 
@@ -96,17 +91,22 @@ click("music/click_interface.wav"){
 		roomList.emplace_back(file);
 	}
 
-
-	for (int i = 0; i < roomList.size(); i++){
-		cout << roomList[i] << endl;
-	}
-
 	ParseRoom(roomList);
+	
+	charFile.open("char/charlist.txt");
+	while (!charFile.eof()){
+		getline(charFile, file);
+		charList.emplace_back(file);
+	}
+	for (int i = 0; i < charList.size(); i++){
+		cout << charList[i] << endl;
+	}
+	ParseChar(charList);
 
 	Point monkeyTile(4, 4);
 	Point teste(4, 4);
 	monkeyTile = tileMap.GetTileCenter(monkeyTile);
-	Permonkey* pM = new Permonkey(monkeyTile.x, monkeyTile.y, teste, tileMap, objList);
+	Permonkey* pM = new Permonkey(monkeyTile.x, monkeyTile.y, teste, tileMap, objList, this->charList[1]);
 	objectArray.emplace_back(pM);
 
 	data = new StateData();
@@ -119,7 +119,9 @@ click("music/click_interface.wav"){
 StageState::~StageState() {
 	delete data;
 	objectArray.clear();
+	cout << "RoomSize : " << roomArray.size() << endl;
 	roomArray.clear();
+	cout << "RoomSize : " << roomArray.size() << endl;
 	//Music::Clear();
 	//Sprite::Clear();
 }
@@ -162,31 +164,224 @@ void StageState::Update(float dt) {
 	case BUY:
 		buySheet.UpdateObjectSheet();
 		break;
+
+
 	case EDIT_OBJECT:{
 		Point tiles = Point(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
+		Point t = tileMap.GetTile(tiles.x, tiles.y);
 		tiles = tileMap.GetTileCenterFromScreen(tiles);
 		objectArray[selectedObject]->MoveTo(tiles.x, tiles.y);
+		occupancyMap.CleanTile(&tileMap, t);
+		obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
 	}
+		break;
+	case SELECT_WALL: {
+	Point pos;
+	Point tiles = Point(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
+	Point tilesaux = tiles;
+	tiles = tileMap.GetTileCenterFromScreen(tiles);
+	Point dif;
+	bool ok = true;
+	Point door = tileMap.GetTileCenter(roomArray[selectedRoom]->GetDoor());
+	Point end = tileMap.GetTileCenter(roomArray[selectedRoom]->GetEnd());
+	Point begin = tileMap.GetTileCenter(roomArray[selectedRoom]->GetBegin());
+
+	for (int j = 0; j < objectArray.size(); j++){
+		if (objectArray[j]->Is("Wall")) {
+			if ((objectArray[j]->Type() == "UPPER_CORNER") || (objectArray[j]->Type() == "LEFT_CORNER") || (objectArray[j]->Type() == "RIGHT_CORNER") || (objectArray[j]->Type() == "INF_CORNER")) {
+				if ((p.x == objectArray[j]->tile.x) && (p.y == objectArray[j]->tile.y)) {
+					ok = false;
+				}
+			}
+		}
+	}
+	if (ok) {
+	if ((move.x != tiles.x) || (move.y != tiles.y)) {
+		for (int j = 0; j < objectArray.size(); j++){
+			if (objectArray[j]->Is("Wall")) {
+				if (objectArray[j]->roomID == roomArray[selectedRoom]->GetID()) {
+
+					if (selectedWall.x == tileEnd.x) {
+						for (int i = 0; i < objectArray.size(); i++){
+							if (objectArray[i]->roomID == roomArray[selectedRoom]->GetID()) {
+							if (objectArray[i]->Is("Wall")) {
+								if (objectArray[i]->Type() == "UPPER_CORNER")
+									roomArray[selectedRoom]->SetBegin(objectArray[i]->tile);
+								if (objectArray[i]->Type() == "INF_CORNER")
+									roomArray[selectedRoom]->SetEnd(objectArray[i]->tile);
+								if (objectArray[i]->Type() == "UPPER_RIGHT"){
+									objectArray.erase(objectArray.begin() + i);
+									i--;
+								}
+							}
+							}
+						}
+						if (objectArray[j]->tile.x == roomArray[selectedRoom]->GetEnd().x){
+							dif.x = tiles.x - move.x;
+							dif.y = tiles.y - move.y;
+							for (int i = 0; i < objectArray.size(); i++){
+								if (objectArray[i]->Is("Wall")) {
+									if (objectArray[i]->roomID == roomArray[selectedRoom]->GetID()) {
+										if (objectArray[i]->Type() == "RIGHT_CORNER") {
+											pos = objectArray[i]->tile;
+											pos = tileMap.GetTileCenter(pos);
+											pos.x = pos.x + dif.x;
+											pos.y = pos.y + dif.y;
+											pos = tileMap.GetTile(pos.x, pos.y);
+										}
+															  
+									}
+								}
+							}
+							if ((pos.y == tileBegin.y) && (pos.x > tileBegin.x + 2) && (pos.x > 0) && (pos.y > 0)) {
+								objectArray[j]->MoveTo(dif.x, dif.y);
+							}
+						}
+					}
+										  
+					if (selectedWall.x == tileBegin.x) {
+						for (int i = 0; i < objectArray.size(); i++){
+							if (objectArray[i]->roomID == roomArray[selectedRoom]->GetID()) {
+								if (objectArray[i]->Is("Wall")) {
+									if (objectArray[i]->Type() == "UPPER_CORNER")
+										roomArray[selectedRoom]->SetBegin(objectArray[i]->tile);
+									if (objectArray[i]->Type() == "INF_CORNER")
+										roomArray[selectedRoom]->SetEnd(objectArray[i]->tile);
+									if (objectArray[i]->Type() == "UPPER_RIGHT"){
+										objectArray.erase(objectArray.begin() + i);
+										i--;
+									}
+								}
+							}
+						}
+						if (objectArray[j]->tile.x == roomArray[selectedRoom]->GetBegin().x){
+							dif.x = tiles.x - move.x;
+							dif.y = tiles.y - move.y;
+							for (int i = 0; i < objectArray.size(); i++){
+								if (objectArray[i]->Is("Wall")) {
+									if (objectArray[i]->roomID == roomArray[selectedRoom]->GetID()) {
+										if (objectArray[i]->Type() == "UPPER_CORNER") {
+											pos = objectArray[i]->tile;
+											pos = tileMap.GetTileCenter(pos);
+											pos.x = pos.x + dif.x;
+											pos.y = pos.y + dif.y;
+											pos = tileMap.GetTile(pos.x, pos.y);
+										}
+									}
+								}
+							}
+							if ((pos.y == tileBegin.y) && (pos.x < tileEnd.x-2) && (pos.x > 0) && (pos.y > 0)) {
+								objectArray[j]->MoveTo(dif.x, dif.y);
+							}
+						}
+					}
+					if (selectedWall.y == tileEnd.y) {
+						for (int i = 0; i < objectArray.size(); i++){
+							if (objectArray[i]->roomID == roomArray[selectedRoom]->GetID()) {
+								if (objectArray[i]->Is("Wall")) {
+									if (objectArray[i]->Type() == "UPPER_CORNER")
+										roomArray[selectedRoom]->SetBegin(objectArray[i]->tile);
+									if (objectArray[i]->Type() == "INF_CORNER")
+										roomArray[selectedRoom]->SetEnd(objectArray[i]->tile);
+									if (objectArray[i]->Type() == "UPPER_LEFT"){
+										objectArray.erase(objectArray.begin() + i);
+										i--;
+									}
+								}
+							}
+						}
+
+						if (objectArray[j]->tile.y == roomArray[selectedRoom]->GetEnd().y) {
+							dif.x = tiles.x - move.x;
+							dif.y = tiles.y - move.y;
+							for (int i = 0; i < objectArray.size(); i++){
+							if (objectArray[i]->Is("Wall")) {
+								if (objectArray[i]->roomID == roomArray[selectedRoom]->GetID()) {
+									if (objectArray[i]->Type() == "LEFT_CORNER") {
+										pos = objectArray[i]->tile;
+										pos = tileMap.GetTileCenter(pos);
+										pos.x = pos.x + dif.x;
+										pos.y = pos.y + dif.y;
+										pos = tileMap.GetTile(pos.x, pos.y);
+									}
+								}
+							}
+						}
+							if ((pos.x == tileBegin.x) && (pos.y > tileBegin.y + 2) && (pos.x > 0) && (pos.y > 0)) {
+								objectArray[j]->MoveTo(dif.x, dif.y);
+							}
+						}
+					}
+
+					if (selectedWall.y == tileBegin.y) {
+						for (int i = 0; i < objectArray.size(); i++){
+							if (objectArray[i]->roomID == roomArray[selectedRoom]->GetID()) {
+								if (objectArray[i]->Is("Wall")) {
+									if (objectArray[i]->Type() == "UPPER_CORNER")
+										roomArray[selectedRoom]->SetBegin(objectArray[i]->tile);
+									if (objectArray[i]->Type() == "INF_CORNER")
+										roomArray[selectedRoom]->SetEnd(objectArray[i]->tile);
+									if (objectArray[i]->Type() == "UPPER_LEFT"){
+										objectArray.erase(objectArray.begin() + i);
+										i--;
+									}
+								}
+							}
+						}
+						if (objectArray[j]->tile.y == roomArray[selectedRoom]->GetBegin().y){
+							dif.x = tiles.x - move.x;
+							dif.y = tiles.y - move.y;
+							for (int i = 0; i < objectArray.size(); i++){
+								if (objectArray[i]->Is("Wall")) {
+									if (objectArray[i]->roomID == roomArray[selectedRoom]->GetID()) {
+										if (objectArray[i]->Type() == "UPPER_CORNER") {
+											pos = objectArray[i]->tile;
+											pos = tileMap.GetTileCenter(pos);
+											pos.x = pos.x + dif.x;
+											pos.y = pos.y + dif.y;
+											pos = tileMap.GetTile(pos.x, pos.y);
+										}
+									}
+								}
+							}
+												  
+												if ((pos.x == tileBegin.x) && (pos.y < tileEnd.y-2) && (pos.x > 0) && (pos.y > 0)) {
+													objectArray[j]->MoveTo(dif.x, dif.y);
+												}
+											}
+										}
+									}
+								}
+							}
+						move = tiles;
+				}
+			}
+		}
 		break;
 	default:
 		break;
 	}
 	
-
-	for (unsigned int i = 0; i < objectArray.size(); i++) {
-		if (objectArray[i]->IsDead()) {
-			DestroyCharacter(i);
-			for (unsigned int j = 0; j < objectArray.size(); j++) {
-				if (objectArray[j]->IsCharacter()) {
+	for (int i = 0; i < objectArray.size(); i++){
+		if (objectArray[i]->Is("Object")){
+			data->money += objectArray[i]->MakeDeposit();
+		}
+		if (objectArray[i]->IsDead()){
+			for (int j = 0; j < objectArray.size(); j++){
+				if (objectArray[j]->IsCharacter()){
 					objectArray[j]->ChangeSelection(i);
 				}
 			}
-			i--;
+			data->fame += (objectArray[i]->satisfaction-50) / 10;
+			if (data->fame < 0)
+				data->fame = 0;
+			DestroyCharacter(i);
+
+
 		}
 	}
-
-	UpdateArray(dt, &tileMap);
 	
+
 	for (int i = 0; i < objectArray.size(); i++){
 
 		if (objectArray[i]->IsCharacter()){
@@ -205,8 +400,10 @@ void StageState::Update(float dt) {
 							vector<int> path = PathAStar(t.x, t.y, roomArray[j]->GetDoor(), heuristicsArray[roomArray[j]->GetID()]);
 							if (!path.empty())
 								objectArray[i]->AddObjective(path);
-							else
+							else{
 								cout << "No path!!!!" << endl;
+								objectArray[i]->CancelGoal();
+							}
 						}
 					}
 				}
@@ -215,7 +412,17 @@ void StageState::Update(float dt) {
 				if (objectArray[i]->GetAction() == DECIDING_OBJECT){
 					int objectIndex = objectArray[i]->GetObjectIndex();
 					if (objectIndex != -1){
-						Point objective = Point(objectArray[objectIndex]->GetTile().x, objectArray[objectIndex]->GetTile().y - 1);
+						vector<Point> objectives = objectArray[objectIndex]->GetAccessPoints();
+						Point objective;
+						for (int j = 0; j < objectives.size(); j++){
+							int index = objectives[j].y*tileMap.GetHeight() + objectives[j].x;
+							cout << "Objectives" << objectives[j].x << "," << objectives[j].y << endl;
+							if (obstacleMap[index] != -1){
+								objective = objectives[j];
+								break;
+							}
+						}
+						//P = Point(objectArray[objectIndex]->GetTile().x, objectArray[objectIndex]->GetTile().y - 1);
 						Point t = objectArray[i]->GetTile();
 						cout << endl << "Debug action DO" << endl << endl;
 						cout << "X,Y : " << t.x << "," << t.y << endl;
@@ -225,12 +432,12 @@ void StageState::Update(float dt) {
 						if (!path.empty())
 							objectArray[i]->AddObjective(path);
 						else
+							objectArray[i]->CancelGoal();
 							cout << "No path!!!!" << endl;
 					}
 				}
 				else{
 					if (objectArray[i]->GetAction() == EXITING){
-						cout << "Entrou exitting!!!!!!!!!!" << endl;
 						int objectIndex = objectArray[i]->GetObjectIndex();
 						if (objectIndex != -1){
 							Point objective = Point(objectArray[objectIndex]->GetTile().x, objectArray[objectIndex]->GetTile().y - 1);
@@ -247,8 +454,8 @@ void StageState::Update(float dt) {
 			}
 		}
 	}
-	if (creationTimer.Get() > 10){
-		CreateCharacter(5, 5);
+	if (creationTimer.Get() > 30){
+		//CreateCharacter(5, 5);
 		creationTimer.Restart();
 	}
 	if (cost > 0)
@@ -256,7 +463,24 @@ void StageState::Update(float dt) {
 	else
 		costText.SetText(" ");
 	costText.SetPos(InputManager::GetInstance().GetMouseX() + 10, InputManager::GetInstance().GetMouseY() + 5, false, false);
-	
+
+	if (objSheet.GetRender()){
+		objSheet.Update();
+		/*if (objSheet.GetSell()){
+			data->money += objSheet.GetPrice();
+			for (int j = 0; j < objectArray.size(); j++){
+				if (objectArray[j]->IsCharacter()){
+					objectArray[j]->ChangeSelection(selectedCharacter);
+				}
+			}
+			DestroyCharacter(selectedCharacter);
+		}*/
+		if (objSheet.GetMove()){
+			selectedObject = selectedCharacter;
+			action = EDIT_OBJECT;
+		}
+	}
+	UpdateArray(dt, &tileMap);
 }
 
 void StageState::Render() {
@@ -278,10 +502,11 @@ void StageState::Render() {
 		SDL_SetRenderDrawColor(Game::GetInstance().GetRenderer(), 255, 255, 255, 255);
 	}
 	SDL_RenderFillRect(Game::GetInstance().GetRenderer(), &fillRect);
-	
+
 	for(int i = 0; i < roomArray.size(); i++){
         roomArray[i]->Render(&tileMap);
     }
+
 	switch (action)	{
 	case NONE:
 		RenderArray();
@@ -294,6 +519,10 @@ void StageState::Render() {
 	case GUI_ROOM:
 		RenderArray();
 		roomSheet.RenderRoomSheet();
+		break;
+	case GUI_WALL:
+		RenderArray();
+		gui.Render();
 		break;
 	case CONSTRUCT_ROOM:
 		selectionBox.Render(&tileMap);
@@ -309,11 +538,14 @@ void StageState::Render() {
 		RenderArray();
 		gui.Render();
 		break;
-	case SUB_GUI_EDIT :
+	case GUI_EDIT:
 		RenderArray();
-		subGuiEdit.Render();
+		gui.Render();
 		break;
 	case EDIT_DOOR:
+		RenderArray();
+		break;
+	case MOVE_WALL:
 		RenderArray();
 		break;
 	case BUY:
@@ -339,16 +571,21 @@ void StageState::Render() {
 
 		RenderArray();
 		break;
+	case EXPAND_WALL:
+		RenderArray();
+		break;
 	default:
 		RenderArray();
 		break;
 	}
+
 	if (sheet.GetRender()){
 		sheet.SetHunger(to_string(objectArray[selectedCharacter]->GetHunger()));
 		sheet.SetSatisfaction(to_string(int(objectArray[selectedCharacter]->satisfaction)));
 		sheet.SetMoney(to_string(objectArray[selectedCharacter]->money));
 		sheet.Render();
 	}
+
 	if (objSheet.GetRender()){
 		objSheet.Open(objectArray[selectedCharacter]->GetTextAttributes());
 		objSheet.Render();
@@ -396,10 +633,11 @@ void StageState::Input() {
 		CheatState *state = new CheatState(this, data);
 		Game::GetInstance().Push(state);
 	}
-	if(InputManager::GetInstance().MouseRelease(SDL_BUTTON_LEFT)){
+	if (InputManager::GetInstance().MouseRelease(SDL_BUTTON_LEFT)){
 
 		switch (action){
 		case NONE:
+			gui.SetState(BASIC);
 			ptile = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 			p = tileMap.GetTileCenter(ptile);
 			//objectArray[0]->AddObjective(p.x, p.y, ptile);
@@ -414,11 +652,11 @@ void StageState::Input() {
 			}
 			break;
 		case GUI_A:
-			if(gui.BuildIconPressed()){
+			if (gui.BuildIconPressed()){
 				click.Play(1);
 				action = GUI_ROOM;
 				gui.SetState(ROOMS);
-            }
+			}
 			else{
 				if (gui.DestroyIconPressed()){
 					click.Play(1);
@@ -432,9 +670,8 @@ void StageState::Input() {
 					else{
 						if (gui.EditIconPressed()){
 							click.Play(1);
-							subGuiEdit.SetPositionSubGUI(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
-							action = SUB_GUI_EDIT;
-							subGuiEdit.SetState(EDIT);
+							action = GUI_EDIT;
+							gui.SetState(EDIT);
 						}
 						else {
 							action = NONE;
@@ -443,22 +680,38 @@ void StageState::Input() {
 				}
 			}
 			break;
-		case SUB_GUI_EDIT:
-			if (subGuiEdit.DoorIconPressed()){
-				click.Play(1);
+		case GUI_EDIT:
+			if (gui.DoorIconPressed()){
 				cout << "editando porta..." << endl;
+				click.Play(1);
 				action = EDIT_DOOR;
 			}
 			else{
-				if (subGuiEdit.WallIconPressed()){
+				if (gui.WallIconPressed()){
 					click.Play(1);
 					cout << "editando parede..." << endl;
-					action = EDIT_WALL;
+					action = GUI_WALL;
+					gui.SetState(EDIT_WALL_GUI);
 				}
 				else {
 					action = NONE;
 				}
 			}
+			break;
+		case GUI_WALL:
+			if (gui.MoveWallPressed()){
+				click.Play(1);
+				action = MOVE_WALL;
+			}
+			else {
+				if (gui.ExpandwallPressed()){
+					action = EXPAND_WALL;
+				}
+				else {
+					action = NONE;
+				}
+			}
+			gui.SetState(BASIC);
 			break;
 		case TILE_SELECT:
 			break;
@@ -467,6 +720,7 @@ void StageState::Input() {
 				action = NONE;
 			}
 			if (roomSheet.IsBuy(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY())){
+				click.Play(1);
 				action = TILE_SELECT;
 				roomAttributes = roomSheet.GetAttributes();
 				selectionBox.SetSprite(roomAttributes.tileSprite);
@@ -475,7 +729,7 @@ void StageState::Input() {
 
 			break;
 		case CONSTRUCT_ROOM:
-			{
+		{
 			action = NONE;
 			Point aux;
 
@@ -490,20 +744,19 @@ void StageState::Input() {
 				selectionBox.begin.x = selectionBox.end.x;
 				selectionBox.end.x = aux.x;
 			}
-			RoomAttributes asd;
-			asd.cost = 50;
-			asd.tileSprite = "img/tileset/tile_madeira.png";
-			asd.type = "Pirate";
 			Room *newRoom = new Room(selectionBox.begin, selectionBox.end, &tileMap, &objectArray, roomArray.size(), roomAttributes);
+			newRoom->EditRoom(true);
+			roomArray.emplace_back(newRoom);
+			action = EDIT_DOOR;
+			building = CONSTRUCT_ROOM;
 			data->money -= newRoom->cost;
-            roomArray.emplace_back(newRoom);
 			vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[roomArray.size() - 1]->GetDoor());
-			heuristicsArray.emplace(newRoom->GetID(),heuristc);
+			heuristicsArray.emplace(newRoom->GetID(), heuristc);
 			obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
 			//Point tileC = tileMap.GetTile(objectArray[0]->box.x + objectArray[0]->box.w / 2, objectArray[0]->box.y + objectArray[0]->box.h);
 			//vector<int> path = PathAStar(tileC.x, tileC.y, newRoom->GetID());
 			//objectArray[0]->AddObjective(path);
-			}
+		}
 			break;
 		case DESTROY_ROOM:
 			for (int i = 0; i < roomArray.size(); i++){
@@ -515,7 +768,7 @@ void StageState::Input() {
 					roomArray.erase(roomArray.begin() + i);
 					i = roomArray.size();
 				}
-				
+
 			}
 			action = NONE;
 			break;
@@ -526,10 +779,14 @@ void StageState::Input() {
 			if (buySheet.IsBuy(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY())){
 				Point Tiles = Point(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 				Tiles = tileMap.GetTileCenterFromScreen(Tiles);
-				Object* object = new Object(Tiles.x, Tiles.y, buySheet.GetAttributes(), tileMap);
-				selectedObject = objectArray.size();
-				objectArray.emplace_back(object);
-				action = EDIT_OBJECT;
+				click.Play(1);
+				if (buySheet.GetAttributes().cost <= data->money){
+					Object* object = new Object(Tiles.x, Tiles.y, buySheet.GetAttributes(), tileMap);
+					data->money -= buySheet.GetAttributes().cost;
+					selectedObject = objectArray.size();
+					objectArray.emplace_back(object);
+					action = EDIT_OBJECT;
+				}
 			}
 			//data->money -= 100;
 			break;
@@ -539,6 +796,7 @@ void StageState::Input() {
 			for (int i = 0; i < roomArray.size(); i++){
 				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 				if (roomArray[i]->IsInside(p)){
+					cout << "editando quarto: " << roomArray[i]->GetID() << endl;
 					roomArray[i]->EditRoom(true);
 					for (int j = 0; j < objectArray.size(); j++){
 						if (objectArray[j]->Is("Wall")){
@@ -546,50 +804,181 @@ void StageState::Input() {
 								roomArray[i]->SetDoor(p.x, p.y, roomArray[i]->GetID(), &objectArray);
 						}
 					}
-					
+
 					for (int j = 0; j < objectArray.size(); j++){
 						if (objectArray[j]->Is("Wall")){
 							if (objectArray[j]->roomID == roomArray[i]->GetID()) {
 								objectArray[j]->Editing(true);
 								if (objectArray[j]->tile.DisPoints(objectArray[j]->tile, roomArray[i]->GetDoor()) == 0) {
-									objectArray.erase(objectArray.begin() + j); 
+									objectArray.erase(objectArray.begin() + j);
 								}
 							}
 						}
 					}
 					vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[i]->GetDoor());
-					heuristicsArray[roomArray[i]->GetID()] = heuristc;
+					if (building == CONSTRUCT_ROOM) {
+						heuristicsArray.emplace(roomArray[i]->GetID(), heuristc);
+						building = NONE;
+					}
+					else
+						heuristicsArray[roomArray[i]->GetID()] = heuristc;
 					obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
 					obstacleMap = occupancyMap.CleanTile(&tileMap, roomArray[i]->GetDoor());
 				}
 			}
 			action = NONE;
 			break;
-		case EDIT_WALL:
+		case EXPAND_WALL: {
+							  bool ok = true;
+							  for (int i = 0; i < roomArray.size(); i++) {
+								  p = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
+								  selectedWall = p;
+								  if (roomArray[i]->IsInside(p)){
+									  roomArray[i]->EditRoom(true);
+									  selectedRoom = i;
+									  for (int j = 0; j < objectArray.size(); j++){
+										  if (objectArray[j]->Is("Wall")) {
+											  if ((objectArray[j]->Type() == "UPPER_CORNER") || (objectArray[j]->Type() == "LEFT_CORNER") || (objectArray[j]->Type() == "RIGHT_CORNER") || (objectArray[j]->Type() == "INF_CORNER")) {
+												  if ((p.x == objectArray[j]->tile.x) && (p.y == objectArray[j]->tile.y)) {
+													  ok = false;
+													  cout << "entrei aki" << endl;
+												  }
+											  }
+										  }
+									  }
+									  if (ok){
+										  roomArray[i]->SetDoor(0, 0, roomArray[i]->GetID(), &objectArray);
+									  }
+									  move = tileMap.GetTileCenter(p);
+									  tileBegin = roomArray[selectedRoom]->GetBegin();
+									  tileEnd = roomArray[selectedRoom]->GetEnd();
+
+									  for (int i = 0; i < objectArray.size(); i++){
+										  if (objectArray[i]->roomID == roomArray[selectedRoom]->GetID()){
+											  if (objectArray[i]->Is("Wall")) {
+												  occupancyMap.CleanTile(&tileMap, objectArray[i]->tile);
+											  }
+										  }
+									  }
+								  }
+							  }
+		}
+			action = SELECT_WALL;
+			break;
+		case MOVE_WALL:
 			for (int i = 0; i < roomArray.size(); i++){
 				p = tileMap.GetTile(InputManager::GetInstance().GetMouseX() - Camera::pos.x, InputManager::GetInstance().GetMouseY() - Camera::pos.y);
 				if (roomArray[i]->IsInside(p)){
+					cout << "editando quarto: " << roomArray[i]->GetID() << endl;
 					roomArray[i]->EditRoom(true);
+					selectedRoom = i;
+					move = tileMap.GetTileCenter(roomArray[i]->GetTileCenterRoom());
 					for (int j = 0; j < objectArray.size(); j++){
-						if (objectArray[j]->Is("Wall")){
-							if (objectArray[j]->roomID == roomArray[i]->GetID()) {
-								objectArray[j]->Editing(true);
-							}
+						if (objectArray[j]->Is("Wall")) {
+							occupancyMap.CleanTile(&tileMap, objectArray[j]->tile);
 						}
 					}
 				}
+				else
+					action = NONE;
 			}
-			action = NONE;
+			action = SELECT_ROOM;
 			break;
 		case EDIT_OBJECT:
 			if (objectArray[selectedObject]->SettlePos(obstacleMap)){
 				obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
 				action = NONE;
-			}
+				break;
+		case SELECT_WALL:{
+							 Point pos;
+							 for (int i = 0; i < objectArray.size(); i++){
+								 if (objectArray[i]->Is("Wall")) {
+									 if (roomArray[selectedRoom]->GetID() == objectArray[i]->roomID){
+										 if (objectArray[i]->Type() == "UPPER_CORNER")
+											 roomArray[selectedRoom]->SetBegin(objectArray[i]->tile);
+										 if (objectArray[i]->Type() == "INF_CORNER")
+											 roomArray[selectedRoom]->SetEnd(objectArray[i]->tile);
+									 }
+								 }
+							 }
+							 if ((roomArray[selectedRoom]->GetBegin().x != tileBegin.x) && (roomArray[selectedRoom]->GetBegin().y == tileBegin.y)){
+								 Point newWall;
+								 for (int k = tileEnd.x - 1; k > roomArray[selectedRoom]->GetBegin().x; k--){
+									 newWall.x = k;
+									 newWall.y = tileBegin.y;
+									 roomArray[selectedRoom]->InsertTileWall(newWall, roomArray[selectedRoom]->GetID(), &objectArray);
+									 newWall.y = tileEnd.y;
+									 roomArray[selectedRoom]->InsertTileWall(newWall, roomArray[selectedRoom]->GetID(), &objectArray);
+								 }
+							 }
+							 if ((roomArray[selectedRoom]->GetEnd().x != tileEnd.x) && (roomArray[selectedRoom]->GetEnd().y == tileEnd.y)){
+								 Point newWall;
+								 for (int k = tileBegin.x + 1; k < roomArray[selectedRoom]->GetEnd().x; k++){
+									 newWall.x = k;
+									 newWall.y = tileBegin.y;
+									 roomArray[selectedRoom]->InsertTileWall(newWall, roomArray[selectedRoom]->GetID(), &objectArray);
+									 newWall.y = tileEnd.y;
+									 roomArray[selectedRoom]->InsertTileWall(newWall, roomArray[selectedRoom]->GetID(), &objectArray);
+								 }
+							 }
+
+							 if ((roomArray[selectedRoom]->GetBegin().x == tileBegin.x) && (roomArray[selectedRoom]->GetBegin().y != tileBegin.y)){
+								 Point newWall;
+								 for (int k = tileEnd.y - 1; k > roomArray[selectedRoom]->GetBegin().y; k--){
+									 newWall.x = tileBegin.x;
+									 newWall.y = k;
+									 roomArray[selectedRoom]->InsertTileWall(newWall, roomArray[selectedRoom]->GetID(), &objectArray);
+									 newWall.x = tileEnd.x;
+									 roomArray[selectedRoom]->InsertTileWall(newWall, roomArray[selectedRoom]->GetID(), &objectArray);
+								 }
+							 }
+							 if ((roomArray[selectedRoom]->GetEnd().x == tileEnd.x) && (roomArray[selectedRoom]->GetEnd().y != tileEnd.y)){
+								 Point newWall;
+								 for (int k = roomArray[selectedRoom]->GetEnd().y - 1; k > tileBegin.y; k--){
+									 newWall.x = tileBegin.x;
+									 newWall.y = k;
+									 roomArray[selectedRoom]->InsertTileWall(newWall, roomArray[selectedRoom]->GetID(), &objectArray);
+									 newWall.x = tileEnd.x;
+									 roomArray[selectedRoom]->InsertTileWall(newWall, roomArray[selectedRoom]->GetID(), &objectArray);
+								 }
+							 }
+							 if ((roomArray[selectedRoom]->GetEnd().x == tileEnd.x) && (roomArray[selectedRoom]->GetEnd().y == tileEnd.y) && (roomArray[selectedRoom]->GetBegin().x == tileBegin.x) && (roomArray[selectedRoom]->GetBegin().y == tileBegin.y)){
+								 Point newWall;
+								 for (int k = tileBegin.x + 1; k < tileEnd.x; k++){
+									 newWall.x = k;
+									 newWall.y = tileBegin.y;
+									 roomArray[selectedRoom]->InsertTileWall(newWall, roomArray[selectedRoom]->GetID(), &objectArray);
+									 newWall.x = tileEnd.y;
+									 roomArray[selectedRoom]->InsertTileWall(newWall, roomArray[selectedRoom]->GetID(), &objectArray);
+								 }
+								 for (int k = tileEnd.y - 1; k > tileBegin.y; k--){
+									 newWall.y = k;
+									 newWall.x = tileBegin.x;
+									 roomArray[selectedRoom]->InsertTileWall(newWall, roomArray[selectedRoom]->GetID(), &objectArray);
+									 newWall.x = tileEnd.x;
+									 roomArray[selectedRoom]->InsertTileWall(newWall, roomArray[selectedRoom]->GetID(), &objectArray);
+								 }
+							 }
+
+							 obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
+							 obstacleMap = occupancyMap.CleanTile(&tileMap, roomArray[selectedRoom]->GetDoor());
+		}
+				action = EDIT_DOOR;
+				building = NONE;
+				break;
+		case SELECT_ROOM:{
+							 vector<int> heuristc = occupancyMap.CreateHeuristic(&tileMap, roomArray[selectedRoom]->GetDoor());
+							 heuristicsArray[roomArray[selectedRoom]->GetID()] = heuristc;
+							 obstacleMap = occupancyMap.Update(&tileMap, &objectArray);
+							 obstacleMap = occupancyMap.CleanTile(&tileMap, roomArray[selectedRoom]->GetDoor());
+		}
+				action = NONE;
+				break;
 		default:
 			break;
-		}
+			}
 
+		}
 	}
 
 	if(InputManager::GetInstance().MousePress(SDL_BUTTON_RIGHT)){
@@ -603,8 +992,7 @@ void StageState::Input() {
 				objSheet.SetRender(false);
 		}
 		else{
-			switch (action)
-			{
+			switch (action){
 			case NONE:
 				gui.SetPosition(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
 				action = GUI_A;
@@ -620,8 +1008,13 @@ void StageState::Input() {
 			case GUI_A:
 				gui.SetPosition(InputManager::GetInstance().GetMouseX(), InputManager::GetInstance().GetMouseY());
 				break;
-			case SUB_GUI_EDIT:
+			case GUI_EDIT:
 				action = NONE;
+				gui.SetState(BASIC);
+				break;
+			case GUI_WALL:
+				action = NONE;
+				gui.SetState(BASIC);
 				break;
 			default:
 				break;
@@ -629,10 +1022,18 @@ void StageState::Input() {
 		}
 	}
 
-	if(InputManager::GetInstance().IsMouseDown(SDL_BUTTON_LEFT)){
+	if (InputManager::GetInstance().IsMouseDown(SDL_BUTTON_LEFT)){
 
 		switch (action){
 		case NONE:
+			break;
+		case GUI_A:
+			if (gui.BuildIconPressed()){
+				gui.SetFrameBuildIcon(2);
+			}
+			if (gui.DestroyIconPressed()){
+				gui.SetFrameDestroyIcon(2);
+			}
 			break;
 		case TILE_SELECT:
 			action = CONSTRUCT_ROOM;
@@ -643,13 +1044,17 @@ void StageState::Input() {
 			break;
 		case AREA_SELECT:
 			break;
+		case MOVE_WALL:
+			break;
+		case EXPAND_WALL:
+			break;
 		default:
 			break;
 		}
 
 	}
 
-	if(InputManager::GetInstance().MouseRelease(SDL_BUTTON_RIGHT)){
+	if (InputManager::GetInstance().MouseRelease(SDL_BUTTON_RIGHT)){
 
 		switch (action){
 		case NONE:
@@ -668,40 +1073,21 @@ void StageState::Input() {
 		}
 
 	}
-	
+
 }
 
 
 void StageState::DestroyRoom(int roomID){
-    cout << roomID << endl;
-	Point pos;
+	cout << roomID << endl;
     for(int i = 0; i<objectArray.size(); i++){
         if(objectArray[i]->roomID  == roomID){
-			if (objectArray[i]->Type() == "LEFT_CORNER" || objectArray[i]->Type() == "RIGHT_CORNER"){
-				if (objectArray[i]->Type() == "LEFT_CORNER"){
-					pos.x = objectArray[i]->box.x;
-					pos.y = objectArray[i]->box.y + objectArray[i]->box.h;
-
-						pos = tileMap.GetTile(pos.x, pos.y);
-					}
-					else{
-						pos.x = objectArray[i]->box.x + objectArray[i]->box.w;
-						pos.y = objectArray[i]->box.y + objectArray[i]->box.h;
-
-						pos = tileMap.GetTile(pos.x, pos.y);
-
-					}
-				}
-			else{
-				pos.x = objectArray[i]->box.x + objectArray[i]->box.w / 2;
-				pos.y = objectArray[i]->box.y + objectArray[i]->box.h;
-				pos = tileMap.GetTile(pos.x, pos.y);
+			if (objectArray[i]->Is("Wall")) {
+				occupancyMap.CleanTile(&tileMap, objectArray[i]->tile);
+				objectArray.erase(objectArray.begin() + i);
+				i--;
 			}
-			occupancyMap.CleanTile(&tileMap, pos);
-            objectArray.erase(objectArray.begin() + i);
-            i--;
-        }
-    }
+		}
+	}
 }
 
 vector<int> StageState::PathAStar(int posX, int posY, Point door, vector<int> heuristic){
@@ -741,8 +1127,6 @@ vector<int> StageState::PathAStar(int posX, int posY, Point door, vector<int> he
 		posY--;
 		index = posY*tileMap.GetWidth() + posX;
 		
-		cout << "Index : " << index << endl;
-		cout << "ObMap size : " << obstacleMap.size() << endl;
 		if (allPaths.find(index) == allPaths.end() && posX >= 0 && posY >= 0 && obstacleMap[index] != -1 && posY < 25 && posX < 25){
 			cost = heuristic[index] + movements;
 			posCost.SetPoint(index, movements, cost);
@@ -805,7 +1189,6 @@ vector<int> StageState::PathAStar(int posX, int posY, Point door, vector<int> he
 		exploredSize = exploredTiles.size();
 
 		actualPos = index;
-		cout << posX << "," << posY << endl;
 		
 	}
 	if (arrived){
@@ -829,7 +1212,8 @@ void StageState::CreateCharacter(int x, int y){
 	Point tile(x, y);
 	Point tiles = tile;
 	tile = tileMap.GetTileCenter(tile);
-	Permonkey* pM = new Permonkey(tile.x, tile.y, tiles, tileMap, objList);
+	int race = rand() % charList.size();
+	Permonkey* pM = new Permonkey(tile.x, tile.y, tiles, tileMap, objList, charList[race]);
 	objectArray.emplace_back(pM);
 }
 
@@ -989,6 +1373,81 @@ void StageState::ParseObject(vector<string> objList){
 	cout << endl;
 	buySheet.SetTypeList(typeList);
 }
+void StageState::CreateStationWalls(Point begin, Point end, TileMap *tileMap, vector<unique_ptr<GameObject> > *objectArray) {
+	string file;
+	file = "img/paredeestacao_canto_sup.png";
+	Point pos(begin.x, begin.y);
+	Point tile = pos;
+	pos = tileMap->GetTileCenter(pos);
+	Wall *wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, STATION_WALL, tile, tileMap, -1);
+	objectArray->emplace_back(wall);
+
+	file = "img/paredeestacao_canto_esq.png";
+	pos.SetPoint(begin.x, end.y);
+	tile = pos;
+	pos = tileMap->GetTileCenter(pos);
+	wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, STATION_WALL, tile, tileMap, -1);
+	objectArray->emplace_back(wall);
+
+	file = "img/paredeestacao_canto_dir.png";
+	pos.SetPoint(end.x, begin.y);
+	tile = pos;
+	pos = tileMap->GetTileCenter(pos);
+	wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, STATION_WALL, tile, tileMap, -1);
+	objectArray->emplace_back(wall);
+
+	file = "img/paredeestacao_canto_inf.png";
+	pos.SetPoint(end.x, end.y);
+	tile = pos;
+	pos = tileMap->GetTileCenter(pos);
+	wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, STATION_WALL, tile, tileMap, -1);
+	objectArray->emplace_back(wall);
+
+	
+	file = "img/paredeestacao_sup_dir.png";
+	
+	for (int i = begin.x + 1; i< end.x; i++){
+		Point pos(i, begin.y);
+		tile = pos;
+
+		pos = tileMap->GetTileCenter(pos);
+		wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, STATION_WALL, tile, tileMap, -1);
+		objectArray->emplace_back(wall);
+	}
+
+	file = "img/paredeestacao_sup_esq.png";
+	for (int i = begin.y + 1; i < end.y; i++){
+		Point pos(begin.x, i);
+		tile = pos;
+		cout << "tiles : " << tile.x << " " << tile.y << endl;
+		pos = tileMap->GetTileCenter(pos);
+		wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, STATION_WALL, tile, tileMap, -1);
+		objectArray->emplace_back(wall);
+	}
+
+	file = "img/paredeestacao_inf_esq.png";
+	for (int i = begin.x + 1; i < end.x; i++){
+		Point pos(i, end.y);
+		tile = pos;
+
+		pos = tileMap->GetTileCenter(pos);
+		wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, STATION_WALL, tile, tileMap, -1);
+		objectArray->emplace_back(wall);
+	}
+
+	file = "img/paredeestacao_inf_dir.png";
+	for (int i = begin.y + 1; i < end.y; i++){
+		Point pos(end.x, i);
+		tile = pos;
+
+		pos = tileMap->GetTileCenter(pos);
+		wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, STATION_WALL, tile, tileMap, -1);
+		objectArray->emplace_back(wall);
+	}
+
+
+
+}
 
 void StageState::ParseRoom(vector<string> roomList){
 	RoomAttributes attributes;
@@ -1045,6 +1504,64 @@ void StageState::ParseRoom(vector<string> roomList){
 	}
 	cout << endl;
 	roomSheet.SetRoomList(list);
+
+}
+
+void StageState::ParseChar(vector<string> charList){
+	CharAttributes attributes;
+	ifstream charFile;
+	string attribute;
+	size_t size;
+	int counter;
+	int raceCounter = 0;
+
+	for (int i = 0; i < charList.size(); i++){
+		charFile.open(charList[i]);
+		counter = 0;
+		while (!charFile.eof()){
+			getline(charFile, attribute);
+			cout << "CharLists" << endl;
+			cout << attribute << endl;
+			size = attribute.find(":");
+			if (size != string::npos){
+				counter++;
+				attribute = attribute.substr(size + 1);
+				switch (counter){
+				case 1:
+					attributes.race = attribute;
+					break;
+				case 2:
+					attributes.preference = attribute;
+					break;
+				case 3:
+					attributes.sprite = attribute;
+					break;
+				default:
+					break;
+				}
+			}
+		}
+
+		charFile.close();
+		/*for (int j = 1; j <= counter; j++){
+		switch (j){
+		case 1:
+		cout << "name: " << attributes.type << endl;
+		break;
+		case 2:
+		cout << "cost: " << attributes.cost << endl;
+		break;
+		case 3:
+		cout << "type: " << attributes.tileSprite << endl;
+		break;
+		}
+		}
+		cout << endl;*/
+		this->charList[raceCounter] = attributes;
+		raceCounter++;
+
+	}
+	cout << endl;
 
 }
 void StageState::Load(){

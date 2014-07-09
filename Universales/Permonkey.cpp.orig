@@ -2,7 +2,7 @@
 #include "Camera.h"
 #include "Object.h"
 
-Permonkey::Permonkey(float x, float y, Point lTile, TileMap tileMap, unordered_map<string, vector<string>> objList) : character("img/permacaco_anim_ss.png", 4, -1, 4), tileMap(tileMap),
+Permonkey::Permonkey(float x, float y, Point lTile, TileMap tileMap, unordered_map<string, vector<string>> objList,CharAttributes attributes) : character(attributes.sprite, 4, -1, 4), tileMap(tileMap),
 step("music/passo_et_verde.wav") {
     box = Rect(x-character.GetWidth()/2,y-character.GetHeight(), character.GetWidth(), character.GetHeight());
 	rotation = 0;
@@ -21,13 +21,15 @@ step("music/passo_et_verde.wav") {
 	found = true;
 	satisfaction = 50;
 
-	preference = "Pirate";
+	preference = attributes.preference;
 	roomChoice = "";
 	actualGoal = 0;
 
 	Classify(objList);
 
 	gone = false;
+	exitting = false;
+	finalStop = false;
 	
 
 	objectSelect = -1;
@@ -100,6 +102,9 @@ Permonkey::~Permonkey(){
 }
 
 void Permonkey::Update(float dt, vector<unique_ptr<GameObject>> *objectArray){
+	if (satisfaction < 0){
+		satisfaction = 0;
+	}
 	timer.Update(dt);
 	if (timer.Get() > 6){
 		hunger += 1;
@@ -144,6 +149,10 @@ void Permonkey::Update(float dt, vector<unique_ptr<GameObject>> *objectArray){
 		break;
 	case USING_OBJECT:
 		rest.Update(dt);
+		if (goals.empty()){
+			rest.Restart();
+			actionCharacter = EXITING;
+		}
 		if (rest.Get() > 5){
 			UseObject(objectArray, objectSelect);
 			rest.Restart();
@@ -152,12 +161,12 @@ void Permonkey::Update(float dt, vector<unique_ptr<GameObject>> *objectArray){
 		}
 		break;
 	case EXITING:
+		exitting = true;
 		SearchObject(objectArray);
-		cout << arrived << endl;
-		if (arrived){
+
+		if (finalStop){
 			gone = true;
 		}
-		cout << found << endl;
 		break;
 	}
 	//tile = tileMap.GetTile(box.x+box.w/2, box.y+box.y);
@@ -225,29 +234,31 @@ void Permonkey::AddObjective(Point pos){
 }
 
 void Permonkey::AddObjective(vector<int> path) {
-	this->path = path;
-	switch (choice)	{
-	case PIRATE_C:
-		choice = GOING_P;
-		break;
-	case SAMURAI_C:
-		choice = GOING_S;
-		break;
-	default:
-		break;
+	if (!finalStop){
+		this->path = path;
+		switch (choice)	{
+		case PIRATE_C:
+			choice = GOING_P;
+			break;
+		case SAMURAI_C:
+			choice = GOING_S;
+			break;
+		default:
+			break;
+		}
+		if (crt >= 0)
+			crt++;
+		//this->path.pop_back();
+		//this->path.pop_back();
+		//cout << "U_Path :: " << path[path.size()-1] % tileMap.GetWidth() << "," << (int)path[path.size()-1] / tileMap.GetWidth() << endl;
+		objective.y = (int)(path[path.size() - 1] / tileMap.GetWidth());
+		objective.x = path[path.size() - 1] % tileMap.GetWidth();
+		objective = tileMap.GetTileCenter(objective);
+		objectiveTile = tileMap.GetTile(objective.x, objective.y);
+		path.pop_back();
+		actionCharacter = MOVING;
+		flagDesvio = false;
 	}
-	if (crt >= 0)
-		crt++;
-	//this->path.pop_back();
-	//this->path.pop_back();
-	//cout << "U_Path :: " << path[path.size()-1] % tileMap.GetWidth() << "," << (int)path[path.size()-1] / tileMap.GetWidth() << endl;
-	objective.y = (int)(path[path.size()-1] / tileMap.GetWidth());
-	objective.x = path[path.size()-1] % tileMap.GetWidth();
-	objective = tileMap.GetTileCenter(objective);
-	objectiveTile = tileMap.GetTile(objective.x, objective.y);
-	path.pop_back();
-	actionCharacter = MOVING;
-	flagDesvio = false;
 }
 
 
@@ -287,6 +298,10 @@ void Permonkey::Move(float dt){
 			}
 			else{
 				arrived = true;
+				if (exitting){
+					finalStop = true;
+					actionCharacter = EXITING;
+				}
 			}
 			if (flagDesvio){
 				objective.x = objectiveMem.x;
@@ -411,25 +426,25 @@ int Permonkey::SearchObject(vector<unique_ptr<GameObject>> *objectArray){
 		for (int i = 0; i < objectArray->size(); i++){
 			if (objectArray->at(i)->Is("Object")){
 				if (objectArray->at(i)->GetTextAttributes()[0] == "Teleporter"){
-					cout << "Last Object = " << i << endl;
 
 					object = i;
 				}
 			}
 		}
-		cout << "New object select : " << object << endl;;
 	}
 	else{
 		for (int i = 0; i < objectArray->size(); i++){
 			if (objectArray->at(i)->Is("Object")){
 				if (objectArray->at(i)->GetTextAttributes()[0] == goals[actualGoal].second){
-					cout << "Object = " << i << endl;
 					object = i;
 				}
 			}
 		}
 	}
 	objectSelect = object;
+	if (objectSelect == -1){
+		CancelGoal();
+	}
 	return object;
 }
 
@@ -453,7 +468,6 @@ vector<int> Permonkey::GetAttributes(){
 }
 
 void Permonkey::UseObject(vector<unique_ptr<GameObject>> *objectArray, int index){
-	cout << "Index : " << index << endl;
 	vector<pair<string, string>> newGoals;
 	if (index >= 0){
 		vector<int> activeAttributes = objectArray->at(index)->GetAttributes();
@@ -468,7 +482,6 @@ void Permonkey::UseObject(vector<unique_ptr<GameObject>> *objectArray, int index
 			}
 		}
 		goals = newGoals;
-		cout << "New Size : " << goals.size() << endl;
 
 	}
 	else{
@@ -538,7 +551,6 @@ void Permonkey::ChooseGoals(){
 	}
 	else{
 		if (otherObjects.size() > 0 ){
-			cout << "Entrou other" << otherObjects.size() << endl;
 			objChoice = rand() % otherObjects.size();
 			goals.emplace_back(otherObjects[objChoice]);
 			otherObjects[objChoice].first = "";
@@ -553,6 +565,19 @@ void Permonkey::ChooseGoals(){
 	}
 }
 
+void Permonkey::CancelGoal(){
+	vector<pair<string, string>> newGoals;
+		objectSelect = -1;
+		goals[actualGoal].first = "";
+		for (int i = 0; i < goals.size(); i++){
+			if (goals[i].first != ""){
+				newGoals.emplace_back(goals[i]);
+			}
+		}
+		goals = newGoals;
+		satisfaction -= 15;
+}
+
 Point Permonkey::GetTile(){
 	return tile;
 }
@@ -564,4 +589,9 @@ void Permonkey::ChangeSelection(int reference){
 	if (objectSelect > reference){
 		objectSelect--;
 	}
+}
+
+int Permonkey::MakeDeposit(){
+	int a;
+	return a;
 }

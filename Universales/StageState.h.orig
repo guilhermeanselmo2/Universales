@@ -1,6 +1,7 @@
 #ifndef StageStateH
 #define StageStateH
 
+#include "Wall.h"
 #include "State.h"
 #include "Sprite.h"
 #include "BlockTileSet.h"
@@ -33,10 +34,14 @@ enum Action{
 	DESTROY_ROOM,
 	AREA_SELECT,
 	GUI_A,
-	SUB_GUI_EDIT,
+	GUI_EDIT,
+	EXPAND_WALL,
+	GUI_WALL,
 	BUY,
-	EDIT_WALL,
+	MOVE_WALL,
 	EDIT_DOOR,
+	SELECT_ROOM,
+	SELECT_WALL,
 	EDIT_OBJECT
 };
 
@@ -51,6 +56,7 @@ public:
 	void DestroyCharacter(int id);
 	vector<int> PathAStar(int posX, int posY, Point door, vector<int> heuristic);
 	void SelectCharacter();
+	void CreateStationWalls(Point begin,Point end,TileMap *tileMap, vector<unique_ptr<GameObject> > *objectArray);
 	void Load();
 	void Save();
 	static StageState *instance;
@@ -62,6 +68,7 @@ private:
 	void Input();
 	void ParseObject(vector<string> objList);
 	void ParseRoom(vector<string> roomList);
+	void ParseChar(vector<string> charList);
 
 
 	Sprite bg, okTile, noTile;
@@ -70,6 +77,10 @@ private:
 	Action action;
 	SelectionBox selectionBox;
 	Point p;
+	Point move;
+	Point selectedWall;
+	Point tileBegin;
+	Point tileEnd;
 	Point ptile;
 	RoomType rType;
 	string charRoom;
@@ -77,10 +88,10 @@ private:
 	vector<int> obstacleMap;
 	unordered_map<int, vector<int>> heuristicsArray;
 	unordered_map<string, vector<string>> objList, roomList;
+	unordered_map<int, CharAttributes> charList;
 	
 	Timer creationTimer;
 	GUI gui;
-	GUI subGuiEdit;
 	Text moneyText;
 	Text costText;
 	OccupancyMap occupancyMap;
@@ -92,6 +103,7 @@ private:
 	int selectedObject, selectedCharacter;
 	RoomAttributes roomAttributes;
 	static vector<string> musicNames;
+	int selectedRoom;
 };
 
 #endif

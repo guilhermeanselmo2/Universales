@@ -9,10 +9,16 @@
 #include <queue>
 #include "Sound.h"
 
+struct CharAttributes{
+	string race;
+	string preference;
+	string sprite;
+};
+
 
 class Permonkey : public GameObject{
 public:
-	Permonkey(float x, float y, Point lTile, TileMap tileMap, unordered_map<string, vector<string>> objList);
+	Permonkey(float x, float y, Point lTile, TileMap tileMap, unordered_map<string, vector<string>> objList, CharAttributes attributes);
 	Permonkey(ifstream &file, TileMap tileMap, unordered_map<string, vector<string>> objList);
     ~Permonkey();
 	void Update(float dt, vector<unique_ptr<GameObject>> *objectArray);
@@ -45,7 +51,10 @@ public:
 	Point GetTile();
 	void ChooseGoals();
 	void ChangeSelection(int reference);
-	
+	void CancelGoal();
+	void SetFrameCount(int frameCount);
+	void SetFrame(int frame);
+	void SetCurrentHeight(int currentHeight);
 	//Object functions
 	void MoveTo(int x, int y);
 	bool SettlePos(vector<int> obstacleMap);
@@ -54,6 +63,7 @@ public:
 	vector<Point> GetAccessPoints();
 	vector<string>GetTextAttributes();
 	vector<pair<string,string>> preferredObjects, otherObjects;
+	int MakeDeposit();
     
 
 private:
@@ -81,6 +91,7 @@ private:
 
 	Sound step;
 	float soundControl;
+	bool exitting, finalStop;
 	bool gone;
 
 

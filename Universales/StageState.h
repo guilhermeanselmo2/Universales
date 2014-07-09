@@ -68,6 +68,7 @@ private:
 	void Input();
 	void ParseObject(vector<string> objList);
 	void ParseRoom(vector<string> roomList);
+	void ParseChar(vector<string> charList);
 
 
 	Sprite bg, okTile, noTile;
@@ -85,10 +86,14 @@ private:
 	string charRoom;
 	vector<unique_ptr<Room>> roomArray;
 	vector<int> obstacleMap;
+	vector<int> doors;
 	unordered_map<int, vector<int>> heuristicsArray;
 	unordered_map<string, vector<string>> objList, roomList;
+	unordered_map<int, CharAttributes> charList;
 	
 	Timer creationTimer;
+	Timer animationTimer;
+	Timer auxanimationTimer;
 	GUI gui;
 	Text moneyText;
 	Text costText;

@@ -35,6 +35,8 @@ void State::UpdateArray(float dt, TileMap *tileMap) {
         }
 		p.SetPoint(p.x + tileMap->GetTileWidth() / 2, p.y - tileMap->GetTileHeight() / 2);
         p = tileMap->GetTile(p.x, p.y);
+			p = objectArray[i]->GetTile();
+
 		p.SetPoint(i,p.x,p.y);
         renderQueue.emplace(p);
     }

@@ -1,0 +1,3 @@
+Race:Astronaut
+Preference:Pirate
+Sprite:img/char/astronaut/astronaut.png

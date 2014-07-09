@@ -208,6 +208,15 @@ void Room::Render(TileMap *tileMap){
 
 void Room::SetDoor(float x, float y, int RoomID, vector<unique_ptr<GameObject> > *objectArray) {
 	Point aux = door;
+	if ((door.x != 0) && (door.y != 0)){
+		for (int j = 0; j < objectArray->size(); j++){
+			if (objectArray->at(j)->tile.DisPoints(objectArray->at(j)->tile, door) == 0) {
+				objectArray->erase(objectArray->begin() + j);
+				j--;
+			}
+		}
+	}
+
 	if ((aux.y < end.y) && (aux.x == end.x)){
 		Point p(tileMap.GetTileCenter(aux));
 		string file = "img/parede_esq_tamanho_do_tile.png";
@@ -234,6 +243,37 @@ void Room::SetDoor(float x, float y, int RoomID, vector<unique_ptr<GameObject> >
 	}
 	door.x = x;
 	door.y = y;
+	
+	if (((door.x == end.x) && (door.y != end.y) && (door.y != begin.y)) || ((door.x == begin.x) && (door.y != begin.y) && (door.y != end.y))) {
+		if (attributes.type == "Pirate") {
+			Point p(tileMap.GetTileCenter(door));
+			string file = "img/spritesheet_parede_pir_dir.png";
+			Wall *wall = new Wall(p.x - tileMap.GetTileWidth() / 2, p.y + tileMap.GetTileHeight() / 2, file, PIRATE_DOOR, aux, &tileMap, RoomID);
+			objectArray->emplace_back(wall);
+		}
+		if (attributes.type == "Japan") {
+			Point p(tileMap.GetTileCenter(door));
+			string file = "img/spritesheet_parede_jap_dir.png";
+			Wall *wall = new Wall(p.x - tileMap.GetTileWidth() / 2, p.y + tileMap.GetTileHeight() / 2, file, SAMURAI_DOOR, aux, &tileMap, RoomID);
+			objectArray->emplace_back(wall);
+		}
+	}
+
+	if (((door.y == end.y) && (door.x != end.x) && (door.x != begin.x)) || ((door.y == begin.y) && (door.x != begin.x) && (door.x != end.x))) {
+		if (attributes.type == "Pirate") {
+			Point p(tileMap.GetTileCenter(door));
+			string file = "img/spritesheet_parede_pir.png";
+			Wall *wall = new Wall(p.x - tileMap.GetTileWidth() / 2, p.y + tileMap.GetTileHeight() / 2, file, PIRATE_DOOR, aux, &tileMap, RoomID);
+			objectArray->emplace_back(wall);
+		}
+		if (attributes.type == "Japan") {
+			Point p(tileMap.GetTileCenter(door));
+			string file = "img/spritesheet_parede_jap.png";
+			Wall *wall = new Wall(p.x - tileMap.GetTileWidth() / 2, p.y + tileMap.GetTileHeight() / 2, file, SAMURAI_DOOR, aux, &tileMap, RoomID);
+			objectArray->emplace_back(wall);
+		}
+	}
+
 	cout << "door: " << door.x << "," << door.y << endl;
 }
 

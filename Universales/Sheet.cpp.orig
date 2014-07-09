@@ -8,8 +8,8 @@ Sheet::Sheet() : sheet("img/objectPrev.png"), objectSprite(""), buy("img/icons/b
 	itemSelected = -1;
 	typeSelected = -1;
 	attributesInfo[0] = Text("font/SFPixelate.ttf", 15, Text::TEXT_SOLID, "", WHITE, box.x + 450, 55);
-	attributesInfo[1] = Text("font/SFPixelate.ttf", 15, Text::TEXT_SOLID, "", WHITE, box.x + 450, 225);
-	attributesInfo[2] = Text("font/SFPixelate.ttf", 15, Text::TEXT_WRAPPED, "", WHITE, box.x + 410, 240, 370);
+	attributesInfo[1] = Text("font/SFPixelate.ttf", 15, Text::TEXT_SOLID, "", WHITE, box.x + 450, 325);
+	attributesInfo[2] = Text("font/SFPixelate.ttf", 15, Text::TEXT_WRAPPED, "", WHITE, box.x + 410, 340, 370);
 }
 
 

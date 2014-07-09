@@ -55,6 +55,8 @@ public:
 	Rect GetBox();
 	Point GetTile();
 
+	int MakeDeposit();
+
 	//Char functions
 	int GetHunger();
 	void Save(ofstream &file);
@@ -63,6 +65,7 @@ public:
 	int GetObjectIndex();
 	void UseObject(vector<unique_ptr<GameObject>> *objectArray, int index);
 	void ChangeSelection(int reference);
+	void CancelGoal();
 
 	Sprite sp;
 	Rect box;
@@ -74,6 +77,7 @@ private:
 	TileMap tileMap;
 	Timer timer;
 	string type;
+	int deposit;
 
 };
 

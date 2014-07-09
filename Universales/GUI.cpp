@@ -2,9 +2,9 @@
 #include "InputManager.h"
 #include <algorithm>
 
-GUI::GUI() : buildIcon("img/icons/iconemartelo.png",2,-1,1), destroyIcon("img/icons/iconedestruicao.png",2,-1,1), buyIcon("img/icons/buy2.png"), editIcon("img/icons/editar.jpg"),
-pirateIcon("img/icons/pirate.jpg"), samuraiIcon("img/icons/samurai.jpg"), doorIcon("img/icons/door.png"), wallIcon("img/icons/wall.jpg"),
-movewallIcon("img/icons/move.png"), expandwallIcon("img/icons/expand.png") {
+GUI::GUI() : buildIcon("img/icons/iconemartelo.png",2,-1,1), destroyIcon("img/icons/iconedestruicao.png",2,-1,1), buyIcon("img/icons/icone_compra.png",2,-1,1), editIcon("img/icons/icone_editar.png",2,-1,1),
+pirateIcon("img/icons/pirate.jpg"), samuraiIcon("img/icons/samurai.jpg"), doorIcon("img/icons/icone_porta.png",2,-1,1), wallIcon("img/icons/icone_parede.png",2,-1,1),
+movewallIcon("img/icons/icone_mover.png",2,-1,1), expandwallIcon("img/icons/icone_alargar.png",2,-1,1) {
 
     box.w = buildIcon.GetWidth()*4;
     box.h = buildIcon.GetHeight()*2;
@@ -48,7 +48,6 @@ GUI::~GUI(){
 }
 
 void GUI::Render(){
-	cout << "Render" << endl;
 	switch (guiState){
 	case BASIC:
 		buildIcon.Render(buildBox.x, buildBox.y);
@@ -65,7 +64,6 @@ void GUI::Render(){
 		wallIcon.Render(wallBox.x, wallBox.y);
 		break;
 	case EDIT_WALL_GUI:
-		cout << "EDIT_WALL_GUI" << endl;
 		movewallIcon.Render(movewallBox.x, movewallBox.y);
 		expandwallIcon.Render(expandwallBox.x, expandwallBox.y);
 		break;
@@ -162,6 +160,30 @@ void GUI::SetFrameBuildIcon(int currentFrame) {
 
 void GUI::SetFrameDestroyIcon(int currentFrame) {
 	destroyIcon.SetFrame(currentFrame);
+}
+
+void GUI::SetFrameBuyIcon(int currentFrame) {
+	buyIcon.SetFrame(currentFrame);
+}
+
+void GUI::SetFrameEditIcon(int currentFrame) {
+	editIcon.SetFrame(currentFrame);
+}
+
+void GUI::SetFrameDoorIcon(int currentFrame) {
+	doorIcon.SetFrame(currentFrame);
+}
+
+void GUI::SetFrameWallIcon(int currentFrame) {
+	wallIcon.SetFrame(currentFrame);
+}
+
+void GUI::SetFrameMoveWallIcon(int currentFrame) {
+	movewallIcon.SetFrame(currentFrame);
+}
+
+void GUI::SetFrameExpandWallIcon(int currentFrame) {
+	expandwallIcon.SetFrame(currentFrame);
 }
 
 bool GUI::DoorIconPressed(){

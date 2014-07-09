@@ -10,6 +10,8 @@ enum WallStyle{
     UPPER_RIGHT = 0,
     UPPER_LEFT,
     LOWER_RIGHT,
+	PIRATE_DOOR,
+	SAMURAI_DOOR,
     LOWER_LEFT,
     UPPER_CORNER,
     LEFT_CORNER,
@@ -36,6 +38,9 @@ public:
 	void AddObjective(vector<int> path);
 	string GetChoice();
 	Point GetTile();
+	void SetFrameCount(int countFrame);
+	void SetFrame(int frame);
+	void SetCurrentHeight(int frame);
 
 	//Non Wall functions
 	void SetHunger(int hunger);
@@ -52,6 +57,9 @@ public:
 	Rect GetBox();
 	void Save(ofstream &file);
 	void ChangeSelection(int reference);
+	void CancelGoal();
+	int MakeDeposit();
+	string type;
 
 private:
 	Timer editTimer;

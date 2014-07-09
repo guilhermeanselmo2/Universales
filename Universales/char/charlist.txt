@@ -1,0 +1,3 @@
+char/info/permonkey.txt
+char/info/fatso.txt
+char/info/astronaut.txt

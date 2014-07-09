@@ -41,10 +41,16 @@ public:
 	virtual void UseObject(vector<unique_ptr<GameObject>> *objectArray, int index) = 0;
 	virtual Rect GetBox() = 0;
 	virtual Point GetTile() = 0;
+	virtual void CancelGoal() = 0;
+
+	virtual void SetFrameCount(int frameCount) = 0;
+	virtual void SetFrame(int frame) = 0;
+	virtual void SetCurrentHeight(int currentHeight) = 0;
 
 	//For object only
 	virtual bool SettlePos(vector<int> obstacleMap) = 0;
 	virtual vector<string>GetTextAttributes()=0;
+	virtual int MakeDeposit() = 0;
 
 	//Only way to make it work
 	virtual int GetHunger() = 0;

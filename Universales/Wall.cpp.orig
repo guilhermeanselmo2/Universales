@@ -2,7 +2,8 @@
 #include "GameObject.h"
 #include "Camera.h"
 
-Wall::Wall(float centerX, float centerY, string file, WallStyle lStyle, Point lTile, int lRoom){
+Wall::Wall(float centerX, float centerY, string file, WallStyle lStyle, Point lTile, TileMap *tileMap, int lRoom) {
+	this->tileMap = *tileMap;
 	editing = false;
 	tile = lTile;
     roomID = lRoom;
@@ -16,16 +17,19 @@ Wall::Wall(float centerX, float centerY, string file, WallStyle lStyle, Point lT
         box = Rect(centerX,centerY-wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
         break;
     case UPPER_CORNER:
-        box = Rect(centerX-wall.GetWidth()/2, centerY-wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+        box = Rect(centerX, centerY-wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
         break;
     case LEFT_CORNER:
-        box = Rect(centerX-wall.GetWidth()/2, centerY-wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+        box = Rect(centerX, centerY-wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
         break;
 	case RIGHT_CORNER:
-		box = Rect(centerX - wall.GetWidth()/2, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		box = Rect(centerX, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
 		break;
 	case INF_CORNER:
-		box = Rect(centerX - wall.GetWidth() / 2, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		box = Rect(centerX, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		break;
+	case STATION_WALL:
+		box = box = Rect(centerX, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
 		break;
     default:
         break;
@@ -38,6 +42,9 @@ Wall::~Wall(){
 }
 
 void Wall::Update(float dt, vector<unique_ptr<GameObject>> *objectArray){
+	tile.x = box.x + tileMap.GetTileWidth() / 2;
+	tile.y = (box.y + wall.GetHeight()) - tileMap.GetTileHeight() / 2;
+	tile = tileMap.GetTile(tile.x,tile.y);
 	editTimer.Update(dt);
 }
 
@@ -88,6 +95,9 @@ string Wall::Type(){
 	case INF_CORNER:
 		return "INF_CORNER";
 		break;
+	case STATION_WALL:
+		return "STATION_WALL";
+		break;
 	default:
 		return "Wall";
 		break;
@@ -122,22 +132,22 @@ void Wall::MoveTo(int x, int y){
 	int centerY = y;
 	switch (style) {
 	case UPPER_RIGHT:
-		box = Rect(centerX, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		box = Rect(box.x + centerX, box.y + centerY, wall.GetWidth(), wall.GetHeight());
 		break;
 	case UPPER_LEFT:
-		box = Rect(centerX, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		box = Rect(box.x + centerX,box.y + centerY , wall.GetWidth(), wall.GetHeight());
 		break;
 	case UPPER_CORNER:
-		box = Rect(centerX - wall.GetWidth() / 2, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		box = Rect(box.x + centerX, box.y + centerY, wall.GetWidth(), wall.GetHeight());
 		break;
 	case LEFT_CORNER:
-		box = Rect(centerX - wall.GetWidth() / 2, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		box = Rect(box.x + centerX, box.y + centerY, wall.GetWidth(), wall.GetHeight());
 		break;
 	case RIGHT_CORNER:
-		box = Rect(centerX - wall.GetWidth() / 2, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		box = Rect(centerX + box.x, centerY + box.y, wall.GetWidth(), wall.GetHeight());
 		break;
 	case INF_CORNER:
-		box = Rect(centerX - wall.GetWidth() / 2, centerY - wall.GetHeight(), wall.GetWidth(), wall.GetHeight());
+		box = Rect(centerX + box.x, centerY + box.y, wall.GetWidth(), wall.GetHeight());
 		break;
 	default:
 		break;
@@ -194,4 +204,13 @@ void Wall::Save(ofstream &file){
 
 void Wall::ChangeSelection(int reference){
 
+}
+
+void Wall::CancelGoal(){
+
+}
+
+int Wall::MakeDeposit(){
+	int a;
+	return a;
 }

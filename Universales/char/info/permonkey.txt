@@ -1,0 +1,3 @@
+Race:Permonkey
+Preference:Japan
+Sprite:img/char/permonkey/permacaco.png

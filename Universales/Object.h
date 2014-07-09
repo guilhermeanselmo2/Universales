@@ -35,7 +35,9 @@ public:
 
 	void MoveTo(int x, int y);
 	bool SettlePos(vector<int> obstacleMap);
-
+	void SetFrameCount(int frameCount);
+	void SetFrame(int frame);
+	void SetCurrentHeight(int currentHeight);
 	bool IsDead();
 	bool Is(string type);
 	void Editing(bool editing);
@@ -55,6 +57,8 @@ public:
 	Rect GetBox();
 	Point GetTile();
 
+	int MakeDeposit();
+
 	//Char functions
 	int GetHunger();
 	void Save(ofstream &file);
@@ -63,6 +67,7 @@ public:
 	int GetObjectIndex();
 	void UseObject(vector<unique_ptr<GameObject>> *objectArray, int index);
 	void ChangeSelection(int reference);
+	void CancelGoal();
 
 	Sprite sp;
 	Rect box;
@@ -74,6 +79,7 @@ private:
 	TileMap tileMap;
 	Timer timer;
 	string type;
+	int deposit;
 
 };
 

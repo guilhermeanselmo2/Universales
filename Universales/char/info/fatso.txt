@@ -1,0 +1,3 @@
+Race:Fatso
+Preference:Pirate
+Sprite:img/char/fatso/fatso.png
