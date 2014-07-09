@@ -4,6 +4,10 @@
 #include "Text.h"
 #include "Button.h"
 #include "Sprite.h"
+#include "Language.h"
+#include "OptionsState.h"
+#include "StageState.h"
+#include "Sound.h"
 
 class PauseState : public State
 {
@@ -18,8 +22,10 @@ private:
 
 	Text text;
 	Button resumeButton;
+	Button saveButton;
 	Button optionsButton;
 	Button quitButton;
 	Sprite bg;
+	Sound click;
 };
 

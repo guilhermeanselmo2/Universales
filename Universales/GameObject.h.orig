@@ -29,8 +29,8 @@ public:
 	virtual bool IsDead() = 0;
 	virtual bool Is(string type) = 0;
 	virtual void Editing(bool editing) = 0;
-
-	//For Character
+	virtual void Save(ofstream &file)=0;
+	//For_Character
 	virtual void AddObjective(float x, float y, Point tile) = 0;
 	virtual void AddObjective(vector<int> path) = 0;
 	virtual bool IsCharacter() = 0;
@@ -55,6 +55,10 @@ public:
 	virtual void MoveTo(int x, int y) = 0;
 
 	virtual vector<int> GetAttributes() = 0;
+
+	virtual void ChangeSelection(int reference) = 0;
+
+
 
 	
 	//void ConvertToTile(TileMap *tileMap);

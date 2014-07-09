@@ -1,0 +1,11 @@
+#include "Character.h"
+
+
+<<<<<<< .merge_file_a07808
+Character::Character(void){}
+=======
+Character::Character(void)
+{
+}
+
+>>>>>>> .merge_file_a07724

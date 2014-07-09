@@ -1,0 +1,4 @@
+Type:Pirate
+TileCost:50
+Tile Sprite:img/tileset/tile_madeira.png
+Description:Yo, yo, yo and a bottle of rum!

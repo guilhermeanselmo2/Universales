@@ -15,6 +15,8 @@ enum GuiState{
 class GUI{
 public:
 	GUI();
+    GUI(string file1, string file2, string file3, string file4);
+	GUI(string file1, string file2);
     ~GUI();
     void Render();
     void SetPosition(float x, float y);

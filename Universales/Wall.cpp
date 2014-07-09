@@ -41,11 +41,11 @@ Wall::~Wall(){
 
 }
 
-void Wall::Update(float dt){
+void Wall::Update(float dt, vector<unique_ptr<GameObject>> *objectArray){
 	tile.x = box.x + tileMap.GetTileWidth() / 2;
 	tile.y = (box.y + wall.GetHeight()) - tileMap.GetTileHeight() / 2;
 	tile = tileMap.GetTile(tile.x,tile.y);
- 	editTimer.Update(dt);
+	editTimer.Update(dt);
 }
 
 void Wall::Render(int cameraX, int cameraY){
@@ -118,15 +118,18 @@ int Wall::GetHunger(){
 	return 0;
 }
 
-Choice Wall::GetChoice(){
-	Choice a = DECIDING;
+void Wall::SetHunger(int hunger){
+	
+}
+
+string Wall::GetChoice(){
+	string a;
 	return a;
 }
 
 void Wall::MoveTo(int x, int y){
 	int centerX = x;
 	int centerY = y;
-
 	switch (style) {
 	case UPPER_RIGHT:
 		box = Rect(box.x + centerX, box.y + centerY, wall.GetWidth(), wall.GetHeight());
@@ -149,4 +152,56 @@ void Wall::MoveTo(int x, int y){
 	default:
 		break;
 	}
+}
+
+bool Wall::SettlePos(vector<int> obstacleMap){
+	return false;
+}
+
+ActionCharacter Wall::GetAction(){
+	return DECIDING_ROOM;
+}
+
+int Wall::GetObjectIndex(){
+	return -1;
+}
+
+vector<int> Wall::GetHeuristic(int i){
+	cout << "Wall" << endl;
+	vector<int> a;
+	return a;
+}
+vector<int> Wall::GetAttributes(){
+	vector<int> a;
+	return a;
+}
+
+void Wall::UseObject(vector<unique_ptr<GameObject>> *objectArray, int index){
+
+}
+
+vector<Point> Wall::GetAccessPoints(){
+	vector<Point> a;
+	return a;
+}
+
+vector<string> Wall::GetTextAttributes(){
+	vector<string> a;
+	return a;
+}
+
+Rect Wall::GetBox(){
+	return box;
+}
+
+Point Wall::GetTile(){
+	return tile;
+}
+
+void Wall::Save(ofstream &file){
+
+}
+
+void Wall::ChangeSelection(int reference){
+
 }

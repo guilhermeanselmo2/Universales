@@ -2,7 +2,8 @@
 #include "Camera.h"
 #include "Object.h"
 
-Permonkey::Permonkey(float x, float y, Point lTile, TileMap tileMap, unordered_map<string, vector<string>> objList) : character("img/permacaco_anim_ss.png", 4, -1, 4), tileMap(tileMap) {
+Permonkey::Permonkey(float x, float y, Point lTile, TileMap tileMap, unordered_map<string, vector<string>> objList) : character("img/permacaco_anim_ss.png", 4, -1, 4), tileMap(tileMap),
+step("music/passo_et_verde.wav") {
     box = Rect(x-character.GetWidth()/2,y-character.GetHeight(), character.GetWidth(), character.GetHeight());
 	rotation = 0;
 	roomID = 0;
@@ -26,11 +27,73 @@ Permonkey::Permonkey(float x, float y, Point lTile, TileMap tileMap, unordered_m
 
 	Classify(objList);
 
+	gone = false;
+	
+
 	objectSelect = -1;
 	
 	
 }
 
+Permonkey::Permonkey(ifstream &file, TileMap tileMap, unordered_map<string, vector<string>> objList) : 
+character("img/permacaco_anim_ss.png", 4, -1, 4), tileMap(tileMap) {
+	file.read(reinterpret_cast<char*> (&box), sizeof(Rect));
+	file.read(reinterpret_cast<char*> (&rotation), sizeof(float));
+	file.read(reinterpret_cast<char*> (&roomID), sizeof(int));
+	file.read(reinterpret_cast<char*> (&crt), sizeof(int));
+	file.read(reinterpret_cast<char*> (&objective), sizeof(Point));
+	file.read(reinterpret_cast<char*> (&tile), sizeof(Point));
+	file.read(reinterpret_cast<char*> (&actionCharacter), sizeof(ActionCharacter));
+	file.read(reinterpret_cast<char*> (&choice), sizeof(Choice));
+	file.read(reinterpret_cast<char*> (&hunger), sizeof(int));
+	file.read(reinterpret_cast<char*> (&money), sizeof(int));
+	file.read(reinterpret_cast<char*> (&found), sizeof(bool));
+	file.read(reinterpret_cast<char*> (&satisfaction), sizeof(int));
+	file.read(reinterpret_cast<char*> (&actualGoal), sizeof(int));
+	file.read(reinterpret_cast<char*> (&objectSelect), sizeof(int));
+	int size;
+	file.read(reinterpret_cast<char*> (&size), sizeof(int));
+	preference.resize(size);
+	for (int p = 0; p < preference.size(); p++){
+		file.read(reinterpret_cast<char*> (&preference[p]), sizeof(char));
+	}
+	file.read(reinterpret_cast<char*> (&size), sizeof(int));
+	roomChoice.resize(size);
+	for (int p = 0; p < roomChoice.size(); p++){
+		file.read(reinterpret_cast<char*> (&roomChoice[p]), sizeof(char));
+	}
+	file.read(reinterpret_cast<char*> (&timer), sizeof(Timer));
+	file.read(reinterpret_cast<char*> (&rest), sizeof(Timer));
+	Classify(objList);
+}
+void Permonkey::Save(ofstream &file){
+	file.write(reinterpret_cast<char*> (&box), sizeof(Rect));
+	file.write(reinterpret_cast<char*> (&rotation), sizeof(float));
+	file.write(reinterpret_cast<char*> (&roomID), sizeof(int));
+	file.write(reinterpret_cast<char*> (&crt), sizeof(int));
+	file.write(reinterpret_cast<char*> (&objective), sizeof(Point));
+	file.write(reinterpret_cast<char*> (&tile), sizeof(Point));
+	file.write(reinterpret_cast<char*> (&actionCharacter), sizeof(ActionCharacter));
+	file.write(reinterpret_cast<char*> (&choice), sizeof(Choice));
+	file.write(reinterpret_cast<char*> (&hunger), sizeof(int));
+	file.write(reinterpret_cast<char*> (&money), sizeof(int));
+	file.write(reinterpret_cast<char*> (&found), sizeof(bool));
+	file.write(reinterpret_cast<char*> (&satisfaction), sizeof(int));
+	file.write(reinterpret_cast<char*> (&actualGoal), sizeof(int));
+	file.write(reinterpret_cast<char*> (&objectSelect), sizeof(int));
+	int size = preference.size();
+	file.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < preference.size(); p++){
+		file.write(reinterpret_cast<char*> (&preference[p]), sizeof(char));
+	}
+	size = roomChoice.size();
+	file.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < roomChoice.size(); p++){
+		file.write(reinterpret_cast<char*> (&roomChoice[p]), sizeof(char));
+	}
+	file.write(reinterpret_cast<char*> (&timer), sizeof(Timer));
+	file.write(reinterpret_cast<char*> (&rest), sizeof(Timer));
+}
 Permonkey::~Permonkey(){
 
 
@@ -60,7 +123,12 @@ void Permonkey::Update(float dt, vector<unique_ptr<GameObject>> *objectArray){
 		}
 		break;
 	case MOVING:
+		soundControl += dt;
 		character.SetFrameTime(0.5);
+		if (soundControl >= 0.5){
+			step.Play(1);
+			soundControl = 0;
+		}
 		character.Update(dt);
 		Move(dt);
 		break;
@@ -84,9 +152,14 @@ void Permonkey::Update(float dt, vector<unique_ptr<GameObject>> *objectArray){
 		}
 		break;
 	case EXITING:
-		cout << "Bye!!" << endl;
+		SearchObject(objectArray);
+		cout << arrived << endl;
+		if (arrived){
+			gone = true;
+		}
+		cout << found << endl;
+		break;
 	}
-	cout << "Action : " << actionCharacter << endl;
 	//tile = tileMap.GetTile(box.x+box.w/2, box.y+box.y);
 }
 
@@ -99,7 +172,7 @@ void Permonkey::Render(int cameraX, int cameraY){
 }
 
 bool Permonkey::IsDead(){
-	return false;
+	return gone;
 
 }
 
@@ -332,18 +405,27 @@ void Permonkey::MoveTo(int x, int y){
 
 int Permonkey::SearchObject(vector<unique_ptr<GameObject>> *objectArray){
 	found = false;
+	int object = -1;
 	if (goals.empty()){
 		actionCharacter = EXITING;
+		for (int i = 0; i < objectArray->size(); i++){
+			if (objectArray->at(i)->Is("Object")){
+				if (objectArray->at(i)->GetTextAttributes()[0] == "Teleporter"){
+					cout << "Last Object = " << i << endl;
+
+					object = i;
+				}
+			}
+		}
+		cout << "New object select : " << object << endl;;
 	}
 	else{
-		cout << "Searching : " << goals.size() << endl;
-	}
-	int object = -1;
-	for (int i = 0; i < objectArray->size(); i++){
-		if (objectArray->at(i)->Is("Object")){
-			if (objectArray->at(i)->GetTextAttributes()[0] == goals[actualGoal].second){
-				cout << "Object = " << i << endl;
-				object = i;
+		for (int i = 0; i < objectArray->size(); i++){
+			if (objectArray->at(i)->Is("Object")){
+				if (objectArray->at(i)->GetTextAttributes()[0] == goals[actualGoal].second){
+					cout << "Object = " << i << endl;
+					object = i;
+				}
 			}
 		}
 	}
@@ -419,9 +501,15 @@ void Permonkey::Classify(unordered_map<string, vector<string>> objList){
 				preferredObjects.emplace_back(nameType);
 			}
 			else{
-				nameType.first = i->first;
-				nameType.second = i->second[j];
-				otherObjects.emplace_back(nameType);
+				if (i->first != "None"){
+					nameType.first = i->first;
+					nameType.second = i->second[j];
+					otherObjects.emplace_back(nameType);
+				}
+				else{
+					lastGoal.first = i->first;
+					lastGoal.second = i->second[j];
+				}
 			}
 		}
 	}
@@ -449,7 +537,7 @@ void Permonkey::ChooseGoals(){
 		
 	}
 	else{
-		if (otherObjects.size() > 0){
+		if (otherObjects.size() > 0 ){
 			cout << "Entrou other" << otherObjects.size() << endl;
 			objChoice = rand() % otherObjects.size();
 			goals.emplace_back(otherObjects[objChoice]);
@@ -467,4 +555,13 @@ void Permonkey::ChooseGoals(){
 
 Point Permonkey::GetTile(){
 	return tile;
+}
+
+void Permonkey::ChangeSelection(int reference){
+	if (objectSelect == reference){
+		objectSelect = -1;
+	}
+	if (objectSelect > reference){
+		objectSelect--;
+	}
 }

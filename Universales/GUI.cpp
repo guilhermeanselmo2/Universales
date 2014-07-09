@@ -48,6 +48,7 @@ GUI::~GUI(){
 }
 
 void GUI::Render(){
+	cout << "Render" << endl;
 	switch (guiState){
 	case BASIC:
 		buildIcon.Render(buildBox.x, buildBox.y);
@@ -64,6 +65,7 @@ void GUI::Render(){
 		wallIcon.Render(wallBox.x, wallBox.y);
 		break;
 	case EDIT_WALL_GUI:
+		cout << "EDIT_WALL_GUI" << endl;
 		movewallIcon.Render(movewallBox.x, movewallBox.y);
 		expandwallIcon.Render(expandwallBox.x, expandwallBox.y);
 		break;

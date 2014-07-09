@@ -27,6 +27,7 @@ struct Attributes{
 class Object : public GameObject{
 public:
 	Object(int x, int y, Attributes attributes, TileMap tileMap);
+	Object(ifstream &file, TileMap tileMap);
 	~Object();
 
 	void Update(float dt, vector<unique_ptr<GameObject>> *objectArray);
@@ -56,10 +57,12 @@ public:
 
 	//Char functions
 	int GetHunger();
+	void Save(ofstream &file);
 	void SetHunger(int hunger);
 	ActionCharacter GetAction();
 	int GetObjectIndex();
 	void UseObject(vector<unique_ptr<GameObject>> *objectArray, int index);
+	void ChangeSelection(int reference);
 
 	Sprite sp;
 	Rect box;

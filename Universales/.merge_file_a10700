@@ -1,0 +1,40 @@
+#pragma once
+
+#include "State.h"
+#include "Text.h"
+#include "Button.h"
+#include "Sprite.h"
+<<<<<<< .merge_file_a10700
+#include "Language.h"
+#include "OptionsState.h"
+#include "StageState.h"
+#include "Sound.h"
+=======
+>>>>>>> .merge_file_a09012
+
+class PauseState : public State
+{
+public:
+	PauseState();
+	~PauseState();
+	void Update(float dt);
+	void Render();
+
+private:
+	void Input();
+
+	Text text;
+	Button resumeButton;
+<<<<<<< .merge_file_a10700
+	Button saveButton;
+	Button optionsButton;
+	Button quitButton;
+	Sprite bg;
+	Sound click;
+=======
+	Button optionsButton;
+	Button quitButton;
+	Sprite bg;
+>>>>>>> .merge_file_a09012
+};
+

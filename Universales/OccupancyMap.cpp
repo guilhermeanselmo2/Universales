@@ -40,26 +40,29 @@ vector<int> OccupancyMap::Update(TileMap *tileMap, vector<unique_ptr<GameObject>
 	return occupancyMap;
 }
 
-vector<int> OccupancyMap::CreateHeuristic(TileMap *tileMap, Point door, int RoomID){
+vector<int> OccupancyMap::CreateHeuristic(TileMap *tileMap, Point pos){
 	vector<int> heuristic;
 	int distX, distY;
 	heuristic.resize(occupancyMap.size());
 	heuristics.resize(occupancyMap.size());
 	for (int i = 0; i < heuristic.size(); i++){
-		distX = i%tileMap->GetWidth() - door.x;
-		distY = ((int)(i / tileMap->GetWidth())) - door.y;
+		distX = i%tileMap->GetWidth() - pos.x;
+		distY = ((int)(i / tileMap->GetWidth())) - pos.y;
 		heuristic[i] = abs(distX) + abs(distY);
 		heuristics[i] = heuristic[i];
 	}
 	return heuristic;
 }
 
+bool OccupancyMap::IsOccupied(int index){
+	return occupancyMap[index] == 1;
+}
+
 
 //Debug only! Very heavy! Caused my game to crash! Don't use it!
 void OccupancyMap::Render(TileMap *tileMap){ 
 	Text text("font/LCALLIG.TTF", 40, Text::TEXT_BLENDED, "  ", WHITE, 100);
-	int x, y;
-	/*
+	int x, y;/*
 	for (int i = 0; i < heuristics.size(); i++){
 		string h = to_string(heuristics[i]);
 		text.SetText(h);

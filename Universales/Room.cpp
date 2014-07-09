@@ -2,31 +2,18 @@
 #include "Camera.h"
 #include "Wall.h"
 
-Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject> > *objectArray, int RoomCount, RoomType type) : tileSp("img/tileset/tile_tatami.png"), tileMap(*tileMap){
-
+Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObject> > *objectArray, int RoomCount, RoomAttributes attributes) : tileSp("img/tileset/tile_tatami.png"){
+	this->tileMap = *tileMap;
+	
 	Point tile;
-	begin = lBegin;
-	end = lEnd;
-	string file;
+    begin = lBegin;
+    end = lEnd;
+    string file;
 	door = Point(0, 0);
 	RoomID = RoomCount + 1;
-	roomType = type;
-	switch (roomType)
-	{
-	case CORRIDOR:
-		tileSp.Open("img/tileset/fundo_espaco.png");
-		break;
-	case SAMURAI:
-		break;
-	case PIRATE:
-		tileSp.Open("img/tileset/tile_madeira.png");
-		break;
-	case STEAM:
-		break;
-	default:
-		break;
-	}
-
+	this->attributes = attributes;
+	tileSp.Open(this->attributes.tileSprite);
+	
 	file = "img/tile_parede_canto_sup_tamanho_do_tile.png";
 	Point pos(begin.x, begin.y);
 	tile = pos;
@@ -56,6 +43,8 @@ Room::Room(Point lBegin, Point lEnd, TileMap *tileMap, vector<unique_ptr<GameObj
 	wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, INF_CORNER, tile, tileMap ,RoomID);
 	objectArray->emplace_back(wall);
 
+	int size = (abs(end.x - begin.x) + 1)*(abs(end.y - begin.y) + 1);
+	cost = size * 5;
 
 	file = "img/parede_dir_tamanho_do_tile.png";
 	for (int i = begin.x + 1; i< end.x; i++){
@@ -314,8 +303,138 @@ Point Room::GetDoor(){
 	return door;
 }
 
-RoomType Room::GetState(){
-	return roomType;
+string Room::GetState(){
+	return attributes.type;
+}
+
+void Room::Save(ofstream &file){
+	cout << RoomID << endl;
+	file.write(reinterpret_cast<char*> (&begin), sizeof(begin));
+	file.write(reinterpret_cast<char*> (&end), sizeof(end));
+	file.write(reinterpret_cast<char*> (&door), sizeof(Point));
+
+	int size = attributes.type.size();
+	file.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < attributes.type.size(); p++){
+		file.write(reinterpret_cast<char*> (&attributes.type[p]), sizeof(char));
+	}
+	size = attributes.description.size();
+	file.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < attributes.description.size(); p++){
+		file.write(reinterpret_cast<char*> (&attributes.description[p]), sizeof(char));
+	}
+	size = attributes.tileSprite.size();
+	file.write(reinterpret_cast<char*> (&size), sizeof(int));
+	for (int p = 0; p < attributes.tileSprite.size(); p++){
+		file.write(reinterpret_cast<char*> (&attributes.tileSprite[p]), sizeof(char));
+	}
+	file.write(reinterpret_cast<char*> (&attributes.cost), sizeof(int));
+	
+	cout << "Save" << endl;
+	cout << door.x << "," << door.y << endl;
+}
+
+Room::Room(ifstream &readFile, TileMap *tileMap, vector<unique_ptr<GameObject>> *objectArray, int RoomCount){
+	this->tileMap = *tileMap;
+
+	readFile.read(reinterpret_cast<char*> (&begin), sizeof(begin));
+	readFile.read(reinterpret_cast<char*> (&end), sizeof(end));
+	readFile.read(reinterpret_cast<char*> (&door), sizeof(Point));
+	//read attributes;
+	int size;
+	readFile.read(reinterpret_cast<char*> (&size), sizeof(int));
+	attributes.type.resize(size);
+	for (int p = 0; p < attributes.type.size(); p++){
+		readFile.read(reinterpret_cast<char*> (&attributes.type[p]), sizeof(char));
+	}
+	readFile.read(reinterpret_cast<char*> (&size), sizeof(int));
+	attributes.description.resize(size);
+	for (int p = 0; p < attributes.description.size(); p++){
+		readFile.read(reinterpret_cast<char*> (&attributes.description[p]), sizeof(char));
+	}
+	readFile.read(reinterpret_cast<char*> (&size), sizeof(int));
+	attributes.tileSprite.resize(size);
+	for (int p = 0; p < attributes.tileSprite.size(); p++){
+		readFile.read(reinterpret_cast<char*> (&attributes.tileSprite[p]), sizeof(char));
+	}
+	readFile.read(reinterpret_cast<char*> (&attributes.cost), sizeof(int));
+
+	Point tile;
+	string file;
+	RoomID = RoomCount + 1;
+	tileSp.Open(this->attributes.tileSprite);
+
+	file = "img/tile_parede_canto_sup_tamanho_do_tile.png";
+	Point pos(begin.x, begin.y);
+	tile = pos;
+	pos = tileMap->GetTileCenter(pos);
+	//cout << begin.x << "," << begin.y << endl;
+	Wall *wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, UPPER_CORNER, tile, tileMap, RoomID);
+	objectArray->emplace_back(wall);
+
+	file = "img/tile_parede_canto_esq_tamanho_do_tile.png";
+	pos.SetPoint(begin.x, end.y);
+	tile = pos;
+	pos = tileMap->GetTileCenter(pos);
+	wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, LEFT_CORNER, tile, tileMap, RoomID);
+	objectArray->emplace_back(wall);
+
+	file = "img/tile_parede_canto_dir_tamanho_do_tile.png";
+	pos.SetPoint(end.x, begin.y);
+	tile = pos;
+	pos = tileMap->GetTileCenter(pos);
+	wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, RIGHT_CORNER, tile, tileMap, RoomID);
+	objectArray->emplace_back(wall);
+
+	file = "img/tile_parede_canto_inf_tamanho_do_tile.png";
+	pos.SetPoint(end.x, end.y);
+	tile = pos;
+	pos = tileMap->GetTileCenter(pos);
+	wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, INF_CORNER, tile, tileMap, RoomID);
+	objectArray->emplace_back(wall);
+
+
+	file = "img/parede_dir_tamanho_do_tile.png";
+	for (int i = begin.x + 1; i< end.x; i++){
+		Point pos(i, begin.y);
+		tile = pos;
+
+		pos = tileMap->GetTileCenter(pos);
+		wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, UPPER_RIGHT, tile, tileMap, RoomID);
+		objectArray->emplace_back(wall);
+
+		pos.SetPoint(i, end.y);
+		tile = pos;
+		pos = tileMap->GetTileCenter(pos);
+		wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, UPPER_RIGHT, tile, tileMap, RoomID);
+		objectArray->emplace_back(wall);
+
+	}
+	/*for(int i = begin.x+1; i< end.x; i++){
+	Point pos(i,begin.y-1);
+	pos = tileMap->GetTileCenter(pos);
+	Wall *wall = new Wall(pos.x-tileMap->GetTileWidth()/4, pos.y+tileMap->GetTileHeigh()/4, file, UPPER_RIGHT);
+	objectArray->emplace_back(wall);
+	}*/
+	file = "img/parede_esq_tamanho_do_tile.png";
+	for (int i = begin.y + 1; i< end.y; i++){
+		Point pos(begin.x, i);
+		tile = pos;
+
+		pos = tileMap->GetTileCenter(pos);
+		wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, UPPER_LEFT, tile, tileMap, RoomID);
+		objectArray->emplace_back(wall);
+
+
+		pos.SetPoint(end.x, i);
+		tile = pos;
+
+		pos = tileMap->GetTileCenter(pos);
+		wall = new Wall(pos.x - tileMap->GetTileWidth() / 2, pos.y + tileMap->GetTileHeight() / 2, file, UPPER_LEFT, tile, tileMap, RoomID);
+		objectArray->emplace_back(wall);
+
+	}
+
 }
 
 void Room::SetBegin(Point begin){

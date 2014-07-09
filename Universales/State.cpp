@@ -25,10 +25,10 @@ bool State::RequestedQuit() {
 
 void State::UpdateArray(float dt, TileMap *tileMap) {
 	for (int i = objectArray.size() - 1; i >= 0; --i) {
-		objectArray[i]->Update(dt);
+		objectArray[i]->Update(dt, &objectArray);
 	}
 	for(int i = 0; i < objectArray.size(); i++){
-        objectArray[i]->Update(dt);
+        objectArray[i]->Update(dt, &objectArray);
         Point p(objectArray[i]->box.x,objectArray[i]->box.y+objectArray[i]->box.h);
         if(objectArray[i]->Is("Wall")){
             p.SetPoint(p.x + tileMap->GetTileWidth()/2,p.y-tileMap->GetTileHeight()/2);
@@ -38,13 +38,18 @@ void State::UpdateArray(float dt, TileMap *tileMap) {
 		p.SetPoint(i,p.x,p.y);
         renderQueue.emplace(p);
     }
-	/*for (unsigned int i = 0; i < objectArray.size(); i++) {
+	/*vector<unique_ptr<GameObject>> newObjectArray;
+	for (unsigned int i = 0; i < objectArray.size(); i++) {
 		if (objectArray[i]->IsDead()) {
 			objectArray.erase(objectArray.begin() + i);
 			i--;
 		}
+		else{
+			newObjectArray.emplace_back(objectArray[i]);
+		}
 	}
-	for (unsigned int i = 0; i < objectArray.size(); i++) {
+	objectArray = newObjectArray;*/
+	/*for (unsigned int i = 0; i < objectArray.size(); i++) {
 		for (int k = 0; k < objectArray.size(); k++) {
 			if (Collision::IsColliding(objectArray[i]->box, objectArray[k]->box, objectArray[i]->rotation, objectArray[k]->rotation)) {
 				objectArray[i]->NotifyCollision(*objectArray[k]);
